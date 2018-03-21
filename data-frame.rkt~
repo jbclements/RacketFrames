@@ -31,15 +31,10 @@
   (cond
     [(empty? column-names) column-hash]
     [else (build-column-hash (begin (hash-set! column-hash (first column-names) idx) column-hash)
-                             (rest column-names) (add1 idx))]))
+                             (rest column-names) (+ idx 1))]))
 
 ; ******************************************************
 
-; ******************************************************
-; This function consumes a list, the index of the element
-; to delete from the list and a counter-idx used as a
-; index comparator.
-;; delete-item-at-idx : (lst idx counter-idx -> lst)
 (define (delete-item-at-idx lst idx counter-idx)
   (cond ((null? lst)
          '())
@@ -68,14 +63,14 @@
              (let* ([csv-data (from-csv (second args))]
                     [column-names (list->vector (map first csv-data))])
                column-names)]
-            [else (list->vector (map car args))])]
+          [else (list->vector (map car args))])]
          [data-store
           (cond
             [(and (symbol? (first args)) (symbol=? (first args) 'from-csv))
              (let* ([csv-data (from-csv (second args))]
                     [data-store (list->vector (map (compose list->vector cdr) csv-data))])
                data-store)]
-            [else (list->vector (map (compose list->vector cdr) args))])])
+          [else (list->vector (map (compose list->vector cdr) args))])])
 
     ; Returns all values from row n.
     (define (get-row n)
@@ -88,7 +83,7 @@
       (cond
         [(<= start end)
          (cons (vector-map (λ (v) (vector-ref v start)) data-source)
-               (get-row-range (add1 start) end data-source))]
+               (get-row-range (+ start 1) end data-source))]
         [else empty]))
 
     ; Returns all values from row start -> end (inclusive) but only from particular

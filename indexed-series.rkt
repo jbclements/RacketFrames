@@ -37,7 +37,7 @@
  Label Label? LabelProjection
  LabelIndex LabelIndex-index
  (struct-out GSeries)
- make-generic-series 
+ new-GSeries 
  series-ref series-iref
  map/GSeries 
  build-index-from-labels label-index label->idx)
@@ -73,7 +73,6 @@
 ; ***********************************************************
 ; This function consumes a list of Labels and produces a
 ; SIndex which is a HashTable Label to Index.
-
 (: build-index-from-labels ((Listof Label) -> SIndex))
 (define (build-index-from-labels labels)
   (let ((index : SIndex (make-hash '())))
@@ -97,8 +96,8 @@
 ; Consumes a Vector of generic type and a list of Labels which
 ; can come in list form or SIndex form and produces a GSeries
 ; struct object.
-(: make-generic-series (All (A) (Vectorof A) (Option (U (Listof Label) SIndex)) -> (GSeries A)))
-(define (make-generic-series data labels)
+(: new-GSeries (All (A) (Vectorof A) (Option (U (Listof Label) SIndex)) -> (GSeries A)))
+(define (new-GSeries data labels)
   
   (: check-mismatch (SIndex -> Void))
   (define (check-mismatch index)
@@ -237,9 +236,9 @@
 
 ; generic series tests
 ; create integer series
-(define g-series-integer (make-generic-series (vector 1 2 3 4) (build-index-from-labels (list 'a 'b 'c 'd))))
+(define g-series-integer (new-GSeries (vector 1 2 3 4) (build-index-from-labels (list 'a 'b 'c 'd))))
 ; create symbol series
-(define g-series-symbol (make-generic-series (vector 'e 'f 'g 'h) (list 'a 'b 'c 'd)))
+(define g-series-symbol (new-GSeries (vector 'e 'f 'g 'h) (list 'a 'b 'c 'd)))
 
 ; integer series ref by index
 (check-equal? (series-iref g-series-integer 2) 3)

@@ -338,6 +338,10 @@
 (check-equal? (NSeries-data (/./ns series-float 2.0))
               (flvector 0.75 1.2 1.8 2.05))
 
+; map tests
+(check-equal? (NSeries-data (map/ns series-float (λ: ((x : Float)) (fl+ x 1.0))))
+              (flvector 2.5 3.4 4.6 5.1))
+
 ; agg tests
 (check-equal? (apply-agg 'sum series-float) 11.6)
 

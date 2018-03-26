@@ -360,6 +360,10 @@
 (check-equal? (ISeries-data (%./is g-series-integer 2))
               (vector 1 0 1 0))
 
+; map tests
+(check-equal? (ISeries-data (map/is g-series-integer (λ: ((x : Fixnum)) (unsafe-fx+ x 1))))
+              (vector 2 3 4 5))
+
 ; agg tests
 (check-equal? (apply-agg 'sum g-series-integer) 10)
 

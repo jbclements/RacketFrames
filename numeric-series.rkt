@@ -163,8 +163,6 @@
     [(= idx (flvector-length flvec)) null]
     [else (cons (flvector-ref flvec idx) (flvector->list flvec (unsafe-fx+ idx 1)))]))
 
-(flvector->list (flvector 1.0 2.0) 0)
-
 ; ***********************************************************
 
 ; ***********************************************************
@@ -298,59 +296,59 @@
                                       (build-index-from-labels (list 'a 'b 'c 'd))))
 
 ; iseries reference tests
-(check-equal? ((nseries-referencer series-float) 0) 1)
+(check-equal? ((nseries-referencer series-float) 0) 1.5)
 
-(check-equal? ((nseries-referencer series-float) 1) 2)
+(check-equal? ((nseries-referencer series-float) 1) 2.4)
 
-(check-equal? (nseries-iref series-float 0) 1)
+(check-equal? (nseries-iref series-float 0) 1.5)
 
-(check-equal? (nseries-iref series-float 1) 2)
+(check-equal? (nseries-iref series-float 1) 2.4)
 
-(check-equal? (nseries-label-ref series-float 'd) 4)
+(check-equal? (nseries-label-ref series-float 'd) 4.1)
 
-(check-equal? (nseries-label-ref series-float 'c) 3)
+(check-equal? (nseries-label-ref series-float 'c) 3.6)
 
 ; series length
 (check-equal? (nseries-length series-float) 4)
 
 ; binop 2 series tests
 (check-equal? (NSeries-data (+/ns series-float series-float-2))
-              (flvector 6.2 8.5 10.1 12.0))
+              (flvector 6.5 8.4 10.6 12.1))
 
 (check-equal? (NSeries-data (-/ns series-float series-float-2))
-              (flvector -4.0 -4.0 -4.0 -4.0))
+              (flvector -3.5 -3.6 -3.4 -3.9000000000000004))
 
 (check-equal? (NSeries-data (*/ns series-float series-float-2))
-              (flvector 5.1 12.2 21.3 32.4))
+              (flvector 7.5 14.399999999999999 25.2 32.8))
 
 ; currently doing only integer division
 (check-equal? (NSeries-data (//ns series-float series-float-2))
-              (flvector 0.0 0.0 0.0 0.0))
+              (flvector 0.3 0.39999999999999997 0.5142857142857143 0.5125))
 
 ; binop scalar series tests
 (check-equal? (NSeries-data (+./ns series-float 2.0))
-              (flvector 3.9 4.8 5.7 6.6))
+              (flvector 3.5 4.4 5.6 6.1))
 
 (check-equal? (NSeries-data (-./ns series-float 1.0))
-              (flvector 0.3 1.6 2.7 3.9))
+              (flvector 0.5 1.4 2.6 3.0999999999999996))
 
 (check-equal? (NSeries-data (*./ns series-float 2.0))
-              (flvector 2.0 4.0 6.0 8.0))
+              (flvector 3.0 4.8 7.2 8.2))
 
 (check-equal? (NSeries-data (/./ns series-float 2.0))
-              (flvector 0.0 1.0 1.0 2.0))
+              (flvector 0.75 1.2 1.8 2.05))
 
 ; agg tests
-(check-equal? (apply-agg 'sum series-float) 10.0)
+(check-equal? (apply-agg 'sum series-float) 11.6)
 
-(check-equal? (apply-agg 'mean series-float) 10/4)
+(check-equal? (apply-agg 'mean series-float) 2.9)
 
-(check-equal? (apply-agg 'count series-float) 4.6)
+(check-equal? (apply-agg 'count series-float) 4)
 
 ; statistics tests
-(check-equal? (apply-stat 'variance series-float) 5/4)
+(check-equal? (apply-stat 'variance series-float) 1.035)
 
-(check-equal? (apply-stat 'stddev series-float) 1.118033988749895)
+(check-equal? (apply-stat 'stddev series-float) 1.0173494974687902)
 
-(check-equal? (apply-stat 'skewness series-float) 0.0)
+(check-equal? (apply-stat 'skewness series-float) -0.18946647505895)
 

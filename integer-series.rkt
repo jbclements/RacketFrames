@@ -5,6 +5,7 @@
 
 #lang typed/racket/base
 (require typed/rackunit)
+(require math/statistics)
 
 ; ***********************************************************
 ; One-dimensional array like structure with axis labels. Labels
@@ -36,10 +37,16 @@
  [-/is (ISeries ISeries -> ISeries)]
  [*/is (ISeries ISeries -> ISeries)]
  [//is (ISeries ISeries -> ISeries)]
- [+./is (Fixnum ISeries -> ISeries)]
+ [%/is (ISeries ISeries -> ISeries)]
+ [r/is (ISeries ISeries -> ISeries)]
+ [+./is (ISeries Fixnum -> ISeries)]
  [-./is (ISeries Fixnum -> ISeries)]
- [*./is (Fixnum ISeries -> ISeries)]
- [/./is (ISeries Fixnum -> ISeries)])
+ [*./is (ISeries Fixnum -> ISeries)]
+ [/./is (ISeries Fixnum -> ISeries)]
+ [%./is (ISeries Fixnum -> ISeries)]
+ [r./is (ISeries Fixnum -> ISeries)]
+ [apply-agg (Symbol ISeries -> Real)]
+ [apply-stat (Symbol ISeries -> Real)])
 ; ***********************************************************
 
 ; ***********************************************************
@@ -189,6 +196,15 @@
 (: //is (ISeries ISeries -> ISeries))
 (define (//is ns1 ns2)
   (bop/is ns1 ns2 unsafe-fxquotient))
+
+(: r/is (ISeries ISeries -> ISeries))
+(define (r/is ns1 ns2)
+  (bop/is ns1 ns2 unsafe-fxremainder))
+
+(: %/is (ISeries ISeries -> ISeries))
+(define (%/is ns1 ns2)
+  (bop/is ns1 ns2 unsafe-fxmodulo))
+
 ; ***********************************************************
 
 ; ***********************************************************
@@ -207,9 +223,10 @@
   (define: v1 : (Vectorof Fixnum) (ISeries-data is))
   (define: len : Index (vector-length v1))
   (define: v-bop : (Vectorof Fixnum) ((inst make-vector Fixnum) len #{0 : Fixnum}))
+
   (do: : ISeries ([idx : Fixnum 0 (unsafe-fx+ idx 1)])
        ((= idx len) (ISeries #f v-bop))
-       (vector-set! v-bop idx (bop fx #{(vector-ref v1 idx) : Fixnum}))))
+       (vector-set! v-bop idx (bop #{(vector-ref v1 idx) : Fixnum} fx))))
 
 ; ***********************************************************
 
@@ -218,71 +235,60 @@
 ; and division using unsafe-fx and the bop./is function defined
 ; above.
 
-(: +./is (Fixnum ISeries -> ISeries))
-(define (+./is fx ns)
-  (bop./is fx ns unsafe-fx+))
+(: +./is (ISeries Fixnum -> ISeries))
+(define (+./is is fx)
+  (bop./is fx is unsafe-fx+))
 
 (: -./is (ISeries Fixnum -> ISeries))
-(define (-./is ns fx )
-  (bop./is fx ns unsafe-fx-))
+(define (-./is is fx)
+  (bop./is fx is unsafe-fx-))
 
-(: *./is (Fixnum ISeries -> ISeries))
-(define (*./is fx ns)
-  (bop./is fx ns unsafe-fx*))
+(: *./is (ISeries Fixnum -> ISeries))
+(define (*./is is fx)
+  (bop./is fx is unsafe-fx*))
 
 (: /./is (ISeries Fixnum -> ISeries))
-(define (/./is ns fx)
-  (bop./is fx ns unsafe-fxquotient))
+(define (/./is is fx)
+  (bop./is fx is unsafe-fxquotient))
+
+(: r./is (ISeries Fixnum -> ISeries))
+(define (r./is is fx)
+  (bop./is fx is unsafe-fxremainder))
+
+(: %./is (ISeries Fixnum -> ISeries))
+(define (%./is is fx)
+  (bop./is fx is unsafe-fxmodulo))
+
 ; ***********************************************************
 
 ; ***********************************************************
 ;; ISeries agg ops
 
-;; In Progress
+; Applies the aggregate function specificed by function-name to the values in
+; the column-name column. Currently supports 3: sum, avg, count.
+(: apply-agg (Symbol ISeries -> Real))
+(define (apply-agg function-name series)
+  (cond 
+    [(eq? function-name 'sum) (apply + (vector->list (ISeries-data series)))]
+    [(eq? function-name 'mean) (mean (vector->list (ISeries-data series)))]
+    ;[(eq? function-name 'median) (median (vector->list (ISeries-data series)))]
+    [(eq? function-name 'count) (iseries-length series)]
+    ;[(eq? function-name 'min) (vector-argmin (lambda (x) x) (ISeries-data series))]
+    ;[(eq? function-name 'max) (vector-argmax (lambda (x) x) (ISeries-data series))]
+    [else (error 'apply-agg "Unknown aggregate function.")]))
 
-#| (: aggops./is (Fixnum ISeries (Fixnum Fixnum -> Fixnum) -> ISeries))
-(define (aggops./is fx is bop)
-  (define: v1 : (Vectorof Fixnum) (ISeries-data is))
-  (define: len : Index (vector-length v1))
-  (define: v-bop : (Vectorof Fixnum) ((inst make-vector Fixnum) len #{0 : Fixnum}))
-  (do: : ISeries ([idx : Fixnum 0 (unsafe-fx+ idx 1)])
-       ((= idx len) (ISeries #f v-bop))
-       (vector-set! v-bop idx (bop fx #{(vector-ref v1 idx) : Fixnum}))))
+; ***********************************************************
 
- ; Applies the aggregate function specificed by function-name to the values in
-    ; the column-name column. Currently supports 3: sum, avg, count.
-    (define (apply-agg function-name column-name)
-      (match function-name
-        ['sum (apply + (vector->list (get-column-values column-name)))]
-        ['avg [let ([column-values (get-column-values column-name)])
-              (/ (apply + (vector->list column-values)) (vector-length column-values))]]
-        ['count [let ([column-values (get-column-values column-name)])
-               (vector-length column-values)]]
-        ['median (calc-median column-name)]))
+; ***********************************************************
+;; ISeries stat ops
 
-    ;(print (get-column-values 'y))
-    
-    (define (calc-median column-name)
-      (median (vector->list (get-column-values column-name))))
-
-    ; Min function to be applied to a set of values.
-    (define (get-min lst)
-      (vector-argmin (lambda (x) x) (list->vector lst)))
-
-    ; Max function to be applied to a set of values.
-    (define (get-max lst)
-      (vector-argmax (lambda (x) x) (list->vector lst)))
-
-    ; Unique function applied to set of values to remove duplicates.
-    (define (uniqify lst)
-      (cond [(empty? lst)
-             '()]
-            [(member (first lst) (rest lst))
-             (uniqify (rest lst))]
-            [else
-             (cons (first lst) (uniqify (rest lst)))]))
-
-|#
+(: apply-stat (Symbol ISeries -> Real))
+(define (apply-stat function-name series)
+  (cond 
+    [(eq? function-name 'variance) (variance (vector->list (ISeries-data series)))]
+    [(eq? function-name 'stddev) (stddev (vector->list (ISeries-data series)))]
+    [(eq? function-name 'skewness) (skewness (vector->list (ISeries-data series)))]
+    [else (error 'apply-stat "Unknown stat function.")]))
 
 ; ***********************************************************
 
@@ -296,6 +302,10 @@
 (define g-series-integer (new-ISeries (vector 1 2 3 4)
                                       (build-index-from-labels (list 'a 'b 'c 'd))))
 
+(define g-series-integer-2 (new-ISeries (vector 5 6 7 8)
+                                      (build-index-from-labels (list 'a 'b 'c 'd))))
+
+; iseries reference tests
 (check-equal? ((iseries-referencer g-series-integer) 0) 1)
 
 (check-equal? ((iseries-referencer g-series-integer) 1) 2)
@@ -310,3 +320,56 @@
 
 ; series length
 (check-equal? (iseries-length g-series-integer) 4)
+
+; binop 2 series tests
+(check-equal? (ISeries-data (+/is g-series-integer g-series-integer-2))
+              (vector 6 8 10 12))
+
+(check-equal? (ISeries-data (-/is g-series-integer g-series-integer-2))
+              (vector -4 -4 -4 -4))
+
+(check-equal? (ISeries-data (*/is g-series-integer g-series-integer-2))
+              (vector 5 12 21 32))
+
+; currently doing only integer division
+(check-equal? (ISeries-data (//is g-series-integer g-series-integer-2))
+              (vector 0 0 0 0))
+
+(check-equal? (ISeries-data (r/is g-series-integer g-series-integer-2))
+              (vector 1 2 3 4))
+
+(check-equal? (ISeries-data (%/is g-series-integer g-series-integer-2))
+              (vector 1 2 3 4))
+
+; binop scalar series tests
+(check-equal? (ISeries-data (+./is g-series-integer 2))
+              (vector 3 4 5 6))
+
+(check-equal? (ISeries-data (-./is g-series-integer 1))
+              (vector 0 1 2 3))
+
+(check-equal? (ISeries-data (*./is g-series-integer 2))
+              (vector 2 4 6 8))
+
+(check-equal? (ISeries-data (/./is g-series-integer 2))
+              (vector 0 1 1 2))
+
+(check-equal? (ISeries-data (r./is g-series-integer 2))
+              (vector 1 0 1 0))
+
+(check-equal? (ISeries-data (%./is g-series-integer 2))
+              (vector 1 0 1 0))
+
+; agg tests
+(check-equal? (apply-agg 'sum g-series-integer) 10)
+
+(check-equal? (apply-agg 'mean g-series-integer) 10/4)
+
+(check-equal? (apply-agg 'count g-series-integer) 4)
+
+; statistics tests
+(check-equal? (apply-stat 'variance g-series-integer) 5/4)
+
+(check-equal? (apply-stat 'stddev g-series-integer) 1.118033988749895)
+
+(check-equal? (apply-stat 'skewness g-series-integer) 0.0)

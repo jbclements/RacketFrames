@@ -1,11 +1,10 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;*    Author: Shubham Kahal
-;*    File: integer-series.rkt
+;*    File: data-frame.rkt
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 #lang typed/racket/base
 (require typed/rackunit)
-(require math/statistics)
 
 ; ***********************************************************
 ; A map of series to label names, represented as a collection

@@ -42,7 +42,7 @@
 (: series-length (Series -> Index))
 (define (series-length series)
   (cond
-    [(GSeries? series) (gseries-length series)]     
+    ;[(GSeries? series) (gseries-length series)]
     [(NSeries? series) (nseries-length series)]     
     [(CSeries? series) (cseries-length series)]     
     [(ISeries? series) (iseries-length series)]

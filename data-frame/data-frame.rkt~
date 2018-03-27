@@ -1,51 +1,28 @@
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;*    Author: Shubham Kahal
-;*    File: integer-series.rkt
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
 #lang typed/racket/base
-(require typed/rackunit)
-(require math/statistics)
-
-; ***********************************************************
-; A map of series to label names, represented as a collection
-; of columns.
-; ***********************************************************
-
-; **************************
-; Test cases are at bottom
-; of file.
-; **************************
-
-; ***********************************************************
-; Provide functions in this file to other files.
 
 (provide:
  [column (Label Series -> Column)]
  [column-heading (Column -> Label)]
  [column-series (Column -> Series)]
- [data-frame-rename (DataFrame Label Label -> DataFrame)]
- [data-frame-project (DataFrame LabelProjection -> DataFrame)]
- [data-frame-drop (DataFrame Label -> DataFrame)]
- [data-frame-remove (DataFrame LabelProjection -> DataFrame)]
- [data-frame-explode (DataFrame [#:project LabelProjection] -> Columns)]
- [data-frame-replace (DataFrame Column -> DataFrame)]
- [data-frame-extend  (DataFrame (U Column Columns DataFrame) -> DataFrame)]
- [data-frame-description (DataFrame [#:project LabelProjection] -> DataFrameDescription)]
- [show-data-frame-description (DataFrameDescription -> Void)])
+ [data-frame-rename (Frame Label Label -> Frame)]
+ [data-frame-project (Frame LabelProjection -> Frame)]
+ [data-frame-drop (Frame Label -> Frame)]
+ [data-frame-remove (Frame LabelProjection -> Frame)]
+ [data-frame-explode (Frame [#:project LabelProjection] -> Columns)]
+ [data-frame-replace (Frame Column -> Frame)]
+ [data-frame-extend  (Frame (U Column Columns Frame) -> Frame)]
+ [data-frame-description (Frame [#:project LabelProjection] -> FrameDescription)]
+ [show-data-frame-description (FrameDescription -> Void)])
 
 (provide
  DataFrame Column Columns
  (struct-out DataFrameDescription)
  data-frame-series
- data-frame-names data-frame-dim 
- data-frame-cseries data-frame-nseries
+ data-frame-names frame-dim 
+ data-frame-cseries frame-nseries
  data-frame-series
- new-data-frame)
+ new-frame)
 
-; ***********************************************************
-
-; ***********************************************************
 (require 
  (only-in racket/vector
 	  vector-copy)
@@ -71,15 +48,12 @@
  (only-in "numeric-series.rkt"
           NSeries NSeries? 
           NSeries-data
-          new-NSeries)
+          mkNSeries)
  (only-in "integer-series.rkt"
 	  ISeries ISeries?
 	  ISeries-data
 	  new-ISeries))
 
-; ***********************************************************
-
-; ***********************************************************
 (define-type Column  (Pair Label Series))
 (define-type Columns (Listof Column))
 
@@ -89,9 +63,6 @@
 (struct: DataFrameDescription ([dimensions : Dim]
                            [series : (Listof SeriesDescription)]))
 
-; ***********************************************************
-
-; ***********************************************************
 (: column (Label Series -> Column))
 (define (column label series)
   (cons label series))
@@ -104,10 +75,7 @@
 (define (column-series col)
   (cdr col))
 
-; ***********************************************************
-
-; ***********************************************************
-(: new-data-frame (Columns -> DataFrame))
+(: new-data-frame (Columns -> Frame))
 (define (new-data-frame cols)
   
   (define (check-equal-length)
@@ -129,10 +97,6 @@
         (data (apply vector ((inst map Series Column) cdr cols))))
     (DataFrame index data)))
 
-; ***********************************************************
-
-; ***********************************************************
-
 (: data-frame-rename (DataFrame Label Label -> DataFrame))
 (define (data-frame-rename data-frame from to)
   (let ((index (LabelIndex-index data-frame)))
@@ -142,13 +106,9 @@
 		  (let ((new-index (hash-copy index)))
 		    (hash-remove! new-index from)
 		    (hash-set! new-index to col-idx)
-		    (DataFrame new-index (vector-copy (DataFrame-series data-frame))))
+		    (DataFrame new-index (vector-copy DataFrame-series data-frame))))
 		  data-frame))
-	data-frame)))
-
-; ***********************************************************
-
-; ***********************************************************
+	data-frame))
 
 (: data-frame-drop (DataFrame Label -> DataFrame))
 (define (data-frame-drop data-frame label)
@@ -156,9 +116,6 @@
 			 (not (eq? (car col) label)))
 		     (data-frame-explode data-frame))))
 
-; ***********************************************************
-
-; ***********************************************************
 (: data-frame-series (DataFrame Symbol -> Series))
 (define (data-frame-series data-frame col)
   (vector-ref (DataFrame-series data-frame)
@@ -180,10 +137,6 @@
 (define (data-frame-labels data-frame)
   (hash->list (assert (LabelIndex-index data-frame))))
 
-; ***********************************************************
-
-; ***********************************************************
-
 (: data-frame-names (DataFrame -> (Listof Symbol)))
 (define (data-frame-names data-frame)  
   (map (λ: ((kv : (Pair Symbol Integer)))
@@ -194,10 +147,6 @@
              (kv2 : (Pair Symbol Index)))
 	    (< (cdr kv1) (cdr kv2))))))
 
-; ***********************************************************
-
-; ***********************************************************
-
 (: data-frame-dim (DataFrame -> Dim))
 (define (data-frame-dim data-frame)
   (let ((cols (length (hash-keys (assert (LabelIndex-index data-frame))))))
@@ -206,10 +155,6 @@
         (let ((rows (let ((series (vector-ref (DataFrame-series data-frame) 0)))
                       (series-length series))))                      
           (Dim rows cols)))))
-
-; ***********************************************************
-
-; ***********************************************************
 
 (: projection-set (LabelProjection -> (Setof Label)))
   (define (projection-set project)
@@ -229,10 +174,6 @@
       (filter (λ: ((a : A))
 		  (set-member? projection (sym-fn a)))
 	      lst)))
-
-; ***********************************************************
-
-; ***********************************************************
 
 (: data-frame-description (DataFrame [#:project LabelProjection] -> DataFrameDescription))
 (define (data-frame-description data-frame #:project [project '()])
@@ -270,10 +211,6 @@
     (displayln (format "DataFrame::(Cols: ~a, Rows: ~a)" (Dim-cols dim) (Dim-rows dim)))
     (for-each print-series-description (DataFrameDescription-series fdesc))))
 
-; ***********************************************************
-
-; ***********************************************************
-
 (: data-frame-explode (DataFrame [#:project LabelProjection] -> Columns))
 (define (data-frame-explode data-frame #:project [project '()])  
   (let ((labeling (label-sort-positional data-frame))
@@ -286,10 +223,6 @@
 			   (car l-s))
 		       project)))
 
-; ***********************************************************
-
-; ***********************************************************
-
 (: data-frame-remove (DataFrame LabelProjection -> DataFrame))
 (define (data-frame-remove data-frame drop-projection)
   (define all-labels (data-frame-all-labels-projection-set data-frame))
@@ -297,37 +230,24 @@
   (define keep-labels (set-subtract all-labels drop-labels))
   (new-data-frame (data-frame-explode data-frame #:project keep-labels)))
 
-; ***********************************************************
-
-; ***********************************************************
-
 (: data-frame-project (DataFrame LabelProjection -> DataFrame))
 (define (data-frame-project data-frame projection)
   (new-data-frame (data-frame-explode data-frame #:project (projection-set projection))))
 
-; ***********************************************************
-
-; ***********************************************************
-
 (: data-frame-replace (DataFrame Column -> DataFrame))
 (define (data-frame-replace data-frame new-col)
   (define name (column-heading new-col))
-  (new-data-frame (for/list ([col (data-frame-explode data-frame)])
+  (new-data-frame (for/list ([col data-(frame-explode data-frame)])
 		       (if (eq? name (column-heading col))
 			   new-col
 			   col))))
 
-; ***********************************************************
-
-; ***********************************************************
 (: data-frame-extend (DataFrame (U Column Columns DataFrame) -> DataFrame))
 (define (data-frame-extend data-frame cols)
   (cond 
    ((DataFrame? cols)
     (new-data-frame (append (data-frame-explode data-frame) (data-frame-explode cols))))
    ((list? cols)
-    (new-data-frame (append (data-frame-explode data-frame) cols)))
+    (new-data-frame (append data-(frame-explode data-frame) cols)))
    (else
     (new-data-frame (append (data-frame-explode data-frame) (list cols))))))
-
-; ***********************************************************

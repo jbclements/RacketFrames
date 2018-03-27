@@ -7,28 +7,28 @@
 (provide:
  [series-description (Label Series -> SeriesDescription)]
  [series-type (Series -> SeriesType)]
- [series-count (Series -> Index)])
+ [series-length (Series -> Index)])
 
 (require 
  (only-in racket/flonum
           flvector-length)
  (only-in "indexed-series.rkt"
           Label
-          GSeries GSeries? GSeries-data gseries-count)         
+          GSeries GSeries? GSeries-data gseries-length)         
  (only-in "categorical-series.rkt"
-          CSeries CSeries? CSeries-data cseries-count)
+          CSeries CSeries? CSeries-data cseries-length)
  (only-in "numeric-series.rkt"
-          NSeries NSeries? NSeries-data nseries-count)
+          NSeries NSeries? NSeries-data nseries-length)
  (only-in "integer-series.rkt"
-	  ISeries ISeries? ISeries-data iseries-count))
+	  ISeries ISeries? ISeries-data iseries-length))
 
 (define-type Series (U GSeries NSeries CSeries ISeries))
 
-(define-type SeriesType (U 'NumericSeries 'CategoricalSeries 'IntegerSeries))
+(define-type SeriesType (U 'GenericSeries 'NumericSeries 'CategoricalSeries 'IntegerSeries))
 
 (struct: SeriesDescription ([name : Label]
                             [type : SeriesType]
-                            [count : Integer]) #:transparent)
+                            [length : Integer]) #:transparent)
 
 (: series-type (Series -> SeriesType))
 (define (series-type series)
@@ -39,15 +39,15 @@
    ((ISeries? series) 'IntegerSeries)
    (else (error 'frame-series-description-type "'UnknownSeries: ~a" series))))
 
-(: series-count (Series -> Index))
-(define (series-count series)
+(: series-length (Series -> Index))
+(define (series-length series)
   (cond
-   [(NSeries? series) (nseries-count series)]     
-   [(CSeries? series) (cseries-count series)]     
-   [(GSeries? series) (gseries-count series)]     
-   [(ISeries? series) (iseries-count series)]
-   [else (error "Unknown Series type in Frame")]))
+    [(GSeries? series) (gseries-length series)]     
+    [(NSeries? series) (nseries-length series)]     
+    [(CSeries? series) (cseries-length series)]     
+    [(ISeries? series) (iseries-length series)]
+    [else (error "Unknown Series type in Frame")]))
       
 (: series-description  (Label Series -> SeriesDescription))
 (define (series-description name series)
-  (SeriesDescription name (series-type series) (series-count series)))
+  (SeriesDescription name (series-type series) (series-length series)))

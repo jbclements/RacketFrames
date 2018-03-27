@@ -168,6 +168,9 @@
 ; ***********************************************************
 ;; Map a function
 
+; This function consumes a series and a function both of Float
+; types and applies the function to each member of the series
+; returning a new series.
 (: map/ns (NSeries (Float -> Float) -> NSeries))
 (define (map/ns series fn)
   (let ((old-data (NSeries-data series))
@@ -355,4 +358,3 @@
 (check-equal? (apply-stat 'stddev series-float) 1.0173494974687902)
 
 (check-equal? (apply-stat 'skewness series-float) -0.18946647505895)
-

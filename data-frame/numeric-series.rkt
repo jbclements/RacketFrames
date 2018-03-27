@@ -25,7 +25,7 @@
 ; Provide functions in this file to other files.
 
 (provide:
- [nseries-ref (NSeries Index -> Float)]
+ [nseries-iref (NSeries Index -> Float)]
  [nseries-label-ref (NSeries Label -> Float)]
  [nseries-length (NSeries -> Index)] 
  [map/ns (NSeries (Float -> Float) -> NSeries)]
@@ -139,10 +139,6 @@
     (λ: ((idx : Index))
 	(flvector-ref data idx))))
 
-(: nseries-ref (NSeries Index -> Float))
-(define (nseries-ref series idx)
-  (flvector-ref (NSeries-data series) idx))
-
 ; This function consumes an integer series and an index and
 ; returns the value at that index in the series.
 (: nseries-iref (NSeries Index -> Float))
@@ -151,7 +147,7 @@
 
 (: nseries-label-ref (NSeries Label -> Float))
 (define (nseries-label-ref series label)
-  (nseries-ref series (label->idx series label)))
+  (nseries-iref series (label->idx series label)))
 
 (: nseries-length (NSeries -> Index))
 (define (nseries-length nseries)

@@ -1,4 +1,23 @@
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;*    Author: Shubham Kahal
+;*    File: series-description.rkt
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 #lang typed/racket/base
+(require typed/rackunit)
+
+; ***********************************************************
+; A map of series to label names, represented as a collection
+; of columns.
+; ***********************************************************
+
+; **************************
+; Test cases are at bottom
+; of file.
+; **************************
+
+; ***********************************************************
+; Provide functions in this file to other files.
 
 (provide
  (struct-out SeriesDescription)
@@ -8,6 +27,10 @@
  [series-description (Label Series -> SeriesDescription)]
  [series-type (Series -> SeriesType)]
  [series-length (Series -> Index)])
+
+; ***********************************************************
+
+; ***********************************************************
 
 (require 
  (only-in racket/flonum
@@ -22,6 +45,10 @@
  (only-in "integer-series.rkt"
 	  ISeries ISeries? ISeries-data iseries-length))
 
+; ***********************************************************
+
+; ***********************************************************
+
 (define-type Series (U GSeries NSeries CSeries ISeries))
 
 (define-type SeriesType (U 'GenericSeries 'NumericSeries 'CategoricalSeries 'IntegerSeries))
@@ -29,6 +56,10 @@
 (struct: SeriesDescription ([name : Label]
                             [type : SeriesType]
                             [length : Integer]) #:transparent)
+
+; ***********************************************************
+
+; ***********************************************************
 
 (: series-type (Series -> SeriesType))
 (define (series-type series)
@@ -43,11 +74,17 @@
 (define (series-length series)
   (cond
     ;[(GSeries? series) (gseries-length series)]
-    [(NSeries? series) (nseries-length series)]     
-    [(CSeries? series) (cseries-length series)]     
+    [(NSeries? series) (nseries-length series)]    
+    [(CSeries? series) (cseries-length series)]    
     [(ISeries? series) (iseries-length series)]
     [else (error "Unknown Series type in Frame")]))
-      
+
 (: series-description  (Label Series -> SeriesDescription))
 (define (series-description name series)
   (SeriesDescription name (series-type series) (series-length series)))
+
+; ***********************************************************
+
+; ***********************************************************
+; Test Cases
+; ***********************************************************

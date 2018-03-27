@@ -86,19 +86,26 @@
 (struct: DataFrame LabelIndex ([series : (Vectorof Series)]))
 
 (struct: DataFrameDescription ([dimensions : Dim]
-                           [series : (Listof SeriesDescription)]))
+                               [series : (Listof SeriesDescription)]))
 
 ; ***********************************************************
 
 ; ***********************************************************
+
+; This function consumes a Label and Series and defines a
+; Column;
 (: column (Label Series -> Column))
 (define (column label series)
   (cons label series))
 
+; This function consumes a Column and just retrieves the
+; first element of pair which is the label heading.
 (: column-heading (Column -> Label))
 (define (column-heading col)
   (car col))
 
+; This function consumes a Column and just retrieves the
+; second element of pair which is the actual series.
 (: column-series (Column -> Series))
 (define (column-series col)
   (cdr col))
@@ -114,15 +121,16 @@
 	   (let ((len (if (null? cols) 
 			  0 
 			  (series-length (cdr (car cols))))))
-	     (unless (andmap (λ: ((s : (Pair Symbol Series)))
-				 (eq? len (series-length (cdr s))))
-			     (cdr cols))
-		     (error 'new-frame "Frame must have equal length series: ~a" 
-			    (map (λ: ((s : (Pair Symbol Series)))
-				     (series-description (car s) (cdr s)))
-				 cols))))))
+             (unless (andmap (λ: ((s : (Pair Symbol Series)))
+                               (eq? len (series-length (cdr s))))
+                             (cdr cols))
+               (error 'new-data-frame "Frame must have equal length series: ~a" 
+                      (map (λ: ((s : (Pair Symbol Series)))
+                             (series-description (car s) (cdr s)))
+                           cols))))))
   
   (check-equal-length)
+  
   (let ((index (build-index-from-labels ((inst map Label Column)
                                          (inst car Label Series) cols)))
         (data (apply vector ((inst map Series Column) cdr cols))))

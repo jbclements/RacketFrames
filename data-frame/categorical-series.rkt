@@ -30,7 +30,7 @@
 (provide:
  [CSeries->SIndex    (CSeries -> SIndex)]
  [cseries-length      (CSeries -> Index)]
- [cseries-ref        (CSeries Fixnum -> String)]
+ [cseries-iref        (CSeries Fixnum -> String)]
  [cseries-referencer (CSeries -> (Fixnum -> String))]
  [map/cs (CSeries (String -> String) -> CSeries)]
  [bop/cs (CSeries CSeries (String String -> String) -> CSeries)]
@@ -194,8 +194,8 @@
 	(let ((code (vector-ref data idx)))
 	  (vector-ref noms code)))))
 
-(: cseries-ref (CSeries Fixnum -> String))
-(define (cseries-ref cseries idx)
+(: cseries-iref (CSeries Fixnum -> String))
+(define (cseries-iref cseries idx)
   (vector-ref (CSeries-nominals cseries)
 	      (vector-ref (CSeries-data cseries) idx)))
 
@@ -241,6 +241,6 @@
 
 (check-equal? ((cseries-referencer series-categorical) 1) "world")
 
-(check-equal? (cseries-ref series-categorical 1) "world")
+(check-equal? (cseries-iref series-categorical 1) "world")
 
 (check-equal? (cseries-length series-categorical) 2)

@@ -31,7 +31,10 @@
  [CSeries->SIndex    (CSeries -> SIndex)]
  [cseries-length      (CSeries -> Index)]
  [cseries-ref        (CSeries Fixnum -> String)]
- [cseries-referencer (CSeries -> (Fixnum -> String))])
+ [cseries-referencer (CSeries -> (Fixnum -> String))]
+ [map/cs (CSeries (String -> String) -> CSeries)]
+ [bop/cs (CSeries CSeries (String String -> String) -> CSeries)]
+ [bop./cs (String CSeries (String String -> String) -> CSeries)])
 ; ***********************************************************
 
 ; ***********************************************************
@@ -144,7 +147,6 @@
 ; ***********************************************************
 
 ; ***********************************************************
-
 ;; Binary CSeries Ops
 
 (: bop/cs (CSeries CSeries (String String -> String) -> CSeries))
@@ -217,6 +219,9 @@
 
 (check-equal? (CSeries-nominals series-categorical) (vector "hello" "world"))
 
+; need to make map function more robust
+;(map/cs series-categorical string-length)
+
 (check-equal? (CSeries-nominals (bop/cs series-categorical series-categorical-2 string-append))
               (vector "hellofoo" "worldbar"))
 
@@ -229,12 +234,13 @@
 (check-equal? (CSeries-data (bop./cs "test" series-categorical string-append))
               (vector 0 1))
 
-; don't know how to check
-;(check-equal? (CSeries->SIndex series-categorical) (hash 'world 1 'hello 0))
+; CSeries->SIndex tests
+(check-equal? (hash-ref (CSeries->SIndex series-categorical) 'hello) 0)
+
+(check-equal? (hash-ref (CSeries->SIndex series-categorical) 'world) 1)
 
 (check-equal? ((cseries-referencer series-categorical) 1) "world")
 
 (check-equal? (cseries-ref series-categorical 1) "world")
 
 (check-equal? (cseries-length series-categorical) 2)
-

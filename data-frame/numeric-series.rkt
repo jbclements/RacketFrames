@@ -27,7 +27,8 @@
 (provide:
  [nseries-iref (NSeries Index -> Float)]
  [nseries-label-ref (NSeries Label -> Float)]
- [nseries-length (NSeries -> Index)] 
+ [nseries-length (NSeries -> Index)]
+ [nseries-data (NSeries -> FlVector)]
  [map/ns (NSeries (Float -> Float) -> NSeries)]
  [bop/ns (NSeries NSeries (Float Float -> Float) -> NSeries)]
  [+/ns (NSeries NSeries -> NSeries)]
@@ -148,6 +149,12 @@
 (: nseries-label-ref (NSeries Label -> Float))
 (define (nseries-label-ref series label)
   (nseries-iref series (label->idx series label)))
+
+; This function consumes a numeric series and returns its
+; data vector.
+(: nseries-data (NSeries -> FlVector))
+(define (nseries-data series)
+  (NSeries-data series))
 
 (: nseries-length (NSeries -> Index))
 (define (nseries-length nseries)

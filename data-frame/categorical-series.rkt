@@ -32,6 +32,7 @@
  [cseries-length      (CSeries -> Index)]
  [cseries-iref        (CSeries Fixnum -> String)]
  [cseries-referencer (CSeries -> (Fixnum -> String))]
+ [cseries-data (CSeries -> (Vectorof String))]
  [map/cs (CSeries (String -> String) -> CSeries)]
  [bop/cs (CSeries CSeries (String String -> String) -> CSeries)]
  [bop./cs (String CSeries (String String -> String) -> CSeries)])
@@ -198,6 +199,12 @@
 (define (cseries-iref cseries idx)
   (vector-ref (CSeries-nominals cseries)
 	      (vector-ref (CSeries-data cseries) idx)))
+
+; This function consumes a categorical series and returns its
+; data vector.
+(: cseries-data (CSeries -> (Vectorof String)))
+(define (cseries-data series)
+  (CSeries-nominals series))
 
 (: cseries-length (CSeries -> Index))
 (define (cseries-length series)

@@ -26,7 +26,8 @@
 (provide:
  [series-description (Label Series -> SeriesDescription)]
  [series-type (Series -> SeriesType)]
- [series-length (Series -> Index)])
+ [series-length (Series -> Index)]
+ [series-data (Series -> (U FlVector (Vectorof String) (Vectorof Fixnum)))])
 
 ; ***********************************************************
 
@@ -39,11 +40,11 @@
           Label
           GSeries GSeries? GSeries-data gseries-length)         
  (only-in "categorical-series.rkt"
-          CSeries CSeries? CSeries-data cseries-length)
+          CSeries CSeries? CSeries-data cseries-length cseries-data)
  (only-in "numeric-series.rkt"
-          NSeries NSeries? NSeries-data nseries-length)
+          NSeries NSeries? NSeries-data nseries-length nseries-data)
  (only-in "integer-series.rkt"
-	  ISeries ISeries? ISeries-data iseries-length))
+	  ISeries ISeries? ISeries-data iseries-length iseries-data))
 
 ; ***********************************************************
 
@@ -82,6 +83,20 @@
 (: series-description  (Label Series -> SeriesDescription))
 (define (series-description name series)
   (SeriesDescription name (series-type series) (series-length series)))
+
+; ***********************************************************
+
+; ***********************************************************
+; Get series data
+
+(: series-data (Series -> (U FlVector (Vectorof String) (Vectorof Fixnum))))
+(define (series-data series)
+  (cond
+    ;[(GSeries? series) (gseries-length series)]
+    [(NSeries? series) (nseries-data series)]    
+    [(CSeries? series) (cseries-data series)]    
+    [(ISeries? series) (iseries-data series)]
+    [else (error "Unknown Series type in Frame")]))
 
 ; ***********************************************************
 

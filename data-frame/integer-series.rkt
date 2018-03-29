@@ -31,6 +31,7 @@
  [iseries-iref (ISeries Index -> Fixnum)]
  [iseries-length (ISeries -> Index)]
  [iseries-referencer (ISeries -> (Index -> Integer))]
+ [iseries-data (ISeries -> (Vectorof Fixnum))]
  [map/is (ISeries (Fixnum -> Fixnum) -> ISeries)]
  [bop/is (ISeries ISeries (Fixnum Fixnum -> Fixnum) -> ISeries)]
  [+/is (ISeries ISeries -> ISeries)]
@@ -113,6 +114,12 @@
 (: iseries-iref (ISeries Index -> Fixnum))
 (define (iseries-iref series idx)
   (vector-ref (ISeries-data series) idx))
+
+; This function consumes an integer series and returns its
+; data vector.
+(: iseries-data (ISeries -> (Vectorof Fixnum)))
+(define (iseries-data series)
+  (ISeries-data series))
 
 ; This function consumes a series and a Label and returns
 ; the value at that Label in the series.

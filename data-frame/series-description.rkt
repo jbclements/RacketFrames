@@ -40,7 +40,7 @@
           Label
           GSeries GSeries? GSeries-data gseries-length)         
  (only-in "categorical-series.rkt"
-          CSeries CSeries? CSeries-data cseries-length cseries-data)
+          CSeries CSeries? CSeries-data cseries-length)
  (only-in "numeric-series.rkt"
           NSeries NSeries? NSeries-data nseries-length nseries-data)
  (only-in "integer-series.rkt"
@@ -94,7 +94,7 @@
   (cond
     ;[(GSeries? series) (gseries-length series)]
     [(NSeries? series) (nseries-data series)]    
-    [(CSeries? series) (cseries-data series)]    
+    ;[(CSeries? series) (cseries-data series)]    
     [(ISeries? series) (iseries-data series)]
     [else (error "Unknown Series type in Frame")]))
 

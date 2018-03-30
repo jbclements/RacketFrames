@@ -100,6 +100,13 @@
 
 ; ***********************************************************
 
+(struct: Summary ([mean : Float]
+                  [variance : Float]
+                  [min : Float]
+                  [max : Float]
+                  [count : Natural]
+                  [nans : Natural]))
+
 ;; An NSeries is an optimized Series for computation over vectors of Float
 ;; i.e., NSeries should be faster then (Series Float)
 (struct: NSeries LabelIndex ([data : FlVector])

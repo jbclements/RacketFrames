@@ -37,18 +37,18 @@
  (only-in "series-description.rkt"
 	  SeriesType Series
 	  SeriesDescription-type
-	  series-type series-length)
- (only-in "data-frame.rkt"
-	  DataFrame new-data-frame data-frame-names
-	  data-frame-cseries data-frame-explode
-	  DataFrameDescription DataFrameDescription-series data-frame-description)
+	  series-type series-count)
+ (only-in "frame.rkt"
+	  Frame new-frame frame-names
+	  frame-cseries frame-explode
+	  FrameDescription FrameDescription-series frame-description)
  (only-in "numeric-series.rkt"
-	  NSeries NSeries? nseries-iref nseries-label-ref)
+	  NSeries NSeries? nseries-ref)
  (only-in "integer-series.rkt"
-	  ISeries ISeries? iseries-iref
+	  ISeries ISeries? iseries-ref
 	  iseries-referencer)
  (only-in "categorical-series.rkt"
-	  cseries-referencer cseries-length cseries-ref
+	  cseries-referencer cseries-count cseries-ref
 	  CSeries CSeries?)
  (only-in "series-builder.rkt"
 	  SeriesBuilder)
@@ -94,10 +94,10 @@
 ; ***********************************************************
 
 ; ***********************************************************
-(: dest-mapping-series-builders (DataFrameDescription Index -> (Listof SeriesBuilder)))
-(define (dest-mapping-series-builders data-frame-description len)
+(: dest-mapping-series-builders (FrameDescription Index -> (Listof SeriesBuilder)))
+(define (dest-mapping-series-builders frame-description len)
   (for/list: : (Listof SeriesBuilder)
-	     ([series (DataFrameDescription-series data-frame-description)])
+	     ([series (FrameDescription-series frame-description)])
 	     (case (SeriesDescription-type series)
 	       ((CategoricalSeries) (new-CSeriesBuilder len))
 	       ((NumericSeries)     (new-NSeriesBuilder len))
@@ -158,7 +158,7 @@
 
   (define: index : JoinHash (make-index))
 
-  (define len (series-length (car cols)))
+  (define len (series-count (car cols)))
   (define: series-key : (Index -> String) (key-fn cols))
 
   (let loop ([i 0])
@@ -196,7 +196,7 @@
 	     (builder (vector-ref dest-builders col)))
 	 (cond
 	  ((NSeries? series)
-	   (let: ((num : Float (nseries-iref series row-id)))
+	   (let: ((num : Float (nseries-ref series row-id)))
 		 (if (NSeriesBuilder? builder)
 		     (append-NSeriesBuilder builder num)
 		     (copy-column-row-error series col))))
@@ -206,7 +206,7 @@
 		     (append-CSeriesBuilder builder  nom)
 		     (copy-column-row-error series col))))
 	  ((ISeries? series)
-	   (let: ((num : Fixnum (iseries-iref series row-id)))
+	   (let: ((num : Fixnum (iseries-ref series row-id)))
 		 (if (ISeriesBuilder? builder)
 		     (append-ISeriesBuilder builder num)
 		     (copy-column-row-error series col))))))))
@@ -222,7 +222,7 @@
 
   (define: a-col-cnt : Fixnum (vector-length a-cols))
   (define: b-col-cnt : Fixnum (vector-length b-cols))
-  (define: fa-len    : Fixnum (series-length (vector-ref a-cols #{0 : Index} )))
+  (define: fa-len    : Fixnum (series-count (vector-ref a-cols #{0 : Index} )))
 
   (for ((fa-row (in-range fa-len)))
        (let*: ((fa-row : Index (assert fa-row index?))
@@ -238,21 +238,21 @@
 ; ***********************************************************
 
 ;; FIXME RPR - Currently only doing a left-outer join on fa to fb
-;; Smart pick which to index, which to drive from sequentially, between DataFrame fa and DataFrame fb.
-(: data-frame-merge (DataFrame DataFrame [#:on (Listof Symbol)] -> DataFrame))
-(define (data-frame-merge fa fb #:on [cols '()])
+;; Smart pick which to index, which to drive from sequentially, between Frame fa and Frame fb.
+(: frame-merge (Frame Frame [#:on (Listof Symbol)] -> Frame))
+(define (frame-merge fa fb #:on [cols '()])
 
   ;;  Directly using frame-explode with an internal define doesn't work.  TR BUG
-  (: data-frame-cols (DataFrame LabelProjection -> (Listof Column)))
-  (define (data-frame-cols data-frame project)
-    (data-frame-explode data-frame #:project project))
+  (: frame-cols (Frame LabelProjection -> (Listof Column)))
+  (define (frame-cols frame project)
+    (frame-explode frame #:project project))
 
   (: src-series ((Listof Column) -> (Vectorof Series)))
   (define (src-series cols)
     (list->vector (map column-series cols)))
 
-  (define: cols-a    : (Setof Label) (list->set (data-frame-names fa)))
-  (define: cols-b    : (Setof Label) (list->set (data-frame-names fb)))
+  (define: cols-a    : (Setof Label) (list->set (frame-names fa)))
+  (define: cols-b    : (Setof Label) (list->set (frame-names fb)))
   (define: join-cols : (Setof Label) (if (null? cols)
 					 (set-intersect cols-a cols-b)
 					 (set-intersect (list->set cols)
@@ -261,26 +261,26 @@
   (define: non-key-common : (Setof Label) (set-subtract (set-intersect cols-a cols-b) join-cols))
 
   (when (null? join-cols)
-	(error "No common columns between data-frames to join on."))
+	(error "No common columns between frames to join on."))
 
   (define: non-key-fb : (Setof Label) (set-subtract cols-b join-cols))
 
-  (define: fa-cols : (Listof Column) (data-frame-cols fa '()))
-  (define: fb-cols : (Listof Column) (data-frame-cols fb non-key-fb))
+  (define: fa-cols : (Listof Column) (frame-cols fa '()))
+  (define: fb-cols : (Listof Column) (frame-cols fb non-key-fb))
 
   (define: fb-index : JoinHash
-    (let ((cols (key-cols-sort-lexical (data-frame-cols fb join-cols))))
+    (let ((cols (key-cols-sort-lexical (frame-cols fb join-cols))))
       (index (key-cols-series cols))))
 
   (define: fa-keyfn : (Index -> Key)
-    (key-fn (key-cols-series (key-cols-sort-lexical (data-frame-cols fa join-cols)))))
+    (key-fn (key-cols-series (key-cols-sort-lexical (frame-cols fa join-cols)))))
 
   (define: dest-builders-a : (Vectorof SeriesBuilder)
-    (list->vector (dest-mapping-series-builders (data-frame-description fa) 10)))
+    (list->vector (dest-mapping-series-builders (frame-description fa) 10)))
 
   (define: dest-builders-b : (Vectorof SeriesBuilder)
     (list->vector
-     (dest-mapping-series-builders (data-frame-description fb #:project non-key-fb) 10)))
+     (dest-mapping-series-builders (frame-description fb #:project non-key-fb) 10)))
 
   ;; side-effects into the builders
   (do-join-build (src-series fa-cols) (src-series fb-cols)
@@ -299,27 +299,27 @@
 	      (cons (join-column-name col non-key-common "fb-")
 		    (series-complete builder))))
 
-  (new-data-frame (append new-a-series new-b-series)))
+  (new-frame (append new-a-series new-b-series)))
 
 ; ***********************************************************
 
 ; ***********************************************************
 
 ;; Append common columns
-(: data-frame-append (DataFrame DataFrame [#:col (Listof Symbol)] -> DataFrame))
-(define (data-frame-append fa fb #:col [cols '()])
+(: frame-append (Frame Frame [#:col (Listof Symbol)] -> Frame))
+(define (frame-append fa fb #:col [cols '()])
 
-  (define: cols-a    : (Setof Label) (list->set (data-frame-names fa)))
-  (define: cols-b    : (Setof Label) (list->set (data-frame-names fb)))
+  (define: cols-a    : (Setof Label) (list->set (frame-names fa)))
+  (define: cols-b    : (Setof Label) (list->set (frame-names fb)))
   (define: append-cols : (Setof Label) (if (null? cols)
 					   (set-intersect cols-a cols-b)
 					   (set-intersect (list->set cols)
 							  (set-intersect cols-a cols-b))))
-  (new-data-frame (map (λ: ((name : Label))
-		      (cons name (cseries-append (data-frame-cseries fa name)
-						 (data-frame-cseries fb name))))
+  (new-frame (map (λ: ((name : Label))
+		      (cons name (cseries-append (frame-cseries fa name)
+						 (frame-cseries fb name))))
 		  (filter (λ: ((name : Label))
 			      (set-member? append-cols name))
-			  (data-frame-names fa)))))
+			  (frame-names fa)))))
 
 ; ***********************************************************

@@ -47,7 +47,7 @@
 	   (curr-len (vector-length data))
 	   (new-len  (assert (inexact->exact (round (* 1.5 curr-len))) exact-integer?)))
       (let: ((new-data : (Vectorof Fixnum) ((inst make-vector Fixnum) new-len 0)))
-	    (do ([idx 0 (add1 idx)])  ;; RACKET REQUEST FOR RUNTIME SUPPORT FOR COPY
+	    (do ([idx 0 (add1 idx)])
 		([>= idx curr-len] (set-ISeriesBuilder-data! builder new-data))
 	      (vector-set! new-data idx (vector-ref data idx))))))
   

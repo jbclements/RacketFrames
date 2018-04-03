@@ -24,6 +24,7 @@
 (require
  racket/pretty
  racket/unsafe/ops
+ racket/flonum
  (only-in racket/set
 	  set set-member?
 	  list->set set->list
@@ -37,19 +38,20 @@
  (only-in "series-description.rkt"
 	  SeriesType Series
 	  SeriesDescription-type
-	  series-type series-length)
+	  series-type series-length
+          series-data)
  (only-in "data-frame.rkt"
 	  DataFrame new-data-frame data-frame-names
 	  data-frame-cseries data-frame-explode
 	  DataFrameDescription DataFrameDescription-series data-frame-description)
  (only-in "numeric-series.rkt"
-	  NSeries NSeries? nseries-iref nseries-label-ref)
+	  NSeries NSeries? nseries-iref nseries-label-ref new-NSeries)
  (only-in "integer-series.rkt"
-	  ISeries ISeries? iseries-iref
+	  ISeries ISeries? iseries-iref new-ISeries
 	  iseries-referencer)
  (only-in "categorical-series.rkt"
-	  cseries-referencer cseries-length cseries-ref
-	  CSeries CSeries?)
+	  cseries-referencer cseries-length cseries-iref
+	  CSeries CSeries? new-CSeries)
  (only-in "series-builder.rkt"
 	  SeriesBuilder)
  (only-in "integer-series-builder.rkt"
@@ -65,7 +67,9 @@
  (only-in "numeric-series-builder.rkt"
 	  NSeriesBuilder NSeriesBuilder?
 	  append-NSeriesBuilder complete-NSeriesBuilder
-	  new-NSeriesBuilder))
+	  new-NSeriesBuilder)
+ (only-in "data-frame-print.rkt"
+          frame-write-tab))
 
 ; ***********************************************************
 
@@ -81,6 +85,7 @@
 ; ***********************************************************
 
 ; ***********************************************************
+
 (: column-series (Column -> Series))
 (define (column-series scol)
   (cdr scol))
@@ -91,9 +96,11 @@
     (if (set-member? common-cols colname)
 	(symbol-prefix colname prefix)
 	colname)))
+
 ; ***********************************************************
 
 ; ***********************************************************
+
 (: dest-mapping-series-builders (DataFrameDescription Index -> (Listof SeriesBuilder)))
 (define (dest-mapping-series-builders data-frame-description len)
   (for/list: : (Listof SeriesBuilder)
@@ -127,7 +134,7 @@
 ;; Build key string from the columns of a frame and a given set of col labels to use.
 ;; Insert a tab char between each key value, e.g., k1 + \t + k2 + \t + ...
 
-(: key-fn ((Listof IndexableSeries) -> (Index -> String)))
+(: key-fn ((Listof IndexableSeries) -> (Index -> Key)))
 (define (key-fn cols)
   (let: ((col-refs : (Listof (Index -> (U Label Integer)))
 		   (for/list ([col (in-list cols)])
@@ -184,7 +191,7 @@
 
 (: copy-column-row-error (Series Integer -> Void))
 (define (copy-column-row-error series col)
-  (error 'frame-merge "Invalid target builder for frame column series ~s at ~s"
+  (error 'data-frame-merge "Invalid target builder for data-frame column series ~s at ~s"
 	 (series-type series) col))
 
 (: copy-column-row ((Vectorof Series) (Vectorof SeriesBuilder) Index -> Void))
@@ -201,7 +208,7 @@
 		     (append-NSeriesBuilder builder num)
 		     (copy-column-row-error series col))))
 	  ((CSeries? series)
-	   (let: ((nom : Label (cseries-ref series row-id)))
+	   (let: ((nom : Label (cseries-iref series row-id)))
 		 (if (CSeriesBuilder? builder)
 		     (append-CSeriesBuilder builder  nom)
 		     (copy-column-row-error series col))))
@@ -228,7 +235,7 @@
        (let*: ((fa-row : Index (assert fa-row index?))
 	       (fa-key : Key (fa-key-fn fa-row)))
 	      (let ((fb-rows (hash-ref join-hash fa-key (λ () '()))))
-		;; (displayln (format "Hash join: ~s ~s, ~s" fa-row fa-key fb-rows))
+                (displayln (format "Hash join: ~s ~s, ~s" fa-row fa-key fb-rows))
 		(for ([fb-row fb-rows])
 		     (copy-column-row a-cols a-builders fa-row)
 		     (copy-column-row b-cols b-builders (assert fb-row index?)))))))
@@ -323,3 +330,136 @@
 			  (data-frame-names fa)))))
 
 ; ***********************************************************
+
+; ***********
+; Test Cases
+; ***********
+
+(define integer-col-1 (cons 'integer-col-1 (new-ISeries (vector 1 2 3 4 5) #f)))
+
+(define integer-col-2 (cons 'integer-col-2 (new-ISeries (vector 6 7 8 9 10) #f)))
+
+(define float-col-1 (cons 'float-col-1 (new-NSeries (flvector 1.5 2.5 3.5 4.5 5.5) #f)))
+
+;(check-equal? (column-series integer-col-1)
+;              (new-ISeries (vector 1 2 3 4 5) #f))
+
+(check-equal? (join-column-name integer-col-1 (set 'integer-col-1 'integer-col-2) "prefix")
+              'prefixinteger-col-1)
+
+; (: dest-mapping-series-builders (DataFrameDescription Index -> (Listof SeriesBuilder)))
+
+(define columns-integer
+  (list 
+   (cons 'col1 (new-ISeries (vector 1 2 3 4) #f))
+   (cons 'col2 (new-ISeries (vector 5 6 7 8) #f))
+   (cons 'col3 (new-ISeries (vector 9 10 11 12) #f))))
+
+(define columns-categorical
+  (list 
+   (cons 'col1 (new-CSeries (vector 'a 'b 'c 'd 'e)))
+   (cons 'col2 (new-CSeries (vector 'e 'f 'g 'h 'i)))
+   (cons 'col3 (new-CSeries (vector 'j 'k 'l 'm 'n)))))
+
+; create new data-frame-integer
+(define data-frame-integer (new-data-frame columns-integer))
+
+; create new data-frame-categorical
+(define data-frame-categorical (new-data-frame columns-categorical))
+
+(dest-mapping-series-builders (data-frame-description data-frame-integer) 4)
+
+(key-cols-sort-lexical (list integer-col-2 integer-col-1))
+
+(key-cols-series (list integer-col-2 integer-col-1 float-col-1))
+
+((key-fn (key-cols-series (list integer-col-2 integer-col-1 float-col-1))) 2)
+
+; build hash join
+(index (key-cols-series (list integer-col-2 integer-col-1 float-col-1)))
+
+(define cseries-1 (new-CSeries (vector 'a 'b 'c 'd 'e)))
+
+(define iseries-1 (new-ISeries (vector 1 2 3 4 5) #f))
+
+(define nseries-1 (new-NSeries (flvector 1.5 2.5 3.5 4.5 5.5) #f))
+
+(define cseries-2 (new-CSeries (vector 'a 'b 'c 'd 'l)))
+
+(define iseries-2 (new-ISeries (vector 1 2 3 4 5) #f))
+
+(define nseries-2 (new-NSeries (flvector 1.5 2.5 3.5 4.5 5.5) #f))
+
+(define cseries-builder-1 (new-CSeriesBuilder))
+
+(define cseries-copy-fn-1 (cseries-copy-fn cseries-1 cseries-builder-1))
+
+(cseries-copy-fn-1 1)
+
+(define cseries-builder-1-complete (complete-CSeriesBuilder cseries-builder-1))
+
+(check-equal? (cseries-iref cseries-builder-1-complete 0) 'b)
+
+;(copy-column-row-error cseries-1 3)
+
+(define cseries-builder-2 (new-CSeriesBuilder))
+
+(define iseries-builder-1 (new-ISeriesBuilder))
+
+(define nseries-builder-1 (new-NSeriesBuilder))
+
+;(: copy-column-row ((Vectorof Series) (Vectorof SeriesBuilder) Index -> Void))
+
+(copy-column-row (vector cseries-1 iseries-1 nseries-1)
+                 (vector cseries-builder-2 iseries-builder-1 nseries-builder-1)
+                 2)
+
+(check-equal? (cseries-iref (complete-CSeriesBuilder cseries-builder-2) 0) 'c)
+
+(check-equal? (iseries-iref (complete-ISeriesBuilder iseries-builder-1) 0) 3)
+
+(check-equal? (nseries-iref (complete-NSeriesBuilder nseries-builder-1) 0) 3.5)
+
+; (: do-join-build ((Vectorof Series) (Vectorof Series)
+;		  (Vectorof SeriesBuilder) (Vectorof SeriesBuilder)
+;		  (Index -> Key) JoinHash -> Void))
+
+(define fa-key-fn (key-fn (list cseries-1 iseries-1 cseries-2 iseries-2)))
+
+(define cseries-builder-a (new-CSeriesBuilder))
+(define iseries-builder-a (new-ISeriesBuilder))
+
+(define cseries-builder-b (new-CSeriesBuilder))
+(define iseries-builder-b (new-ISeriesBuilder))
+
+(do-join-build
+ (vector cseries-1 iseries-1)
+ (vector cseries-2 iseries-2)
+ (vector cseries-builder-a iseries-builder-a)
+ (vector cseries-builder-b iseries-builder-b)
+ fa-key-fn
+(index (list cseries-1 iseries-1 cseries-2 iseries-2)))
+
+(series-data (complete-CSeriesBuilder cseries-builder-a))
+
+(frame-write-tab (data-frame-merge data-frame-integer data-frame-categorical) (current-output-port))
+
+(define columns-integer-2
+  (list 
+   (cons 'col1 (new-ISeries (vector 1 2 3 4) #f))
+   (cons 'col2 (new-ISeries (vector 5 6 7 8) #f))
+   (cons 'col3 (new-ISeries (vector 9 10 11 12) #f))))
+
+(define columns-integer-3
+  (list 
+   (cons 'col1 (new-ISeries (vector 1 2 3 4) #f))
+   (cons 'col2 (new-ISeries (vector 25 26 27 28) #f))
+   (cons 'col3 (new-ISeries (vector 29 30 31 32) #f))))
+
+; create new data-frame-integer-2
+(define data-frame-integer-2 (new-data-frame columns-integer-2))
+
+; create new data-frame-integer-3
+(define data-frame-integer-3 (new-data-frame columns-integer-3))
+
+(frame-write-tab (data-frame-merge data-frame-integer-2 data-frame-integer-3 (list 'col1)) (current-output-port))

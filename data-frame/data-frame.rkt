@@ -195,6 +195,10 @@
 
 ; ***********************************************************
 
+; (map (inst cons Symbol Integer) '(a b c d) '(1 2 3 4))
+; - : (Listof (Pairof Symbol Integer))
+; '((a . 1) (b . 2) (c . 3) (d . 4))
+
 (: data-frame-names (DataFrame -> (Listof Symbol)))
 (define (data-frame-names data-frame)  
   (map (λ: ((kv : (Pair Symbol Integer)))
@@ -320,6 +324,7 @@
 
 ; ***********************************************************
 
+; replaces column name
 (: data-frame-replace (DataFrame Column -> DataFrame))
 (define (data-frame-replace data-frame new-col)
   (define name (column-heading new-col))
@@ -462,17 +467,17 @@
 ; ************************
 
 (check-equal? (series-data (data-frame-series data-frame-categorical 'col1))
-              (vector "hello" "world"))
+              (vector 'hello 'world))
 
 (check-equal? (series-data (data-frame-series data-frame-categorical 'col2))
-              (vector "fizz" "buzz"))
+              (vector 'fizz 'buzz))
 
 (set! data-frame-categorical (data-frame-rename data-frame-categorical 'col1 'col-one))
 
 (check-equal? (data-frame-names data-frame-categorical) (list 'col-one 'col2 'col3))
 
 (check-equal? (series-data (data-frame-series data-frame-categorical 'col-one))
-              (vector "hello" "world"))
+              (vector 'hello 'world))
 
 ; check error
 ;(data-frame-series data-frame-float 'col1)
@@ -493,7 +498,7 @@
               (flvector 1.5 2.5 3.5 4.5))
 
 (check-equal? (series-data (data-frame-series data-frame-mix 'categorical-col))
-              (vector "hello" "world" "fizz" "buzz"))
+              (vector 'hello 'world 'fizz 'buzz))
 
 (set! data-frame-mix (data-frame-rename data-frame-mix 'float-col 'float-column))
 
@@ -510,3 +515,10 @@
 ; check float-column is gone
 
 (check-equal? (data-frame-names data-frame-mix) (list 'integer-col 'categorical-col))
+
+; data-frame-explode tests
+(data-frame-explode data-frame-integer)
+
+(data-frame-description data-frame-integer)
+
+(show-data-frame-description (data-frame-description data-frame-integer))

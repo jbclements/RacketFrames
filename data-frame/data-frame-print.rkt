@@ -95,7 +95,7 @@
 
 (: format-cseries (CSeries Index -> String))
 (define (format-cseries cseries row)
-  (~a (cseries-iref cseries row)
+  (~a (symbol->string (cseries-iref cseries row))
       #:width WIDTH
       #:align 'left))
 

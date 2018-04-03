@@ -8,7 +8,8 @@
 (provide:
  [CSeries->SIndex    (CSeries -> SIndex)]
  [cseries-length      (CSeries -> Index)]
- [cseries-ref        (CSeries Fixnum -> Label)]
+ [cseries-iref        (CSeries Fixnum -> Label)]
+ [cseries-data        (CSeries -> (Vectorof Symbol))]
  [cseries-referencer (CSeries -> (Fixnum -> Label))])
 
 (require
@@ -87,11 +88,15 @@
 	(let ((code (vector-ref data idx)))
 	  (vector-ref noms code)))))
 
-(: cseries-ref (CSeries Fixnum -> Label))
-(define (cseries-ref cseries idx)
+(: cseries-iref (CSeries Fixnum -> Label))
+(define (cseries-iref cseries idx)
   (vector-ref (CSeries-nominals cseries)
 	      (vector-ref (CSeries-data cseries) idx)))
 
 (: cseries-length (CSeries -> Index))
 (define (cseries-length series)
   (vector-length (CSeries-data series)))
+
+(: cseries-data (CSeries -> (Vectorof Symbol)))
+(define (cseries-data series)
+  (CSeries-nominals series))

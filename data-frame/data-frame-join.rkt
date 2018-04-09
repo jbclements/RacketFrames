@@ -86,10 +86,16 @@
 
 ; ***********************************************************
 
+; This function consumes a Column and returns the series of
+; the Column which is just the second element of the list.
 (: column-series (Column -> Series))
 (define (column-series scol)
   (cdr scol))
 
+; This function consumes a Column, Setof Label and String
+; and checks if the column name of Column is a member of the
+; given Setof Label, and if it is, it prepends the prefix
+; to the column name and returns that new value.
 (: join-column-name (Column (Setof Label) String -> Symbol))
 (define (join-column-name column common-cols prefix)
   (let ((colname (car column)))
@@ -101,6 +107,9 @@
 
 ; ***********************************************************
 
+; This function consumes a DataFrameDescription and an Index
+; and returns new default series builders of the the given
+; length.
 (: dest-mapping-series-builders (DataFrameDescription Index -> (Listof SeriesBuilder)))
 (define (dest-mapping-series-builders data-frame-description len)
   (for/list: : (Listof SeriesBuilder)
@@ -117,6 +126,8 @@
 
 ; ***********************************************************
 
+; This function consumes a Listof Columns and alphabetically
+; sorts it on the column name and returns new sorted list.
 (: key-cols-sort-lexical ((Listof Column) -> (Listof Column)))
 (define (key-cols-sort-lexical cols)
   ((inst sort Column Column)
@@ -125,6 +136,9 @@
        (string<=? (symbol->string (car kc1))
 		  (symbol->string (car kc2))))))
 
+; This function consumes a Listof Column and filteres it for
+; only columns of CSeries or ISeries and returns those series
+; in list form.
 (: key-cols-series ((Listof Column) -> (Listof IndexableSeries)))
 (define (key-cols-series cols)
   (filter (λ: ((s : Series)) (or (CSeries? s)
@@ -462,4 +476,4 @@
 ; create new data-frame-integer-3
 (define data-frame-integer-3 (new-data-frame columns-integer-3))
 
-(frame-write-tab (data-frame-merge data-frame-integer-2 data-frame-integer-3 (list 'col1)) (current-output-port))
+(frame-write-tab (data-frame-merge data-frame-integer-2 data-frame-integer-3 #:on (list 'col1)) (current-output-port))

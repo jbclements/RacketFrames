@@ -1,0 +1,12 @@
+#lang racket
+
+(require benchmark plot/pict racket racket/runtime-path compiler/find-exe)
+
+(define-runtime-path fib-path
+    "examples/macro-examples/fib.rkt")
+
+(define-runtime-path collatz-path
+    "examples/macro-examples/collatz.rkt")
+
+(define-runtime-path compiled-dir
+    "examples/macro-examples/compiled")

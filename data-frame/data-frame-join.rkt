@@ -251,6 +251,34 @@
 		     (append-ISeriesBuilder builder num)
 		     (copy-column-row-error series col))))))))
 
+; This functions consumes a Vectorof Series and Vectorof SeriesBuilder
+; and an Index and does not return any value. It copies an entire row
+; from the given Vectorof Series into the given Vectorof SeriesBuilders.
+(: copy-null-to-row ((Vectorof Series) (Vectorof SeriesBuilder) -> Void))
+(define (copy-null-to-row src-series dest-builders)
+;;  (when (zero? (modulo row-id 10000))
+;;	(displayln (format "Copy row: ~a" row-id)))
+  (for ([col (in-range (vector-length src-series))])
+    ; Loop through each column and get the associated series and series builder.
+       (let ((series (vector-ref src-series col))
+	     (builder (vector-ref dest-builders col)))
+         ; Copy specific row values into correct series builders. If series is
+         ; a NSeries then associated value will be appended onto NSeriesBuilder,
+         ; and same goes for ISeries and CSeries.
+         (cond
+	  ((NSeries? series)
+           (if (NSeriesBuilder? builder)
+               (append-NSeriesBuilder builder -1.0)
+               (copy-column-row-error series col)))
+	  ((CSeries? series)
+           (if (CSeriesBuilder? builder)
+               (append-CSeriesBuilder builder 'null)
+               (copy-column-row-error series col)))
+	  ((ISeries? series)
+           (if (ISeriesBuilder? builder)
+               (append-ISeriesBuilder builder 1)
+               (copy-column-row-error series col)))))))
+
 ; ***********************************************************
 
 ; ***********************************************************
@@ -274,9 +302,14 @@
          (displayln fa-key)
 	      (let ((fb-rows (hash-ref join-hash fa-key (λ () '()))))
                 (displayln (format "Hash join: ~s ~s, ~s" fa-row fa-key fb-rows))
-		(for ([fb-row fb-rows])
-		     (copy-column-row a-cols a-builders fa-row)
-		     (copy-column-row b-cols b-builders (assert fb-row index?)))))))
+                (if (null? fb-rows)
+                    (begin (copy-column-row a-cols a-builders fa-row)
+                    ; Copy nans into fb
+                    (copy-null-to-row b-cols b-builders))
+                    (for ([fb-row fb-rows])
+                      ; maps possible multiple rows from b to row in a
+                      (copy-column-row a-cols a-builders fa-row)
+                      (copy-column-row b-cols b-builders (assert fb-row index?))))))))
 
 ; ***********************************************************
 
@@ -570,16 +603,16 @@
 (define columns-integer-2
   (list 
    (cons 'col1 (new-ISeries (vector 1 2 3 4) #f))
-   (cons 'col4 (new-ISeries (vector 21 22 23 24) #f))
    (cons 'col2 (new-ISeries (vector 5 6 7 8) #f))
-   (cons 'col3 (new-ISeries (vector 9 10 11 12) #f))))
+   (cons 'col3 (new-ISeries (vector 9 10 11 12) #f))
+   (cons 'col4 (new-ISeries (vector 21 22 23 24) #f))))
 
 (define columns-integer-3
   (list 
    (cons 'col1 (new-ISeries (vector 1 2 3 4) #f))
-   (cons 'col4 (new-ISeries (vector 1 2 3 4) #f))
    (cons 'col2 (new-ISeries (vector 25 26 27 28) #f))
-   (cons 'col3 (new-ISeries (vector 29 30 31 32) #f))))
+   (cons 'col3 (new-ISeries (vector 29 30 31 32) #f))
+   (cons 'col4 (new-ISeries (vector 101 201 301 401) #f))))
 
 ; create new data-frame-integer-2
 (define data-frame-integer-2 (new-data-frame columns-integer-2))
@@ -587,6 +620,10 @@
 ; create new data-frame-integer-3
 (define data-frame-integer-3 (new-data-frame columns-integer-3))
 
-(frame-write-tab (data-frame-join-left data-frame-integer-2 data-frame-integer-3 #:on (list 'col3)) (current-output-port))
+(frame-write-tab (data-frame-join-left data-frame-integer-2 data-frame-integer-3 #:on (list 'col1)) (current-output-port))
 
-(frame-write-tab (data-frame-join-right data-frame-integer-2 data-frame-integer-3 #:on (list 'col3)) (current-output-port))
+(frame-write-tab (data-frame-join-left data-frame-integer-2 data-frame-integer-3 #:on (list 'col2)) (current-output-port))
+
+(frame-write-tab (data-frame-join-right data-frame-integer-2 data-frame-integer-3 #:on (list 'col1)) (current-output-port))
+
+(frame-write-tab (data-frame-join-right data-frame-integer-2 data-frame-integer-3 #:on (list 'col2)) (current-output-port))

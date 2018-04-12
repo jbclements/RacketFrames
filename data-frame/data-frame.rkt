@@ -38,8 +38,7 @@
  (struct-out DataFrameDescription)
  data-frame-series
  data-frame-names data-frame-dim 
- data-frame-cseries data-frame-nseries
- data-frame-series
+ data-frame-cseries data-frame-nseries data-frame-iseries
  new-data-frame)
 
 ; ***********************************************************
@@ -205,8 +204,8 @@
 
 ; This function uses the above function and the assert function
 ; to ensure the series returned is an ISeries.
-(: DataFrame-iseries (DataFrame Symbol -> ISeries))
-(define (DataFrame-iseries data-frame name)
+(: data-frame-iseries (DataFrame Symbol -> ISeries))
+(define (data-frame-iseries data-frame name)
   (assert (data-frame-series data-frame name) ISeries?))
 
 ; This function consumes a DataFrame and returns a Listof pairs

@@ -27,6 +27,7 @@
 (provide:
  [nseries-iref (NSeries Index -> Float)]
  [nseries-label-ref (NSeries Label -> Float)]
+ [nseries-referencer (NSeries -> (Index -> Float))]
  [nseries-length (NSeries -> Index)]
  [nseries-data (NSeries -> FlVector)]
  [map/ns (NSeries (Float -> Float) -> NSeries)]
@@ -40,7 +41,9 @@
  [*./ns (NSeries Float -> NSeries)]
  [/./ns (NSeries Float -> NSeries)]
  [apply-agg (Symbol NSeries -> Real)]
- [apply-stat (Symbol NSeries -> Real)])
+ [apply-stat (Symbol NSeries -> Real)]
+ [flvector->list (FlVector Fixnum -> (Listof Float))]
+ [list->flvector ((Listof Float) -> FlVector)])
 
 (provide
  flvector-print
@@ -172,6 +175,20 @@
   (cond
     [(= idx (flvector-length flvec)) null]
     [else (cons (flvector-ref flvec idx) (flvector->list flvec (unsafe-fx+ idx 1)))]))
+
+(: list->flvector ((Listof Float) -> FlVector))
+(define (list->flvector float-list)
+  (define len : Index (length float-list))
+
+  (define result-flvector (make-flvector len))
+
+  (for([flo float-list]
+     [i (in-range len)])
+    (flvector-set! result-flvector i flo))
+
+  result-flvector)
+
+(list->flvector (list 1.5 2.5 3.5))
 
 ; ***********************************************************
 

@@ -30,7 +30,7 @@
  [new-ISeries ((Vectorof Fixnum) (Option (U (Listof Label) SIndex)) -> ISeries)]
  [iseries-iref (ISeries Index -> Fixnum)]
  [iseries-length (ISeries -> Index)]
- [iseries-referencer (ISeries -> (Index -> Integer))]
+ [iseries-referencer (ISeries -> (Index -> Fixnum))]
  [iseries-data (ISeries -> (Vectorof Fixnum))]
  [map/is (ISeries (Fixnum -> Fixnum) -> ISeries)]
  [bop/is (ISeries ISeries (Fixnum Fixnum -> Fixnum) -> ISeries)]
@@ -103,7 +103,7 @@
 ; lambda function which consumes an index and provides the
 ; value of the data at that index in the series. It can be
 ; defined once and used repeatedly as a referencer.
-(: iseries-referencer (ISeries -> (Index -> Integer)))
+(: iseries-referencer (ISeries -> (Index -> Fixnum)))
 (define (iseries-referencer cseries)
   (let ((data (ISeries-data cseries)))
     (λ: ((idx : Index))

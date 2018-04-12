@@ -7,7 +7,7 @@
 (require typed/rackunit)
 
 ; ***********************************************************
-; data-frame-join rough draft
+; data-frame-concat
 ; ***********************************************************
 
 ; **************************
@@ -77,8 +77,6 @@
 ; This function consumes two DataFrames and produces a
 ; concatenation of all their series on matching column
 ; names.
-
-; TR Bug??
 (: data-frame-concat (DataFrame DataFrame [#:col (Listof Symbol)] -> DataFrame))
 (define (data-frame-concat dfa dfb #:col [cols '()])
 
@@ -93,7 +91,7 @@
                                (let ((dfa-series (data-frame-series dfa name))
                                      (dfb-series (data-frame-series dfb name)))
                                  (if (not (equal? (series-type dfa-series) (series-type dfb-series)))
-                                     (error data-frame-concat
+                                     (error 'data-frame-concat
                                             "The series types are different, unable to concat.") 
                                      (case (series-type dfa-series)
                                        ('CategoricalSeries (cseries-append (data-frame-cseries dfa name)
@@ -102,12 +100,12 @@
                                                                             (data-frame-nseries dfb name)))
                                        ('IntegerSeries     (iseries-append (data-frame-iseries dfa name)
                                                                             (data-frame-iseries dfb name)))
-                                       (else (error data-frame-concat
+                                       (else (error 'data-frame-concat
                                                     "Unknown series type ~a."
-                                                    (SeriesDescription-type dfa-series)))))))
+                                                    (series-type dfa-series))))))))
                          (filter (λ: ((name : Label))
                                    (set-member? append-cols name))
-                                 (data-frame-names dfa))))))
+                                 (data-frame-names dfa)))))
 
 ; Test Cases
 
@@ -131,20 +129,26 @@
 ; create new data-frame-integer-3
 (define data-frame-integer-2 (new-data-frame columns-integer-2))
 
+(displayln "Concat Test 1")
+
+(frame-write-tab data-frame-integer-1 (current-output-port))
+
+(frame-write-tab data-frame-integer-2 (current-output-port))
+
 (frame-write-tab (data-frame-concat data-frame-integer-1 data-frame-integer-2) (current-output-port))
 
 (define columns-mixed-1
   (list 
    (cons 'col1 (new-ISeries (vector 1 2 3 4) #f))
    (cons 'col2 (new-NSeries (flvector 5.2 6.2 7.2 8.2) #f))
-   (cons 'col3 (new-CSeries (vector 'a 'b 'c 'd) #f))
+   (cons 'col3 (new-CSeries (vector 'a 'b 'c 'd)))
    (cons 'col4 (new-ISeries (vector 21 22 23 24) #f))))
 
 (define columns-mixed-2
   (list 
    (cons 'col1 (new-ISeries (vector 1 2 3 4) #f))
    (cons 'col2 (new-NSeries (flvector 25.3 26.3 27.3 28.3) #f))
-   (cons 'col3 (new-CSeries (vector 'e 'f 'g 'h) #f))
+   (cons 'col3 (new-CSeries (vector 'e 'f 'g 'h)))
    (cons 'col4 (new-ISeries (vector 1 2 3 4) #f))))
 
 ; create new data-frame-mixed-1
@@ -152,5 +156,11 @@
 
 ; create new data-frame-mixed-2
 (define data-frame-mixed-2 (new-data-frame columns-mixed-2))
+
+(displayln "Concat Test 2")
+
+(frame-write-tab data-frame-mixed-1 (current-output-port))
+
+(frame-write-tab data-frame-mixed-2 (current-output-port))
 
 (frame-write-tab (data-frame-concat data-frame-mixed-1 data-frame-mixed-2) (current-output-port))

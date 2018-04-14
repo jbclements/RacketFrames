@@ -286,10 +286,10 @@
 ; This function consumes two Vectorof Series and two Vectorof
 ; SeriesBuilder. The types of Series and SeriesBuilder must
 ; match in the respective indicies.
-(: do-join-build ((Vectorof Series) (Vectorof Series) (Vectorof Series)
+(: do-join-build-left/right ((Vectorof Series) (Vectorof Series) (Vectorof Series)
 		  (Vectorof SeriesBuilder) (Vectorof SeriesBuilder)
 		  (Index -> Key) JoinHash -> Void))
-(define (do-join-build a-cols b-cols b-cols-match a-builders b-builders dfa-key-fn join-hash)
+(define (do-join-build-left/right a-cols b-cols b-cols-match a-builders b-builders dfa-key-fn join-hash)
 
   (define: a-col-cnt : Fixnum (vector-length a-cols))
   (define: b-col-cnt : Fixnum (vector-length b-cols))
@@ -341,6 +341,54 @@
 
 ; ***********************************************************
 
+; This function consumes two Vectorof Series and two Vectorof
+; SeriesBuilder. The types of Series and SeriesBuilder must
+; match in the respective indicies.
+(: do-join-build-outer ((Vectorof Series) (Vectorof Series)
+		  (Vectorof SeriesBuilder) (Vectorof SeriesBuilder)
+		  (Index -> Key) (Index -> Key) JoinHash JoinHash -> Void))
+(define (do-join-build-outer a-cols b-cols a-builders b-builders dfa-key-fn dfb-key-fn join-hash-a join-hash-b)
+
+  (define: a-col-cnt : Fixnum (vector-length a-cols))
+  (define: b-col-cnt : Fixnum (vector-length b-cols))
+  (define: dfa-len   : Fixnum (series-length (vector-ref a-cols #{0 : Index} )))
+  (define: dfb-len   : Fixnum (series-length (vector-ref b-cols #{0 : Index} )))
+
+  (for ((dfa-row (in-range dfa-len)))
+       (let*: ((dfa-row : Index (assert dfa-row index?))
+	       (dfa-key : Key (dfa-key-fn dfa-row)))
+	      (let ((dfb-rows (hash-ref join-hash-b dfa-key (λ () '()))))
+                ;(displayln (format "Hash join: ~s ~s, ~s" dfa-row dfa-key dfb-rows))
+                (if (null? dfb-rows)                    
+                    (begin
+                      ; copy a value but null for b
+                      (copy-column-row a-cols a-builders dfa-row)
+                      (copy-null-to-row b-cols b-builders))
+                    (for ([dfb-row dfb-rows])
+                      ; maps possible multiple rows from b to row in a
+                      (copy-column-row a-cols a-builders dfa-row)
+                      (copy-column-row b-cols b-builders (assert dfb-row index?)))))))
+
+  ; do vice versa for b
+  (for ((dfb-row (in-range dfb-len)))
+       (let*: ((dfb-row : Index (assert dfb-row index?))
+	       (dfb-key : Key (dfb-key-fn dfb-row)))
+	      (let ((dfa-rows (hash-ref join-hash-a dfb-key (λ () '()))))
+                ;(displayln (format "Hash join: ~s ~s, ~s" dfa-row dfa-key dfb-rows))
+                (if (null? dfa-rows)                    
+                    (begin
+                      ; copy a value but null for b
+                      (copy-column-row b-cols b-builders dfb-row)
+                      (copy-null-to-row a-cols a-builders))
+                    (for ([dfa-row dfa-rows])
+                      ; maps possible multiple rows from b to row in a
+                      (copy-column-row a-cols a-builders (assert dfa-row index?))
+                      (copy-column-row b-cols b-builders dfb-row)))))))
+
+; ***********************************************************
+
+; ***********************************************************
+
 ; pass in the matched columns as well for display purposes
 
 ; This function consumes two DataFrames to join and an optional
@@ -369,8 +417,6 @@
 					 (set-intersect cols-a cols-b)
 					 (set-intersect (list->set cols)
 							(set-intersect cols-a cols-b))))
-
-  (define: non-key-common : (Setof Label) (set-subtract (set-intersect cols-a cols-b) join-cols))
 
   ;(when (null? join-cols)
   ;(error "No common columns between data-frames to join on."))
@@ -401,21 +447,21 @@
   (define: dest-builders-b : (Vectorof SeriesBuilder)
     (list->vector
      (dest-mapping-series-builders (data-frame-description dfb) 10)))
-
-  (do-join-build (src-series dfa-cols) (src-series dfb-cols) (src-series dfb-cols-match)
+  
+  (do-join-build-left/right (src-series dfa-cols) (src-series dfb-cols) (src-series dfb-cols-match)
 		 dest-builders-a dest-builders-b
 		 dfa-keyfn dfb-index)
 
   (define: new-a-series : (Listof Column)
     (for/list ([builder (in-vector dest-builders-a)]
 	       [col     (in-list dfa-cols)])
-	      (cons (join-column-name col non-key-common "dfa-")
+	      (cons (join-column-name col cols-a "dfa-")
 		    (series-complete builder))))
 
   (define: new-b-series : (Listof Column)
     (for/list ([builder (in-vector dest-builders-b)]
 	       [col     (in-list dfb-cols)])
-	      (cons (join-column-name col non-key-common "dfb-")
+	      (cons (join-column-name col cols-b "dfb-")
 		    (series-complete builder))))
 
   (new-data-frame (append new-a-series new-b-series)))
@@ -452,8 +498,6 @@
 					 (set-intersect (list->set cols)
 							(set-intersect cols-b cols-a))))
 
-  (define: non-key-common : (Setof Label) (set-subtract (set-intersect cols-b cols-a) join-cols))
-
   ;(when (null? join-cols)
   ;(error "No common columns between data-frames to join on."))
 
@@ -485,20 +529,20 @@
     (list->vector
      (dest-mapping-series-builders (data-frame-description dfa #:project non-key-dfa) 10)))
 
-  (do-join-build (src-series dfb-cols) (src-series dfa-cols) (src-series dfa-cols-match)
+  (do-join-build-left/right (src-series dfb-cols) (src-series dfa-cols) (src-series dfa-cols-match)
 		 dest-builders-b dest-builders-a
 		 dfb-keyfn dfa-index)
 
   (define: new-a-series : (Listof Column)
     (for/list ([builder (in-vector dest-builders-a)]
 	       [col     (in-list dfa-cols)])
-	      (cons (join-column-name col non-key-common "dfa-")
+	      (cons (join-column-name col cols-a "dfa-")
 		    (series-complete builder))))
 
   (define: new-b-series : (Listof Column)
     (for/list ([builder (in-vector dest-builders-b)]
 	       [col     (in-list dfb-cols)])
-	      (cons (join-column-name col non-key-common "dfb-")
+	      (cons (join-column-name col cols-b "dfb-")
 		    (series-complete builder))))
 
   (new-data-frame (append new-a-series new-b-series)))
@@ -533,8 +577,6 @@
 					 (set-intersect cols-a cols-b)
 					 (set-intersect (list->set cols)
 							(set-intersect cols-a cols-b))))
-
-  (define: non-key-common : (Setof Label) (set-subtract (set-intersect cols-a cols-b) join-cols))
 
   (when (null? join-cols)
 	(error "No common columns between data-frames to join on."))
@@ -571,13 +613,100 @@
   (define: new-a-series : (Listof Column)
     (for/list ([builder (in-vector dest-builders-a)]
 	       [col     (in-list dfa-cols)])
-	      (cons (join-column-name col non-key-common "dfa-")
+	      (cons (join-column-name col cols-a "dfa-")
 		    (series-complete builder))))
 
   (define: new-b-series : (Listof Column)
     (for/list ([builder (in-vector dest-builders-b)]
 	       [col     (in-list dfb-cols)])
-	      (cons (join-column-name col non-key-common "dfb-")
+	      (cons (join-column-name col cols-b "dfb-")
+		    (series-complete builder))))
+
+  (new-data-frame (append new-a-series new-b-series)))
+
+; ***********************************************************
+
+; ***********************************************************
+
+; This function consumes two DataFrames to join and an optional
+; on argument which contains a Listof column names to join on.
+; This function does a left join on dfa to dfb.
+; Currently this function only supports joining on one column.
+(: data-frame-join-outer (DataFrame DataFrame [#:on (Listof Symbol)] -> DataFrame))
+(define (data-frame-join-outer dfa dfb #:on [cols '()])
+
+  ; This function consumes a DataFrame and LabelProjection and
+  ; projects those columns.
+  (: data-frame-cols (DataFrame LabelProjection -> (Listof Column)))
+  (define (data-frame-cols data-frame project)
+    (data-frame-explode data-frame #:project project))
+
+  ; This function consumes a Listof Column and returns a Vectorof
+  ; Series contained in those columns.
+  (: src-series ((Listof Column) -> (Vectorof Series)))
+  (define (src-series cols)
+    (list->vector (map column-series cols)))
+
+  (define: cols-a    : (Setof Label) (list->set (data-frame-names dfa)))
+  (define: cols-b    : (Setof Label) (list->set (data-frame-names dfb)))
+  ; Get the common cols between fa and fb
+  (define: join-cols : (Setof Label) (if (null? cols)
+					 (set-intersect cols-a cols-b)
+					 (set-intersect (list->set cols)
+							(set-intersect cols-a cols-b))))
+
+  (when (null? join-cols)
+	(error "No common columns between data-frames to join on."))
+
+  ; The column of fb that are not in the join set.
+  (define: non-key-dfb : (Setof Label) (set-subtract cols-b join-cols))
+
+  ; get all dfa-cols regardless of join intersection
+  (define: dfa-cols : (Listof Column) (data-frame-cols dfa '()))
+  ; only get dfb-cols not in join intersection
+  (define: dfb-cols : (Listof Column) (data-frame-cols dfb '()))
+
+  ; Create index on fb dataframe on join-cols.
+  (define: dfa-index : JoinHash
+    (let ((cols (key-cols-sort-lexical (data-frame-cols dfa '()))))
+      (index (key-cols-series cols))))
+  
+  ; Create index on fb dataframe on join-cols.
+  (define: dfb-index : JoinHash
+    (let ((cols (key-cols-sort-lexical (data-frame-cols dfb '()))))
+      (index (key-cols-series cols))))
+
+  (define: dfa-keyfn : (Index -> Key)
+    (key-fn (key-cols-series (key-cols-sort-lexical (data-frame-cols dfa '())))))
+
+  (define: dfb-keyfn : (Index -> Key)
+    (key-fn (key-cols-series (key-cols-sort-lexical (data-frame-cols dfb '())))))
+
+  ; Get series builders of default length 10 for all columns in fa.
+  (define: dest-builders-a : (Vectorof SeriesBuilder)
+    (list->vector (dest-mapping-series-builders (data-frame-description dfa) 10)))
+
+  ; Get series builders of default length 10 for only non-key-fb columns in fb.
+  (define: dest-builders-b : (Vectorof SeriesBuilder)
+    (list->vector
+     (dest-mapping-series-builders (data-frame-description dfb) 10)))
+
+  ; (define (do-join-build-outer a-cols b-cols a-builders b-builders dfa-key-fn dfb-key-fn join-hash-a join-hash-b)
+
+  (do-join-build-outer (src-series dfa-cols) (src-series dfb-cols)
+		 dest-builders-a dest-builders-b
+		 dfa-keyfn dfb-keyfn dfa-index dfb-index)
+
+  (define: new-a-series : (Listof Column)
+    (for/list ([builder (in-vector dest-builders-a)]
+	       [col     (in-list dfa-cols)])
+	      (cons (join-column-name col cols-a "dfa-")
+		    (series-complete builder))))
+
+  (define: new-b-series : (Listof Column)
+    (for/list ([builder (in-vector dest-builders-b)]
+	       [col     (in-list dfb-cols)])
+	      (cons (join-column-name col cols-b "dfb-")
 		    (series-complete builder))))
 
   (new-data-frame (append new-a-series new-b-series)))
@@ -694,7 +823,7 @@
 
 (check-equal? (nseries-iref (complete-NSeriesBuilder nseries-builder-1) 0) 3.5)
 
-; (: do-join-build ((Vectorof Series) (Vectorof Series)
+; (: do-join-build-left/right ((Vectorof Series) (Vectorof Series)
 ;		  (Vectorof SeriesBuilder) (Vectorof SeriesBuilder)
 ;		  (Index -> Key) JoinHash -> Void))
 
@@ -767,4 +896,6 @@
 
 (frame-write-tab (data-frame-join-inner data-frame-integer-2 data-frame-integer-3 #:on (list 'col1)) (current-output-port))
 
-(frame-write-tab (data-frame-join-inner data-frame-integer-2 data-frame-integer-3 #:on (list 'col2)) (current-output-port))
+(frame-write-tab (data-frame-join-inner data-frame-integer-4 data-frame-integer-5 #:on (list 'col2)) (current-output-port))
+
+(frame-write-tab (data-frame-join-outer data-frame-integer-4 data-frame-integer-5 #:on (list 'col3)) (current-output-port))

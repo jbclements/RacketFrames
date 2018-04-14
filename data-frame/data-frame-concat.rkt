@@ -19,7 +19,7 @@
 ; Provide functions in this file to other files.
 (provide:
  [data-frame-concat-vertical (DataFrame DataFrame [#:col (Listof Symbol)] -> DataFrame)]
- [data-frame-concat-horizontal (DataFrame DataFrame [#:col (Listof Symbol)] -> DataFrame)])
+ [data-frame-concat-horizontal (DataFrame DataFrame -> DataFrame)])
 
 (require
  racket/pretty
@@ -139,8 +139,8 @@
                                    (set-member? append-cols name))
                                  (data-frame-names dfa)))))
 
-(: data-frame-concat-horizontal (DataFrame DataFrame [#:col (Listof Symbol)] -> DataFrame))
-(define (data-frame-concat-horizontal dfa dfb #:col [cols '()])
+(: data-frame-concat-horizontal (DataFrame DataFrame -> DataFrame))
+(define (data-frame-concat-horizontal dfa dfb)
 
   (define: cols-a    : (Setof Label) (list->set (data-frame-names dfa)))
   (define: cols-b    : (Setof Label) (list->set (data-frame-names dfb)))
@@ -192,12 +192,17 @@
 
      (define: new-a-series : Columns
        (for/list ([builder (in-vector dest-builders-a)]
-               [col     (in-list dfa-cols)])
-      (cons (join-column-name col cols-a "dfa-")
-                    (series-complete builder))))
+                  [col     (in-list dfa-cols)])
+         (cons (join-column-name col cols-a "dfa-")
+            (series-complete builder))))
 
      (new-data-frame (append new-a-series dfb-cols))]
-    [else (new-data-frame (append dfa-cols dfb-cols))])
+    [else
+     (define: new-a-series : Columns
+       (for/list ([col     (in-list dfa-cols)])
+         (cons (join-column-name col cols-a "dfa-")
+               (cdr col))))
+     (new-data-frame (append new-a-series dfb-cols))])
   )
 
 ; Test Cases
@@ -258,7 +263,7 @@
 
 (frame-write-tab (data-frame-concat-vertical data-frame-mixed-1 data-frame-mixed-2) (current-output-port))
 
-(frame-write-tab (data-frame-concat-horizontal data-frame-mixed-1 data-frame-mixed-3) (current-output-port))
+(frame-write-tab (data-frame-concat-horizontal data-frame-mixed-1 data-frame-mixed-2) (current-output-port))
 
 (define columns-mixed-3
   (list 
@@ -267,7 +272,7 @@
    (cons 'col3 (new-CSeries (vector 'e 'f 'g 'h 'i)))
    (cons 'col4 (new-ISeries (vector 1 2 3 4 7) #f))))
 
-; create new data-frame-mixed-1
+; create new data-frame-mixed-3
 (define data-frame-mixed-3 (new-data-frame columns-mixed-3))
 
 (frame-write-tab (data-frame-concat-horizontal data-frame-mixed-2 data-frame-mixed-3) (current-output-port))

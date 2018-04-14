@@ -24,6 +24,7 @@
  racket/pretty
  racket/unsafe/ops
  racket/flonum
+ racket/set
  (only-in racket/set
 	  set set-member?
 	  list->set set->list
@@ -354,36 +355,44 @@
   (define: dfa-len   : Fixnum (series-length (vector-ref a-cols #{0 : Index} )))
   (define: dfb-len   : Fixnum (series-length (vector-ref b-cols #{0 : Index} )))
 
+  (define: joined-key-set : (Setof Key) (set))
+
+  ; do for a
   (for ((dfa-row (in-range dfa-len)))
        (let*: ((dfa-row : Index (assert dfa-row index?))
-	       (dfa-key : Key (dfa-key-fn dfa-row)))
-	      (let ((dfb-rows (hash-ref join-hash-b dfa-key (λ () '()))))
-                ;(displayln (format "Hash join: ~s ~s, ~s" dfa-row dfa-key dfb-rows))
-                (if (null? dfb-rows)                    
-                    (begin
-                      ; copy a value but null for b
-                      (copy-column-row a-cols a-builders dfa-row)
-                      (copy-null-to-row b-cols b-builders))
-                    (for ([dfb-row dfb-rows])
-                      ; maps possible multiple rows from b to row in a
-                      (copy-column-row a-cols a-builders dfa-row)
-                      (copy-column-row b-cols b-builders (assert dfb-row index?)))))))
+               (dfa-key : Key (dfa-key-fn dfa-row)))
+         
+         (set! joined-key-set (set-add joined-key-set dfa-key))
+         (let ((dfb-rows (hash-ref join-hash-b dfa-key (λ () '()))))
+           (displayln (format "Hash join A: ~s ~s, ~s" dfa-row dfa-key dfb-rows))
+           (if (null? dfb-rows)                    
+               (begin
+                 ; copy a value but null for b
+                 (copy-column-row a-cols a-builders dfa-row)
+                 (copy-null-to-row b-cols b-builders))
+               (for ([dfb-row dfb-rows])
+                 ; maps possible multiple rows from b to row in a                      
+                 (copy-column-row a-cols a-builders dfa-row)
+                 (copy-column-row b-cols b-builders (assert dfb-row index?)))))))
 
   ; do vice versa for b
   (for ((dfb-row (in-range dfb-len)))
        (let*: ((dfb-row : Index (assert dfb-row index?))
-	       (dfb-key : Key (dfb-key-fn dfb-row)))
+               (dfb-key : Key (dfb-key-fn dfb-row)))
+         (displayln joined-key-set)
+         (displayln (subset? (set dfb-key) joined-key-set))
+         (when (not (subset? (set dfb-key) joined-key-set))
 	      (let ((dfa-rows (hash-ref join-hash-a dfb-key (λ () '()))))
-                ;(displayln (format "Hash join: ~s ~s, ~s" dfa-row dfa-key dfb-rows))
+                (displayln (format "Hash join B: ~s ~s, ~s" dfb-row dfb-key dfa-rows))
                 (if (null? dfa-rows)                    
                     (begin
                       ; copy a value but null for b
                       (copy-column-row b-cols b-builders dfb-row)
                       (copy-null-to-row a-cols a-builders))
                     (for ([dfa-row dfa-rows])
-                      ; maps possible multiple rows from b to row in a
+                      ; maps possible multiple rows from b to row in a                      
                       (copy-column-row a-cols a-builders (assert dfa-row index?))
-                      (copy-column-row b-cols b-builders dfb-row)))))))
+                      (copy-column-row b-cols b-builders dfb-row))))))))
 
 ; ***********************************************************
 
@@ -668,19 +677,19 @@
 
   ; Create index on fb dataframe on join-cols.
   (define: dfa-index : JoinHash
-    (let ((cols (key-cols-sort-lexical (data-frame-cols dfa '()))))
+    (let ((cols (key-cols-sort-lexical (data-frame-cols dfa join-cols))))
       (index (key-cols-series cols))))
   
   ; Create index on fb dataframe on join-cols.
   (define: dfb-index : JoinHash
-    (let ((cols (key-cols-sort-lexical (data-frame-cols dfb '()))))
+    (let ((cols (key-cols-sort-lexical (data-frame-cols dfb join-cols))))
       (index (key-cols-series cols))))
 
   (define: dfa-keyfn : (Index -> Key)
-    (key-fn (key-cols-series (key-cols-sort-lexical (data-frame-cols dfa '())))))
+    (key-fn (key-cols-series (key-cols-sort-lexical (data-frame-cols dfa join-cols)))))
 
   (define: dfb-keyfn : (Index -> Key)
-    (key-fn (key-cols-series (key-cols-sort-lexical (data-frame-cols dfb '())))))
+    (key-fn (key-cols-series (key-cols-sort-lexical (data-frame-cols dfb join-cols)))))
 
   ; Get series builders of default length 10 for all columns in fa.
   (define: dest-builders-a : (Vectorof SeriesBuilder)
@@ -690,8 +699,6 @@
   (define: dest-builders-b : (Vectorof SeriesBuilder)
     (list->vector
      (dest-mapping-series-builders (data-frame-description dfb) 10)))
-
-  ; (define (do-join-build-outer a-cols b-cols a-builders b-builders dfa-key-fn dfb-key-fn join-hash-a join-hash-b)
 
   (do-join-build-outer (src-series dfa-cols) (src-series dfb-cols)
 		 dest-builders-a dest-builders-b
@@ -892,10 +899,54 @@
 ; create new data-frame-integer-5
 (define data-frame-integer-5 (new-data-frame columns-integer-5))
 
-(frame-write-tab (data-frame-join-left data-frame-integer-4 data-frame-integer-5 #:on (list 'col1 'co3)) (current-output-port))
+(frame-write-tab (data-frame-join-left data-frame-integer-4 data-frame-integer-5 #:on (list 'co3)) (current-output-port))
 
 (frame-write-tab (data-frame-join-inner data-frame-integer-2 data-frame-integer-3 #:on (list 'col1)) (current-output-port))
 
 (frame-write-tab (data-frame-join-inner data-frame-integer-4 data-frame-integer-5 #:on (list 'col2)) (current-output-port))
 
+(frame-write-tab (data-frame-join-outer data-frame-integer-4 data-frame-integer-5 #:on (list 'col2)) (current-output-port))
+
 (frame-write-tab (data-frame-join-outer data-frame-integer-4 data-frame-integer-5 #:on (list 'col3)) (current-output-port))
+
+(define columns-mixed-1
+  (list 
+   (cons 'col1 (new-ISeries (vector 1 2 3 4) #f))
+   (cons 'col2 (new-CSeries (vector 'a 'b 'c 'd)))
+   (cons 'col3 (new-ISeries (vector 21 22 23 24) #f))))
+
+(define columns-mixed-2
+  (list 
+   (cons 'col1 (new-ISeries (vector 1 2 3 4) #f))
+   (cons 'col2 (new-CSeries (vector 'a 'b 'c 'd)))
+   (cons 'col3 (new-ISeries (vector 1 2 3 4) #f))))
+
+; create new data-frame-mixed-1
+(define data-frame-mixed-1 (new-data-frame columns-mixed-1))
+
+; create new data-frame-mixed-2
+(define data-frame-mixed-2 (new-data-frame columns-mixed-2))
+
+(frame-write-tab (data-frame-join-outer data-frame-mixed-1 data-frame-mixed-2 #:on (list 'col2)) (current-output-port))
+
+(frame-write-tab (data-frame-join-outer data-frame-mixed-1 data-frame-mixed-2 #:on (list 'col3)) (current-output-port))
+
+(define columns-mixed-3
+  (list 
+   (cons 'col1 (new-ISeries (vector 1 2 3 4) #f))
+   (cons 'col2 (new-CSeries (vector 'a 'b 'c 'd)))
+   (cons 'col3 (new-ISeries (vector 21 22 23 24) #f))))
+
+(define columns-mixed-4
+  (list 
+   (cons 'col1 (new-ISeries (vector 1 2 3 4) #f))
+   (cons 'col2 (new-CSeries (vector 'a 'b 'g 'd)))
+   (cons 'col3 (new-ISeries (vector 1 2 3 4) #f))))
+
+; create new data-frame-mixed-1
+(define data-frame-mixed-3 (new-data-frame columns-mixed-3))
+
+; create new data-frame-mixed-2
+(define data-frame-mixed-4 (new-data-frame columns-mixed-4))
+
+(frame-write-tab (data-frame-join-outer data-frame-mixed-1 data-frame-mixed-2 #:on (list 'col2)) (current-output-port))

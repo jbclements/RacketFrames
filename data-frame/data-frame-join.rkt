@@ -300,7 +300,7 @@
        (let*: ((dfa-row : Index (assert dfa-row index?))
 	       (dfa-key : Key (dfa-key-fn dfa-row)))
 	      (let ((dfb-rows (hash-ref join-hash dfa-key (λ () '()))))
-                (displayln (format "Hash join: ~s ~s, ~s" dfa-row dfa-key dfb-rows))
+                ;(displayln (format "Hash join: ~s ~s, ~s" dfa-row dfa-key dfb-rows))
                 (if (null? dfb-rows)
                     (begin (copy-column-row a-cols a-builders dfa-row)
                     ; Copy nans into fb
@@ -330,9 +330,7 @@
   (for ((dfa-row (in-range dfa-len)))
        (let*: ((dfa-row : Index (assert dfa-row index?))
 	       (dfa-key : Key (dfa-key-fn dfa-row)))
-	      (let ((dfb-rows (hash-ref join-hash dfa-key (λ () '()))))
-                (displayln (format "Hash join: ~s ~s, ~s" dfa-row dfa-key dfb-rows))                
-                ;(copy-null-to-row b-cols-match b-builders))
+	      (let ((dfb-rows (hash-ref join-hash dfa-key (λ () '()))))                
                 (for ([dfb-row dfb-rows])
                   ; maps possible multiple rows from b to row in a
                   (copy-column-row a-cols a-builders dfa-row)
@@ -364,7 +362,7 @@
          
          (set! joined-key-set (set-add joined-key-set dfa-key))
          (let ((dfb-rows (hash-ref join-hash-b dfa-key (λ () '()))))
-           (displayln (format "Hash join A: ~s ~s, ~s" dfa-row dfa-key dfb-rows))
+           ;(displayln (format "Hash join A: ~s ~s, ~s" dfa-row dfa-key dfb-rows))
            (if (null? dfb-rows)                    
                (begin
                  ; copy a value but null for b
@@ -378,12 +376,10 @@
   ; do vice versa for b
   (for ((dfb-row (in-range dfb-len)))
        (let*: ((dfb-row : Index (assert dfb-row index?))
-               (dfb-key : Key (dfb-key-fn dfb-row)))
-         (displayln joined-key-set)
-         (displayln (subset? (set dfb-key) joined-key-set))
+               (dfb-key : Key (dfb-key-fn dfb-row)))         
          (when (not (subset? (set dfb-key) joined-key-set))
 	      (let ((dfa-rows (hash-ref join-hash-a dfb-key (λ () '()))))
-                (displayln (format "Hash join B: ~s ~s, ~s" dfb-row dfb-key dfa-rows))
+                ;(displayln (format "Hash join B: ~s ~s, ~s" dfb-row dfb-key dfa-rows))
                 (if (null? dfa-rows)                    
                     (begin
                       ; copy a value but null for b
@@ -943,10 +939,34 @@
    (cons 'col2 (new-CSeries (vector 'a 'b 'g 'd)))
    (cons 'col3 (new-ISeries (vector 1 2 3 4) #f))))
 
-; create new data-frame-mixed-1
+; create new data-frame-mixed-3
 (define data-frame-mixed-3 (new-data-frame columns-mixed-3))
 
-; create new data-frame-mixed-2
+; create new data-frame-mixed-4
 (define data-frame-mixed-4 (new-data-frame columns-mixed-4))
 
-(frame-write-tab (data-frame-join-outer data-frame-mixed-1 data-frame-mixed-2 #:on (list 'col2)) (current-output-port))
+(frame-write-tab (data-frame-join-outer data-frame-mixed-3 data-frame-mixed-4 #:on (list 'col2)) (current-output-port))
+
+(define columns-mixed-5
+  (list 
+   (cons 'col1 (new-ISeries (vector 1 2 3 4) #f))
+   (cons 'col2 (new-CSeries (vector 'a 'b 'c 'd)))
+   (cons 'col3 (new-ISeries (vector 21 22 23 24) #f))))
+
+(define columns-mixed-6
+  (list 
+   (cons 'col1 (new-ISeries (vector 11 21 31 41) #f))
+   (cons 'col2 (new-CSeries (vector 'a 'b 'g 'd)))
+   (cons 'col3 (new-ISeries (vector 22 22 23 24) #f))))
+
+; create new data-frame-mixed-5
+(define data-frame-mixed-5 (new-data-frame columns-mixed-5))
+
+; create new data-frame-mixed-6
+(define data-frame-mixed-6 (new-data-frame columns-mixed-6))
+
+(frame-write-tab (data-frame-join-left data-frame-mixed-5 data-frame-mixed-6 #:on (list 'col3)) (current-output-port))
+
+(frame-write-tab (data-frame-join-inner data-frame-mixed-5 data-frame-mixed-6 #:on (list 'col2)) (current-output-port))
+
+(frame-write-tab (data-frame-join-right data-frame-mixed-5 data-frame-mixed-6 #:on (list 'col2)) (current-output-port))

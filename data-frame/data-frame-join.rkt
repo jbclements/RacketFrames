@@ -18,7 +18,14 @@
 ; ***********************************************************
 ; Provide functions in this file to other files.
 (provide:
- [data-frame-join-left (DataFrame DataFrame [#:on (Listof Symbol)] -> DataFrame)])
+ [data-frame-join-left (DataFrame DataFrame [#:on (Listof Symbol)] -> DataFrame)]
+ [data-frame-join-right (DataFrame DataFrame [#:on (Listof Symbol)] -> DataFrame)]
+ [data-frame-join-inner (DataFrame DataFrame [#:on (Listof Symbol)] -> DataFrame)]
+ [data-frame-join-outer (DataFrame DataFrame [#:on (Listof Symbol)] -> DataFrame)]
+ [copy-column-row-error (Series Integer -> Void)]
+ [copy-column-row ((Vectorof Series) (Vectorof SeriesBuilder) Index -> Void)]
+ [dest-mapping-series-builders (DataFrameDescription Index -> (Listof SeriesBuilder))]
+ [join-column-name (Column (Setof Label) String -> Symbol)])
 
 (require
  racket/pretty
@@ -267,17 +274,13 @@
          ; a NSeries then associated value will be appended onto NSeriesBuilder,
          ; and same goes for ISeries and CSeries.
          (cond
-	  ((NSeries? series)
-           (if (NSeriesBuilder? builder)
-               (append-NSeriesBuilder builder -1.0)
-               (copy-column-row-error series col)))
 	  ((CSeries? series)
            (if (CSeriesBuilder? builder)
                (append-CSeriesBuilder builder 'null)
                (copy-column-row-error series col)))
 	  ((ISeries? series)
            (if (ISeriesBuilder? builder)
-               (append-ISeriesBuilder builder 1)
+               (append-ISeriesBuilder builder -100000)
                (copy-column-row-error series col)))))))
 
 ; ***********************************************************

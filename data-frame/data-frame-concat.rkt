@@ -18,7 +18,8 @@
 ; ***********************************************************
 ; Provide functions in this file to other files.
 (provide:
- [data-frame-concat (DataFrame DataFrame [#:col (Listof Symbol)] -> DataFrame)])
+ [data-frame-concat-vertical (DataFrame DataFrame [#:col (Listof Symbol)] -> DataFrame)]
+ [data-frame-concat-horizontal (DataFrame DataFrame [#:col (Listof Symbol)] -> DataFrame)])
 
 (require
  racket/pretty
@@ -40,9 +41,11 @@
 	  series-type series-length
           series-data)
  (only-in "data-frame.rkt"
-	  DataFrame new-data-frame data-frame-names
+	  DataFrame Columns new-data-frame data-frame-names
 	  data-frame-series data-frame-cseries data-frame-nseries data-frame-iseries data-frame-explode
-	  DataFrameDescription DataFrameDescription-series data-frame-description)
+	  DataFrameDescription DataFrameDescription-series data-frame-description column-series)
+ (only-in "data-frame-join.rkt"
+          dest-mapping-series-builders copy-column-row-error copy-column-row join-column-name)
  (only-in "numeric-series.rkt"
 	  NSeries NSeries? nseries-iref nseries-label-ref new-NSeries)
  (only-in "integer-series.rkt"
@@ -74,11 +77,40 @@
  (only-in "data-frame-print.rkt"
           frame-write-tab))
 
+; This functions consumes a Vectorof Series and Vectorof SeriesBuilder
+; and an Index and does not return any value. It copies an entire row
+; from the given Vectorof Series into the given Vectorof SeriesBuilders.
+(: copy-null-to-row ((Vectorof Series) (Vectorof SeriesBuilder) -> Void))
+(define (copy-null-to-row src-series dest-builders)
+;;  (when (zero? (modulo row-id 10000))
+;;	(displayln (format "Copy row: ~a" row-id)))
+  (for ([col (in-range (vector-length src-series))])
+    ; Loop through each column and get the associated series and series builder.
+       (let ((series (vector-ref src-series col))
+	     (builder (vector-ref dest-builders col)))
+         ; Copy specific row values into correct series builders. If series is
+         ; a NSeries then associated value will be appended onto NSeriesBuilder,
+         ; and same goes for ISeries and CSeries.
+         (cond
+	  ((CSeries? series)
+           (if (CSeriesBuilder? builder)
+               (append-CSeriesBuilder builder 'null)
+               (copy-column-row-error series col)))
+	  ((ISeries? series)
+           (if (ISeriesBuilder? builder)
+               (append-ISeriesBuilder builder -100000)
+               (copy-column-row-error series col)))
+          ((NSeries? series)
+           (if (NSeriesBuilder? builder)
+               (append-NSeriesBuilder builder -100000.0)
+               (copy-column-row-error series col)))))))
+
+
 ; This function consumes two DataFrames and produces a
 ; concatenation of all their series on matching column
 ; names.
-(: data-frame-concat (DataFrame DataFrame [#:col (Listof Symbol)] -> DataFrame))
-(define (data-frame-concat dfa dfb #:col [cols '()])
+(: data-frame-concat-vertical (DataFrame DataFrame [#:col (Listof Symbol)] -> DataFrame))
+(define (data-frame-concat-vertical dfa dfb #:col [cols '()])
 
   (define: cols-a    : (Setof Label) (list->set (data-frame-names dfa)))
   (define: cols-b    : (Setof Label) (list->set (data-frame-names dfb)))
@@ -91,7 +123,7 @@
                                (let ((dfa-series (data-frame-series dfa name))
                                      (dfb-series (data-frame-series dfb name)))
                                  (if (not (equal? (series-type dfa-series) (series-type dfb-series)))
-                                     (error 'data-frame-concat
+                                     (error 'data-frame-concat-vertical
                                             "The series types are different, unable to concat.") 
                                      (case (series-type dfa-series)
                                        ('CategoricalSeries (cseries-append (data-frame-cseries dfa name)
@@ -100,12 +132,73 @@
                                                                             (data-frame-nseries dfb name)))
                                        ('IntegerSeries     (iseries-append (data-frame-iseries dfa name)
                                                                             (data-frame-iseries dfb name)))
-                                       (else (error 'data-frame-concat
+                                       (else (error 'data-frame-concat-vertical
                                                     "Unknown series type ~a."
                                                     (series-type dfa-series))))))))
                          (filter (λ: ((name : Label))
                                    (set-member? append-cols name))
                                  (data-frame-names dfa)))))
+
+(: data-frame-concat-horizontal (DataFrame DataFrame [#:col (Listof Symbol)] -> DataFrame))
+(define (data-frame-concat-horizontal dfa dfb #:col [cols '()])
+
+  (define: cols-a    : (Setof Label) (list->set (data-frame-names dfa)))
+  (define: cols-b    : (Setof Label) (list->set (data-frame-names dfb)))
+  (define: dfa-cols    : Columns (data-frame-explode dfa))
+  (define: dfb-cols    : Columns (data-frame-explode dfb))
+  (define: dfa-len   : Fixnum (series-length (cdr (list-ref dfa-cols 0))))
+  (define: dfb-len   : Fixnum (series-length (cdr (list-ref dfb-cols 0))))
+
+  ; This function consumes a DataFrame and LabelProjection and
+  ; projects those columns.
+  (: data-frame-cols (DataFrame LabelProjection -> Columns))
+  (define (data-frame-cols data-frame project)
+    (data-frame-explode data-frame #:project project))
+
+  ; This function consumes a Listof Column and returns a Vectorof
+  ; Series contained in those columns.
+  (: src-series (Columns -> (Vectorof Series)))
+  (define (src-series cols)
+    (list->vector (map column-series cols)))
+
+  (cond
+    [(> dfa-len dfb-len)
+     ; Get series builders of default length 10 for all columns in fb.
+     (define: dest-builders-b : (Vectorof SeriesBuilder)
+       (list->vector (dest-mapping-series-builders (data-frame-description dfb) 10)))
+
+     (for ([i (in-range dfb-len)])
+       (copy-column-row (src-series (data-frame-cols dfb '())) dest-builders-b (assert i index?)))
+
+     (for ([i (in-range (- dfa-len dfb-len))])
+       (copy-null-to-row (src-series (data-frame-cols dfb '())) dest-builders-b))     
+
+     (define: new-b-series : Columns
+       (for/list ([builder (in-vector dest-builders-b)]
+                  [col     (in-list dfb-cols)])
+         (cons (join-column-name col cols-b "dfb-")
+               (series-complete builder))))
+
+     (new-data-frame (append dfa-cols new-b-series))]
+    [(< dfa-len dfb-len)
+     (define: dest-builders-a : (Vectorof SeriesBuilder)
+       (list->vector (dest-mapping-series-builders (data-frame-description dfa) 10)))
+
+     (for ([i (in-range dfa-len)])
+       (copy-column-row (src-series (data-frame-cols dfa '())) dest-builders-a (assert i index?)))
+
+     (for ([i (in-range (- dfb-len dfa-len))])
+       (copy-null-to-row (src-series (data-frame-cols dfa '())) dest-builders-a))
+
+     (define: new-a-series : Columns
+       (for/list ([builder (in-vector dest-builders-a)]
+               [col     (in-list dfa-cols)])
+      (cons (join-column-name col cols-a "dfa-")
+                    (series-complete builder))))
+
+     (new-data-frame (append new-a-series dfb-cols))]
+    [else (new-data-frame (append dfa-cols dfb-cols))])
+  )
 
 ; Test Cases
 
@@ -135,7 +228,7 @@
 
 (frame-write-tab data-frame-integer-2 (current-output-port))
 
-(frame-write-tab (data-frame-concat data-frame-integer-1 data-frame-integer-2) (current-output-port))
+(frame-write-tab (data-frame-concat-vertical data-frame-integer-1 data-frame-integer-2) (current-output-port))
 
 (define columns-mixed-1
   (list 
@@ -163,4 +256,18 @@
 
 (frame-write-tab data-frame-mixed-2 (current-output-port))
 
-(frame-write-tab (data-frame-concat data-frame-mixed-1 data-frame-mixed-2) (current-output-port))
+(frame-write-tab (data-frame-concat-vertical data-frame-mixed-1 data-frame-mixed-2) (current-output-port))
+
+(frame-write-tab (data-frame-concat-horizontal data-frame-mixed-1 data-frame-mixed-3) (current-output-port))
+
+(define columns-mixed-3
+  (list 
+   (cons 'col1 (new-ISeries (vector 1 2 3 4 5) #f))
+   (cons 'col2 (new-NSeries (flvector 25.3 26.3 27.3 28.3 32.1) #f))
+   (cons 'col3 (new-CSeries (vector 'e 'f 'g 'h 'i)))
+   (cons 'col4 (new-ISeries (vector 1 2 3 4 7) #f))))
+
+; create new data-frame-mixed-1
+(define data-frame-mixed-3 (new-data-frame columns-mixed-3))
+
+(frame-write-tab (data-frame-concat-horizontal data-frame-mixed-2 data-frame-mixed-3) (current-output-port))

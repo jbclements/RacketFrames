@@ -38,8 +38,7 @@
  (struct-out DataFrameDescription)
  data-frame-series
  data-frame-names data-frame-dim 
- data-frame-cseries data-frame-nseries
- data-frame-series
+ data-frame-cseries data-frame-nseries data-frame-iseries
  new-data-frame)
 
 ; ***********************************************************
@@ -48,6 +47,7 @@
 
 (require
  racket/flonum
+ racket/set
  (only-in racket/vector
 	  vector-copy)
  (only-in racket/set
@@ -81,6 +81,7 @@
 ; ***********************************************************
 
 ; ***********************************************************
+; Data Structure Definitions
 
 (define-type Column  (Pair Label Series))
 (define-type Columns (Listof Column))
@@ -117,6 +118,10 @@
 
 ; ***********************************************************
 
+; This function consumes a Listof Column and constructs a
+; DataFrame from it. The function checks that all columns
+; are of the same length and builds a LabelIndex and a
+; Vectorof Series.
 (: new-data-frame (Columns -> DataFrame))
 (define (new-data-frame cols)
   
@@ -144,6 +149,10 @@
 
 ; ***********************************************************
 
+; This function consumes a DataFrame and two labels. It locates
+; the index of the column in the DataFrame LabelIndex and creates
+; a new LabelIndex with the new column name mapped to this index.
+; Then a new DataFrame is created and returned.
 (: data-frame-rename (DataFrame Label Label -> DataFrame))
 (define (data-frame-rename data-frame from to)
   (let ((index (LabelIndex-index data-frame)))
@@ -161,6 +170,10 @@
 
 ; ***********************************************************
 
+; This function consumes a DataFrame and a Label for the column
+; to drop from the DataFrame. Using the data-frame-explode
+; function, this column is filtered out of the DataFrame, and a
+; new DataFrame is returned.
 (: data-frame-drop (DataFrame Label -> DataFrame))
 (define (data-frame-drop data-frame label)
   (new-data-frame (filter (λ: ((col : Column))
@@ -170,23 +183,34 @@
 ; ***********************************************************
 
 ; ***********************************************************
+; This function consumes a DataFrame and a Symbol representing
+; the column name and returns the Series of that column.
 (: data-frame-series (DataFrame Symbol -> Series))
 (define (data-frame-series data-frame col)
   (vector-ref (DataFrame-series data-frame)
               (label-index (assert (LabelIndex-index data-frame)) col)))
 
+; This function uses the above function and the assert function
+; to ensure the series returned is a CSeries.
 (: data-frame-cseries (DataFrame Symbol -> CSeries))
 (define (data-frame-cseries data-frame name)
   (assert (data-frame-series data-frame name) CSeries?))
 
+; This function uses the above function and the assert function
+; to ensure the series returned is a NSeries.
 (: data-frame-nseries (DataFrame Symbol -> NSeries))
 (define (data-frame-nseries data-frame name)
   (assert (data-frame-series data-frame name) NSeries?))
 
-(: DataFrame-iseries (DataFrame Symbol -> ISeries))
-(define (DataFrame-iseries data-frame name)
+; This function uses the above function and the assert function
+; to ensure the series returned is an ISeries.
+(: data-frame-iseries (DataFrame Symbol -> ISeries))
+(define (data-frame-iseries data-frame name)
   (assert (data-frame-series data-frame name) ISeries?))
 
+; This function consumes a DataFrame and returns a Listof pairs
+; consisting of the column name and its associated index in the
+; DataFrame.
 (: data-frame-labels (DataFrame -> (Listof (Pair Symbol Index))))
 (define (data-frame-labels data-frame)
   (hash->list (assert (LabelIndex-index data-frame))))
@@ -195,10 +219,13 @@
 
 ; ***********************************************************
 
+; (inst) example usage
 ; (map (inst cons Symbol Integer) '(a b c d) '(1 2 3 4))
 ; - : (Listof (Pairof Symbol Integer))
 ; '((a . 1) (b . 2) (c . 3) (d . 4))
 
+; This function consumes a DataFrame and returns of Listof
+; Symbol representing all the column names.
 (: data-frame-names (DataFrame -> (Listof Symbol)))
 (define (data-frame-names data-frame)  
   (map (λ: ((kv : (Pair Symbol Integer)))
@@ -213,6 +240,10 @@
 
 ; ***********************************************************
 
+; This function consumes a DataFrame and calculates the dimensions.
+; It does so by calculating the length of a column series, thus
+; getting the number of rows and the total number of columns. It
+; then stores these two values in the Dim struct and returns it.
 (: data-frame-dim (DataFrame -> Dim))
 (define (data-frame-dim data-frame)
   (let ((cols (length (hash-keys (assert (LabelIndex-index data-frame))))))
@@ -225,17 +256,28 @@
 ; ***********************************************************
 
 ; ***********************************************************
-
+; This function consumes a LabelProjection which may be a
+; Listof Label or a Setof Label and ensure that it is a Setof
+; Label and returns this set.
 (: projection-set (LabelProjection -> (Setof Label)))
-  (define (projection-set project)
-    (if (list? project) 
-	(list->set project) 
-	project))
+(define (projection-set project)
+  (if (list? project) 
+      (list->set project) 
+      project))
 
+; This function consumes a DataFrame and using the project-set
+; function above returns a sorted set of all the column names
+; in the DataFrame.
 (: data-frame-all-labels-projection-set (DataFrame -> (Setof Label)))
 (define (data-frame-all-labels-projection-set data-frame)
   (projection-set (map (inst car Symbol Any) (label-sort-positional data-frame))))
-  
+
+; This function consumes a List of type A and a function which
+; consumes an element of type A and returns a Symbol as well as
+; a LabelProjection which is a Listof Label or Setof Label and
+; returns a Listof A which is filtered based on the labels present
+; in the given LabelProjection. Thus only the items that are desired
+; to be projected are projected.
 (: projection-filter (All (A) (Listof A) (A -> Symbol) LabelProjection -> (Listof A)))
 (define (projection-filter lst sym-fn project)  
   (define projection (projection-set project))  
@@ -249,6 +291,10 @@
 
 ; ***********************************************************
 
+; This function consumes a DataFrame and an optional LabelProjection
+; adn constructs a DataFrameDescription struct which contains the
+; DataFrame Dim and a list of SeriesDecriptions for each series of
+; each column.
 (: data-frame-description (DataFrame [#:project LabelProjection] -> DataFrameDescription))
 (define (data-frame-description data-frame #:project [project '()])
   
@@ -271,7 +317,8 @@
 							   (series-length series))
 					descs)))))))
 
-;; Really need to enumerate a minimal set of generic functions, such as `show'
+; This function consumes a DataFrameDescription struct and displays
+; the DataFrame Dim and Series Descriptions in formated form.
 (: show-data-frame-description (DataFrameDescription -> Void))
 (define (show-data-frame-description fdesc)
   
@@ -289,6 +336,12 @@
 
 ; ***********************************************************
 
+; This function consumes a DataFrame and an optional LabelProjection
+; which indicates which columns to project and returns a Listof Column
+; If no LabelProjection is given, all columns are projected. The
+; label-sort-positional returns a labeling, which is a (Listof (Pair Label Index)).
+; This list is looped through and only the items to project are filtered for.
+; In the end an appropriate Listof Column is returned.
 (: data-frame-explode (DataFrame [#:project LabelProjection] -> Columns))
 (define (data-frame-explode data-frame #:project [project '()])  
   (let ((labeling (label-sort-positional data-frame))
@@ -305,6 +358,13 @@
 
 ; ***********************************************************
 
+; This function consumes a DataFrame and LabelProjection indicating
+; which columns to remove from the DataFrame. The column names in
+; the DataFrame are put into a set called all-labels. The drop-projection
+; is converted to a set as well. The labels to be kept are calculated
+; by substracting the drop-projection from all of the possible labels.
+; Then the DataFrame is exploded retaining only the columns to keep.
+; A new data frame is constructed fomr these column and returned.
 (: data-frame-remove (DataFrame LabelProjection -> DataFrame))
 (define (data-frame-remove data-frame drop-projection)
   (define all-labels (data-frame-all-labels-projection-set data-frame))
@@ -316,6 +376,8 @@
 
 ; ***********************************************************
 
+; This function consumes a DataFrame and LabelProjection and
+; creates a new DataFrame only containing the columns to project.
 (: data-frame-project (DataFrame LabelProjection -> DataFrame))
 (define (data-frame-project data-frame projection)
   (new-data-frame (data-frame-explode data-frame #:project (projection-set projection))))
@@ -324,7 +386,9 @@
 
 ; ***********************************************************
 
-; replaces column name
+; This function consumes a DataFrame and Column and replaces
+; the old column with the same column heading with this new
+; column.
 (: data-frame-replace (DataFrame Column -> DataFrame))
 (define (data-frame-replace data-frame new-col)
   (define name (column-heading new-col))
@@ -337,6 +401,13 @@
 ; ***********************************************************
 
 ; ***********************************************************
+
+; This functions consumes a DataFrame and either a Column,
+; Listof Column or a DataFrame adn extends the given DataFrame.
+; If a DataFrame is passed for the second argument it is first
+; exploded and appended on to the exploded given data frame. Then
+; a new DataFrame is constructed and returned. The other cases
+; are self-explanatory.
 (: data-frame-extend (DataFrame (U Column Columns DataFrame) -> DataFrame))
 (define (data-frame-extend data-frame cols)
   (cond 
@@ -430,6 +501,15 @@
 
 (check-equal? (series-data (data-frame-series data-frame-integer 'col-one))
               (vector 1 2 3 4))
+
+(check-equal? (data-frame-labels data-frame-integer)
+              (list (cons 'col2 1) (cons 'col3 2) (cons 'col-one 0)))
+
+(check-equal? (projection-set (list 'col-one 'col2 'col3))
+              (set 'col-one 'col2 'col3))
+
+(check-equal? (data-frame-all-labels-projection-set data-frame-integer)
+              (set 'col-one 'col2 'col3))
 
 ; check error
 ;(data-frame-series data-frame-integer 'col1)

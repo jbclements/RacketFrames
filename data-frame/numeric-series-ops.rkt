@@ -1,4 +1,4 @@
-#lang typed/racket/base
+#lang typed/racket
 
 (provide:
  ;[nseries-head (NSeries [#:rows Index] -> Void)]

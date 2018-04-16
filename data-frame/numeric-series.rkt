@@ -3,7 +3,7 @@
 ;*    File: numeric-series.rkt
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-#lang typed/racket/base
+#lang typed/racket
 (require typed/rackunit)
 (require math/statistics)
 

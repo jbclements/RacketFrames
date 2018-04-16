@@ -3,7 +3,7 @@
 ;*    File: data-frame-join.rkt
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-#lang typed/racket/base
+#lang typed/racket
 (require typed/rackunit)
 
 ; ***********************************************************

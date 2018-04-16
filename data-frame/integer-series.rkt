@@ -3,7 +3,7 @@
 ;*    File: integer-series.rkt
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-#lang typed/racket/base
+#lang typed/racket
 (require typed/rackunit)
 (require math/statistics)
 
@@ -29,6 +29,7 @@
 (provide:
  [new-ISeries ((Vectorof Fixnum) (Option (U (Listof Label) SIndex)) -> ISeries)]
  [iseries-iref (ISeries Index -> Fixnum)]
+ [iseries-range (ISeries Index -> (Vectorof Fixnum))]
  [iseries-length (ISeries -> Index)]
  [iseries-referencer (ISeries -> (Index -> Fixnum))]
  [iseries-data (ISeries -> (Vectorof Fixnum))]
@@ -114,6 +115,10 @@
 (: iseries-iref (ISeries Index -> Fixnum))
 (define (iseries-iref series idx)
   (vector-ref (ISeries-data series) idx))
+
+(: iseries-range (ISeries Index -> (Vectorof Fixnum)))
+(define (iseries-range series pos)
+   (vector-take (ISeries-data series) pos))
 
 ; This function consumes an integer series and returns its
 ; data vector.
@@ -280,8 +285,8 @@
     [(eq? function-name 'mean) (mean (vector->list (ISeries-data series)))]
     ;[(eq? function-name 'median) (median (vector->list (ISeries-data series)))]
     [(eq? function-name 'count) (iseries-length series)]
-    ;[(eq? function-name 'min) (vector-argmin (lambda (x) x) (ISeries-data series))]
-    ;[(eq? function-name 'max) (vector-argmax (lambda (x) x) (ISeries-data series))]
+    [(eq? function-name 'min) (vector-argmin (lambda ([x : Fixnum]) x) (ISeries-data series))]
+    [(eq? function-name 'max) (vector-argmax (lambda ([x : Fixnum]) x) (ISeries-data series))]
     [else (error 'apply-agg "Unknown aggregate function.")]))
 
 ; ***********************************************************
@@ -377,6 +382,10 @@
 (check-equal? (apply-agg 'mean series-integer) 10/4)
 
 (check-equal? (apply-agg 'count series-integer) 4)
+
+(check-equal? (apply-agg 'min series-integer) 1)
+
+(check-equal? (apply-agg 'max series-integer) 4)
 
 ; statistics tests
 (check-equal? (apply-stat 'variance series-integer) 5/4)

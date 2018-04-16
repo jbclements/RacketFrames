@@ -3,7 +3,7 @@
 ;*    File: data-frame-concat.rkt
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-#lang typed/racket/base
+#lang typed/racket
 (require typed/rackunit)
 
 ; ***********************************************************

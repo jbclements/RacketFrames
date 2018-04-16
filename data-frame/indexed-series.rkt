@@ -3,7 +3,7 @@
 ;*    File: indexed-series.rkt
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-#lang typed/racket/base
+#lang typed/racket
 (require typed/rackunit)
 
 ; ***********************************************************
@@ -89,8 +89,8 @@
 ; ***********************************************************
 
 ; ***********************************************************
-;; General Series parameterized by A, allows for generic types.
-;; Numeric and categorical series will be further optimized.
+; General Series parameterized by A, allows for generic types.
+; Numeric and categorical series will be further optimized.
 (struct (A) GSeries LabelIndex ([data : (Vectorof A)]))
 
 ; Consumes a Vector of generic type and a list of Labels which

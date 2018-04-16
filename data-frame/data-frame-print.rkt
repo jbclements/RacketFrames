@@ -3,7 +3,7 @@
 ;*    File: data-frame-print.rkt
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-#lang typed/racket/base
+#lang typed/racket
 (require typed/rackunit)
 
 ; ***********************************************************

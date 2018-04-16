@@ -12,7 +12,7 @@
 
 (require
  racket/flonum
- (only-in "../frame/numeric-series.rkt"
+ (only-in "numeric-series.rkt"
           NSeries))
 (struct: NSeriesBuilder ([index  : Index]
 			 [data : FlVector]) #:mutable)
@@ -44,7 +44,7 @@
 	   (curr-len (flvector-length data))
 	   (new-len  (assert (inexact->exact (round (* 1.5 curr-len))) exact-integer?)))
       (let: ((new-data : FlVector (make-flvector new-len +nan.0)))
-	    (do ([idx 0 (add1 idx)])  ;; RACKET REQUEST FOR RUNTIME SUPPORT FOR COPY
+	    (do ([idx 0 (add1 idx)])
 		([>= idx curr-len] (set-NSeriesBuilder-data! builder new-data))
 	      (flvector-set! new-data idx (flvector-ref data idx))))))
   

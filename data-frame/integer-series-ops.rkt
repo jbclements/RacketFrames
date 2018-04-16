@@ -1,9 +1,9 @@
-#lang typed/racket/base
+#lang typed/racket
 
-(provide:
- ;[nseries-head (NSeries [#:rows Index] -> Void)]
- ;[nseries-unique (NSeries -> NSeries)] 
- [iseries-append (ISeries ISeries -> ISeries)])
+;(provide:
+ ;[iseries-head (ISeries [#:rows Index] -> Void)]
+ ;[iseries-unique (ISeries -> ISeries)] 
+ ;[iseries-append (ISeries ISeries -> ISeries)])
 
 (require
  (only-in grip/data/format
@@ -37,12 +37,14 @@
   (append-iseries isb)
   (complete-ISeriesBuilder builder))
 
-;(: remove-duplicates ((Listof Float) -> (Listof Float)))
-;(define (remove-duplicates lst)
-;  (foldr (lambda ([x : Float] [y : Float]) (cons x (filter (lambda ([z : Float]) (not (= x z))) y))) null lst))
+#|
+(: remove-duplicates ((Listof Fixnum) -> (Listof Fixnum)))
+(define (remove-duplicates lst)
+  (foldr (lambda ([x : Fixnum] [y : Fixnum]) (cons x (filter (lambda ([z : Fixnum]) (not (= x z))) y))) null lst))
 
-;(: nseries-unique (NSeries -> NSeries))
-;(define (nseries-unique nseries)
-;  (NSeries #f (list->flvector (remove-duplicates (flvector->list (nseries-data nseries) 0)))))
+(: iseries-unique (ISeries -> ISeries))
+(define (iseries-unique iseries)
+  (ISeries #f (list->vector (remove-duplicates (vector->list (iseries-data iseries) 0)))))
+|#
 
 (define default-nseries-rows 10)

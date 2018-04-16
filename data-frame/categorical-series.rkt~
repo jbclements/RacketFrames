@@ -7,8 +7,9 @@
 
 (provide:
  [CSeries->SIndex    (CSeries -> SIndex)]
- [cseries-count      (CSeries -> Index)]
- [cseries-ref        (CSeries Fixnum -> Label)]
+ [cseries-length      (CSeries -> Index)]
+ [cseries-iref        (CSeries Fixnum -> Label)]
+ [cseries-data        (CSeries -> (Vectorof Symbol))]
  [cseries-referencer (CSeries -> (Fixnum -> Label))])
 
 (require
@@ -29,8 +30,8 @@
 	((>= i len) (void))
       (displayln  (vector-ref nominals (vector-ref data i))))))
 
-(struct CSeries LabelIndex ([data : (Vectorof Index)]
-			    [nominals : (Vectorof Label)]))
+(struct: CSeries LabelIndex ([data     : (Vectorof Index)]
+			     [nominals : (Vectorof Label)]))
 
 ;; #:methods gen:custom-write [(define write-proc writer-CSeries)])
 
@@ -53,7 +54,7 @@
 		       (vector-set! nominals idx nom)))
     nominals)
 
-  (let loop : CSeries ((idx : Natural 0) (code : Index 0))
+  (let: loop : CSeries ((idx : Natural 0) (code : Index 0))
 	(if (>= idx len)
 	    (CSeries #f data (make-nominal-vector))
 	    (let ((nom (vector-ref nominals idx)))
@@ -87,11 +88,15 @@
 	(let ((code (vector-ref data idx)))
 	  (vector-ref noms code)))))
 
-(: cseries-ref (CSeries Fixnum -> Label))
-(define (cseries-ref cseries idx)
+(: cseries-iref (CSeries Fixnum -> Label))
+(define (cseries-iref cseries idx)
   (vector-ref (CSeries-nominals cseries)
 	      (vector-ref (CSeries-data cseries) idx)))
 
-(: cseries-count (CSeries -> Index))
-(define (cseries-count series)
+(: cseries-length (CSeries -> Index))
+(define (cseries-length series)
   (vector-length (CSeries-data series)))
+
+(: cseries-data (CSeries -> (Vectorof Symbol)))
+(define (cseries-data series)
+  (CSeries-nominals series))

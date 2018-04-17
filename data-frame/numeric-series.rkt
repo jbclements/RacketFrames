@@ -27,6 +27,7 @@
 (provide:
  [nseries-iref (NSeries Index -> Float)]
  [nseries-label-ref (NSeries Label -> Float)]
+ [nseries-range (NSeries Index -> FlVector)]
  [nseries-referencer (NSeries -> (Index -> Float))]
  [nseries-length (NSeries -> Index)]
  [nseries-data (NSeries -> FlVector)]
@@ -155,6 +156,18 @@
 (: nseries-iref (NSeries Index -> Float))
 (define (nseries-iref series idx)
   (flvector-ref (NSeries-data series) idx))
+
+; This function consumes an integer series and an index and
+; returns a vector of values in the range [0:index] in the series.
+; No flvector-take function available, so for loop was used.
+(: nseries-range (NSeries Index -> FlVector))
+(define (nseries-range series pos)
+  (define flvector-ranged (make-flvector pos))
+
+  (for [(idx (range pos))]
+    (flvector-set! flvector-ranged idx (flvector-ref (NSeries-data series) idx)))
+  
+  flvector-ranged)
 
 (: nseries-label-ref (NSeries Label -> Float))
 (define (nseries-label-ref series label)

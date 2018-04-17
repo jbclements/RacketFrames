@@ -10,13 +10,15 @@
 	  Label SIndex LabelIndex
           label-index label->idx)
 
- (only-in "../../data-frame/integer-series.rkt"
-          new-ISeries
-          iseries-iref
-          iseries-label-ref
-          iseries-range))
+ (only-in "../../data-frame/numeric-series.rkt"
+          new-NSeries
+          nseries-iref
+          nseries-label-ref
+          nseries-range))
 
-(require racket/format)
+(require racket/format
+         racket/flonum)
+
 ; ***********************************************************
 
  #| def setup(self, index):
@@ -81,31 +83,31 @@
 
 (define N (expt 10 6))
 
-(: data (Vectorof Fixnum))
-(define data (make-vector N (random N)))
+(: data FlVector)
+(define data (make-flvector N (real->double-flonum (random N))))
 
-(define series-integer (new-ISeries data #f))
+(define series-float (new-NSeries data #f))
 
 #| def time_getitem_scalar(self, index):
       self.data[800000] |#
 (define i-ref-bench-before (now))
-(define iseries-iref-value (iseries-iref series-integer 80000))
+(define nseries-iref-value (nseries-iref series-float 80000))
 (- (now) i-ref-bench-before)
 
 #| def time_getitem_slice(self, index):
         self.data[:800000] |#
-(define i-range-bench-before (now))
-(define iseries-range-80000 (iseries-range series-integer 80000))
-(- (now) i-range-bench-before)
+(define n-range-bench-before (now))
+(define nseries-range-80000 (nseries-range series-float 80000))
+(- (now) n-range-bench-before)
 
 (: label-index (Listof Symbol))
 (define label-index (for/list: : (Listof Symbol)
                       ([i (range N)])
                       (string->symbol (string-append "a" (number->string i)))))
 
-(define series-integer-with-label-index (new-ISeries data
+(define series-float-with-label-index (new-NSeries data
                                                      (build-index-from-labels label-index)))
 
-(define i-ref-label-bench-before (now))
-(define iseries-label-ref-value (iseries-label-ref series-integer-with-label-index 'a80000))
-(- (now) i-ref-label-bench-before)
+(define n-ref-label-bench-before (now))
+(define nseries-label-ref-value (nseries-label-ref series-float-with-label-index 'c))
+(- (now) n-ref-label-bench-before)

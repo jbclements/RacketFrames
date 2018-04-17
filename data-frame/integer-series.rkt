@@ -29,6 +29,7 @@
 (provide:
  [new-ISeries ((Vectorof Fixnum) (Option (U (Listof Label) SIndex)) -> ISeries)]
  [iseries-iref (ISeries Index -> Fixnum)]
+ [iseries-label-ref (ISeries Label -> Integer)]
  [iseries-range (ISeries Index -> (Vectorof Fixnum))]
  [iseries-length (ISeries -> Index)]
  [iseries-referencer (ISeries -> (Index -> Fixnum))]
@@ -116,9 +117,18 @@
 (define (iseries-iref series idx)
   (vector-ref (ISeries-data series) idx))
 
+; This function consumes an integer series and an index and
+; returns a vector of values in the range [0:index] in the series.
 (: iseries-range (ISeries Index -> (Vectorof Fixnum)))
 (define (iseries-range series pos)
    (vector-take (ISeries-data series) pos))
+
+; This function consumes an integer series and a start index and
+; end index and returns a vector of values in the range [start:end]
+; in the series.
+;(: iseries-range-start (ISeries Index Index -> (Vectorof Fixnum)))
+;(define (iseries-range-start series start-pos end-pos)
+   ;(vector->values (ISeries-data series) start-pos end-pos))
 
 ; This function consumes an integer series and returns its
 ; data vector.

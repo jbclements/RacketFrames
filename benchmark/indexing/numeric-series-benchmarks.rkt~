@@ -98,14 +98,9 @@
 (define iseries-range-80000 (iseries-range series-integer 80000))
 (- (now) i-range-bench-before)
 
-(: label-index (Listof Symbol))
-(define label-index (for/list: : (Listof Symbol)
-                      ([i (range N)])
-                      (string->symbol (string-append "a" (number->string i)))))
-
-(define series-integer-with-label-index (new-ISeries data
-                                                     (build-index-from-labels label-index)))
+(define series-integer-with-label-index (new-ISeries (vector 1 2 3 4)
+                                                     (build-index-from-labels (list 'a 'b 'c 'd))))
 
 (define i-ref-label-bench-before (now))
-(define iseries-label-ref-value (iseries-label-ref series-integer-with-label-index 'a80000))
+(define iseries-label-ref-value (iseries-label-ref series-integer-with-label-index 'c))
 (- (now) i-ref-label-bench-before)

@@ -9,6 +9,7 @@
  [CSeries->SIndex    (CSeries -> SIndex)]
  [cseries-length      (CSeries -> Index)]
  [cseries-iref        (CSeries Fixnum -> Label)]
+ [cseries-range (CSeries Index -> (Vectorof Label))]
  [cseries-data        (CSeries -> (Vectorof Symbol))]
  [cseries-referencer (CSeries -> (Fixnum -> Label))])
 
@@ -92,6 +93,13 @@
 (define (cseries-iref cseries idx)
   (vector-ref (CSeries-nominals cseries)
 	      (vector-ref (CSeries-data cseries) idx)))
+
+; This function consumes an integer series and an index and
+; returns a vector of values in the range [0:index] in the series.
+(: cseries-range (CSeries Index -> (Vectorof Label)))
+(define (cseries-range series pos)
+  (vector-map (lambda ([idx : Index]) (vector-ref (CSeries-nominals series) idx))
+              (vector-take (CSeries-data series) pos)))
 
 (: cseries-length (CSeries -> Index))
 (define (cseries-length series)

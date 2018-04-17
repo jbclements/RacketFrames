@@ -90,17 +90,25 @@
       self.data[800000] |#
 (define i-ref-bench-before (now))
 (define iseries-iref-value (iseries-iref series-integer 80000))
-(- (now) i-ref-bench-before)
+(define i-ref-bench-after (- (now) i-ref-bench-before))
+
+(fprintf (current-output-port)
+         "Integer Series i-ref Bench: ~v ms.\n"
+         i-ref-bench-after)
 
 #| def time_getitem_slice(self, index):
         self.data[:800000] |#
 (define i-range-bench-before (now))
 (define iseries-range-80000 (iseries-range series-integer 80000))
-(- (now) i-range-bench-before)
+(define i-range-bench-after (- (now) i-range-bench-before))
+
+(fprintf (current-output-port)
+         "Integer Series range bench ~v ms.\n"
+         i-range-bench-after)
 
 (: label-index (Listof Symbol))
 (define label-index (for/list: : (Listof Symbol)
-                      ([i (range N)])
+                      ([i N])
                       (string->symbol (string-append "a" (number->string i)))))
 
 (define series-integer-with-label-index (new-ISeries data
@@ -108,4 +116,8 @@
 
 (define i-ref-label-bench-before (now))
 (define iseries-label-ref-value (iseries-label-ref series-integer-with-label-index 'a80000))
-(- (now) i-ref-label-bench-before)
+(define i-ref-label-bench-after (- (now) i-ref-label-bench-before))
+
+(fprintf (current-output-port)
+         "Integer Series label ref bench: ~v ms.\n"
+         i-ref-label-bench-after)

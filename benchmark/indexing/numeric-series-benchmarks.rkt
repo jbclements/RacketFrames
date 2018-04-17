@@ -92,13 +92,26 @@
       self.data[800000] |#
 (define i-ref-bench-before (now))
 (define nseries-iref-value (nseries-iref series-float 80000))
-(- (now) i-ref-bench-before)
+(define i-ref-bench-after (- (now) i-ref-bench-before))
+
+(fprintf (current-output-port)
+         "Numeric Series i-ref bench ~v ms.\n"
+         i-ref-bench-after)
+
+(printf "Pandas Compare* indexing.NumericSeriesIndexing.time_getitem_scalar 25.58μs \n")
 
 #| def time_getitem_slice(self, index):
         self.data[:800000] |#
 (define n-range-bench-before (now))
 (define nseries-range-80000 (nseries-range series-float 80000))
-(- (now) n-range-bench-before)
+(define n-range-bench-after (- (now) n-range-bench-before))
+
+(fprintf (current-output-port)
+         "Numeric Series range bench ~v ms.\n"
+         n-range-bench-after)
+
+(printf "Pandas Compare* indexing.NumericSeriesIndexing.time_getitem_slice: 103.22μs. \n")
+
 
 (: label-index (Listof Symbol))
 (define label-index (for/list: : (Listof Symbol)
@@ -109,5 +122,11 @@
                                                      (build-index-from-labels label-index)))
 
 (define n-ref-label-bench-before (now))
-(define nseries-label-ref-value (nseries-label-ref series-float-with-label-index 'c))
-(- (now) n-ref-label-bench-before)
+(define nseries-label-ref-value (nseries-label-ref series-float-with-label-index 'a100))
+(define n-ref-label-bench-after (- (now) n-ref-label-bench-before))
+
+(fprintf (current-output-port)
+         "Numeric Series ref label bench ~v ms.\n"
+         n-ref-label-bench-after)
+
+(printf "Pandas Compare* NumericSeriesIndexing.time_ix_scalar 80.14μs. \n")

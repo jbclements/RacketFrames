@@ -1,9 +1,9 @@
 #lang typed/racket
 
-;(provide:
+(provide:
  ;[iseries-head (ISeries [#:rows Index] -> Void)]
  ;[iseries-unique (ISeries -> ISeries)] 
- ;[iseries-append (ISeries ISeries -> ISeries)])
+ [iseries-append (ISeries ISeries -> ISeries)])
 
 (require
  (only-in grip/data/format

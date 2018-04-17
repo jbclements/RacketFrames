@@ -19,7 +19,9 @@
 ; Provide functions in this file to other files.
 (provide:
  [data-frame-concat-vertical (DataFrame DataFrame [#:col (Listof Symbol)] -> DataFrame)]
- [data-frame-concat-horizontal (DataFrame DataFrame -> DataFrame)])
+ [data-frame-concat-vertical-list ((Listof DataFrame) -> DataFrame)]
+ [data-frame-concat-horizontal (DataFrame DataFrame -> DataFrame)]
+ [data-frame-concat-horizontal-list ((Listof DataFrame) -> DataFrame)])
 
 (require
  racket/pretty
@@ -139,6 +141,11 @@
                                    (set-member? append-cols name))
                                  (data-frame-names dfa)))))
 
+(: data-frame-concat-vertical-list ((Listof DataFrame) -> DataFrame))
+(define (data-frame-concat-vertical-list data-frame-lst)
+  (foldl (lambda ([data-frame-a : DataFrame] [data-frame-b : DataFrame])
+           (data-frame-concat-vertical data-frame-a data-frame-b)) (car data-frame-lst) (cdr data-frame-lst)))
+
 (: data-frame-concat-horizontal (DataFrame DataFrame -> DataFrame))
 (define (data-frame-concat-horizontal dfa dfb)
 
@@ -205,6 +212,10 @@
      (new-data-frame (append new-a-series dfb-cols))])
   )
 
+(: data-frame-concat-horizontal-list ((Listof DataFrame) -> DataFrame))
+(define (data-frame-concat-horizontal-list data-frame-lst)
+  (foldl data-frame-concat-horizontal (car data-frame-lst) (cdr data-frame-lst))) 
+
 ; Test Cases
 
 (define columns-integer-1
@@ -227,13 +238,13 @@
 ; create new data-frame-integer-3
 (define data-frame-integer-2 (new-data-frame columns-integer-2))
 
-(displayln "Concat Test 1")
+;(displayln "Concat Test 1")
 
-(frame-write-tab data-frame-integer-1 (current-output-port))
+;(frame-write-tab data-frame-integer-1 (current-output-port))
 
-(frame-write-tab data-frame-integer-2 (current-output-port))
+;(frame-write-tab data-frame-integer-2 (current-output-port))
 
-(frame-write-tab (data-frame-concat-vertical data-frame-integer-1 data-frame-integer-2) (current-output-port))
+;(frame-write-tab (data-frame-concat-vertical data-frame-integer-1 data-frame-integer-2) (current-output-port))
 
 (define columns-mixed-1
   (list 
@@ -255,15 +266,15 @@
 ; create new data-frame-mixed-2
 (define data-frame-mixed-2 (new-data-frame columns-mixed-2))
 
-(displayln "Concat Test 2")
+;(displayln "Concat Test 2")
 
-(frame-write-tab data-frame-mixed-1 (current-output-port))
+;(frame-write-tab data-frame-mixed-1 (current-output-port))
 
-(frame-write-tab data-frame-mixed-2 (current-output-port))
+;(frame-write-tab data-frame-mixed-2 (current-output-port))
 
-(frame-write-tab (data-frame-concat-vertical data-frame-mixed-1 data-frame-mixed-2) (current-output-port))
+;(frame-write-tab (data-frame-concat-vertical data-frame-mixed-1 data-frame-mixed-2) (current-output-port))
 
-(frame-write-tab (data-frame-concat-horizontal data-frame-mixed-1 data-frame-mixed-2) (current-output-port))
+;(frame-write-tab (data-frame-concat-horizontal data-frame-mixed-1 data-frame-mixed-2) (current-output-port))
 
 (define columns-mixed-3
   (list 

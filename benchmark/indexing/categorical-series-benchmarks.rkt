@@ -32,7 +32,7 @@
             self.s.get_value(self.lbl)
 
     def time_getitem_scalar(self, index):
-        self.s[self.lbl] |#
+        self.s[80000] |#
 
 (define now current-inexact-milliseconds)
 
@@ -43,10 +43,23 @@
 
 (define series-categorical (new-CSeries data))
 
-(define c-ref-label-bench-before (now))
-(cseries-iref series-categorical 80000)
-(- (now) c-ref-label-bench-before)
+(define c-iref-bench-before (now))
+(define cseries-iref-result (cseries-iref series-categorical 80000))
+(define c-iref-bench-after (- (now) c-iref-bench-before))
+
+(fprintf (current-output-port)
+         "Categorical Series i-ref bench ~v ms.\n"
+         c-iref-bench-after)
+
+(printf "Pandas Compare* Running indexing.NonNumericSeriesIndexing.time_getitem_scalar 20.88ms. \n")
 
 (define c-range-bench-before (now))
 (define cseries-range-80000 (cseries-range series-categorical 80000))
-(- (now) c-range-bench-before)
+(define c-range-bench-after (- (now) c-range-bench-before))
+
+(fprintf (current-output-port)
+         "Categorical Series range bench ~v ms.\n"
+         c-range-bench-after)
+
+(printf "Running indexing.NonNumericSeriesIndexing.time_getitem_pos_slice 69.11μs. \n") 
+

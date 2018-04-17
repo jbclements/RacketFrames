@@ -201,7 +201,7 @@
 
   result-flvector)
 
-(list->flvector (list 1.5 2.5 3.5))
+(check-equal? (list->flvector (list 1.5 2.5 3.5)) (flvector 1.5 2.5 3.5))
 
 ; ***********************************************************
 

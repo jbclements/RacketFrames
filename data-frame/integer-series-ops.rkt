@@ -1,8 +1,10 @@
 #lang typed/racket
 
+(require typed/rackunit)
+
 (provide:
- ;[iseries-head (ISeries [#:rows Index] -> Void)]
- ;[iseries-unique (ISeries -> ISeries)] 
+ [iseries-head (ISeries [#:rows Index] -> ISeries)]
+ [iseries-unique (ISeries -> ISeries)] 
  [iseries-append (ISeries ISeries -> ISeries)])
 
 (require
@@ -11,7 +13,7 @@
  (only-in racket/vector
 	  vector-copy)
  (only-in "integer-series.rkt"
-	  ISeries iseries-data iseries-length iseries-referencer)
+	  ISeries new-ISeries iseries-data iseries-length iseries-referencer iseries-iref)
  (only-in "integer-series-builder.rkt"
 	  ISeriesBuilder
 	  new-ISeriesBuilder
@@ -37,14 +39,58 @@
   (append-iseries isb)
   (complete-ISeriesBuilder builder))
 
-#|
+
 (: remove-duplicates ((Listof Fixnum) -> (Listof Fixnum)))
 (define (remove-duplicates lst)
-  (foldr (lambda ([x : Fixnum] [y : Fixnum]) (cons x (filter (lambda ([z : Fixnum]) (not (= x z))) y))) null lst))
+  (foldr (lambda ([x : Fixnum] [y : (Listof Fixnum)]) (cons x (filter (lambda ([z : Fixnum]) (not (= x z))) y))) null lst))
 
 (: iseries-unique (ISeries -> ISeries))
 (define (iseries-unique iseries)
-  (ISeries #f (list->vector (remove-duplicates (vector->list (iseries-data iseries) 0)))))
-|#
+  (ISeries #f (list->vector (remove-duplicates (vector->list (iseries-data iseries))))))
 
-(define default-nseries-rows 10)
+(: iseries-head (ISeries [#:rows Index] -> ISeries))
+(define (iseries-head iseries #:rows [rows 10])
+  (if (< (vector-length (iseries-data iseries)) rows)
+      (new-ISeries (for/vector: : (Vectorof Fixnum) ([i (vector-length (iseries-data iseries))]) (iseries-iref iseries i)) #f)
+      (new-ISeries (for/vector: : (Vectorof Fixnum) ([i rows]) (iseries-iref iseries i)) #f)))
+
+(define default-iseries-rows 10)
+
+(: display-iseries-head (ISeries [#:rows Index] -> Void))
+(define (display-iseries-head iseries #:rows [rows default-iseries-rows])
+  (define iref (iseries-referencer iseries))
+  (let ((rows (min rows (iseries-length iseries))))
+    (do ([i 0 (add1 i)])
+	((>= i rows) (displayln ""))
+      (display (~a (string-append "[" (number->string i) "]") 
+		   #:width 5 #:align 'left))
+      (displayln (~a (number->string (iref (assert i index?))) 
+		     #:align 'left)))))
+
+(: iseries-abs (ISeries -> ISeries))
+(define (iseries-abs iseries)
+  (define iref (iseries-referencer iseries))
+  (define rows (iseries-length iseries))
+  (define builder (new-ISeriesBuilder rows))
+
+  (for ([i rows])
+    (append-ISeriesBuilder builder (assert (abs (iref (assert i index?))) fixnum?)))
+
+  (complete-ISeriesBuilder builder))
+
+; create integer series
+(define series-integer (new-ISeries (vector 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20) #f))
+
+(iseries-data (iseries-unique series-integer))
+
+(iseries-data (iseries-head series-integer))
+
+(define series-integer-duplicates (new-ISeries (vector 5 5 5 5 5) #f))
+
+(iseries-data (iseries-unique series-integer-duplicates))
+
+(iseries-data (iseries-head series-integer-duplicates))
+
+(define series-integer-negatives (new-ISeries (vector -5 -5 -5 -5 -5) #f))
+
+(iseries-data (iseries-abs series-integer-negatives))

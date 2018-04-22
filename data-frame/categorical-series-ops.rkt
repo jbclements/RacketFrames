@@ -1,7 +1,8 @@
 #lang typed/racket
 
 (provide:
- [cseries-head (CSeries [#:rows Index] -> Void)]
+ [cseries-head (CSeries [#:rows Index] -> CSeries)]
+ [cseries-head-display (CSeries [#:rows Index] -> Void)]
  [cseries-unique (CSeries -> CSeries)] 
  [cseries-append (CSeries CSeries -> CSeries)])
 
@@ -11,7 +12,7 @@
  (only-in racket/vector
 	  vector-copy)
  (only-in "categorical-series.rkt"
-	  CSeries CSeries-nominals cseries-length cseries-referencer)
+	  CSeries new-CSeries cseries-data CSeries-nominals cseries-length cseries-referencer)
  (only-in "categorical-series-builder.rkt"
 	  CSeriesBuilder
 	  new-CSeriesBuilder
@@ -52,8 +53,15 @@
 
 (define default-cseries-rows 10)
 
-(: cseries-head (CSeries [#:rows Index] -> Void))
-(define (cseries-head cseries #:rows [rows default-cseries-rows])
+(: cseries-head (CSeries [#:rows Index] -> CSeries))
+(define (cseries-head cseries #:rows [rows 10])
+  (define cref (cseries-referencer cseries))
+  (if (< (vector-length (cseries-data cseries)) rows)
+      (new-CSeries (for/vector: : (Vectorof Symbol) ([i (vector-length (cseries-data cseries))]) (cref i)))
+      (new-CSeries (for/vector: : (Vectorof Symbol) ([i rows]) (cref i)))))
+
+(: cseries-head-display (CSeries [#:rows Index] -> Void))
+(define (cseries-head-display cseries #:rows [rows default-cseries-rows])
   (define cref (cseries-referencer cseries))
   (let ((rows (min rows (cseries-length cseries))))
     (do ([i 0 (add1 i)])

@@ -1,19 +1,17 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;*    Author: Shubham Kahal
-;*    File: integer-series.rkt
+;*    File: boolean-series.rkt
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 #lang typed/racket
 (require typed/rackunit)
-(require math/statistics)
 
 ; ***********************************************************
 ; One-dimensional array like structure with axis labels. Labels
 ; must be unique and must be a hashable type. The series object
 ; supports both integer (idx) and label-based indexing. Functions
 ; can be mapped to each value of the series allowing for various
-; operations. The integer series is optimized for working with
-; integers.
+; operations. The integer series is optimized for working booleans.
 ; ***********************************************************
 
 ; **************************
@@ -27,7 +25,7 @@
  (struct-out ISeries))
 
 (provide:
- [new-ISeries ((Vectorof Fixnum) (Option (U (Listof Label) SIndex)) -> ISeries)]
+ [new-BSeries ((Vectorof Boolean) (Option (U (Listof Label) SIndex)) -> BSeries)]
  [iseries-iref (ISeries Index -> Fixnum)]
  [iseries-label-ref (ISeries Label -> Integer)]
  [iseries-range (ISeries Index -> (Vectorof Fixnum))]
@@ -35,19 +33,6 @@
  [iseries-referencer (ISeries -> (Index -> Fixnum))]
  [iseries-data (ISeries -> (Vectorof Fixnum))]
  [map/is (ISeries (Fixnum -> Fixnum) -> ISeries)]
- [bop/is (ISeries ISeries (Fixnum Fixnum -> Fixnum) -> ISeries)]
- [+/is (ISeries ISeries -> ISeries)]
- [-/is (ISeries ISeries -> ISeries)]
- [*/is (ISeries ISeries -> ISeries)]
- [//is (ISeries ISeries -> ISeries)]
- [%/is (ISeries ISeries -> ISeries)]
- [r/is (ISeries ISeries -> ISeries)]
- [+./is (ISeries Fixnum -> ISeries)]
- [-./is (ISeries Fixnum -> ISeries)]
- [*./is (ISeries Fixnum -> ISeries)]
- [/./is (ISeries Fixnum -> ISeries)]
- [%./is (ISeries Fixnum -> ISeries)]
- [r./is (ISeries Fixnum -> ISeries)]
  [apply-agg (Symbol ISeries -> Real)]
  [apply-stat (Symbol ISeries -> Real)])
 ; ***********************************************************
@@ -73,13 +58,13 @@
 ; safer. This library will be using unsafe operations for
 ; speed improvement.
 
-;; Integer series optimized with use of Fixnum.
-(struct ISeries LabelIndex ([data : (Vectorof Fixnum)]))
+;; Boolean series.
+(struct BSeries LabelIndex ([data : (Vectorof Boolean)]))
 
 ; Consumes a Vector of Fixnum and a list of Labels which
 ; can come in list form or SIndex form and produces a ISeries
 ; struct object.
-(: new-ISeries ((Vectorof Fixnum) (Option (U (Listof Label) SIndex)) -> ISeries))
+(: new-BSeries ((Vectorof Boolean) (Option (U (Listof Label) SIndex)) -> ISeries))
 (define (new-ISeries data labels)
 
   (: check-mismatch (SIndex -> Void))

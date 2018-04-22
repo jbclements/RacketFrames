@@ -258,7 +258,13 @@
 ; series map
 (check-equal? (GSeries-data (map/GSeries g-series-integer (λ: ((x : Integer))
                                                             (add1 x)))) #(2 3 4 5))
+; create struct series
+(define g-series-struct (new-GSeries (vector (LabelIndex #f) (LabelIndex #f)) (build-index-from-labels (list 'a 'b))))
 
+; struct series ref by index
+(check-equal? (LabelIndex-index (assert (series-iref g-series-struct 1) LabelIndex?)) (LabelIndex-index (LabelIndex #f)))
+
+; integer series ref by label
 ; checks labeling function which converts labels hash to list
 (check-equal? (labeling (LabelIndex (build-index-from-labels (list 'a 'b 'c 'd))))
               '((b . 1) (c . 2) (d . 3) (a . 0)))

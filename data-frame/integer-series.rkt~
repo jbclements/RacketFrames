@@ -3,7 +3,7 @@
 ;*    File: integer-series.rkt
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-#lang typed/racket/base
+#lang typed/racket
 (require typed/rackunit)
 (require math/statistics)
 
@@ -29,8 +29,10 @@
 (provide:
  [new-ISeries ((Vectorof Fixnum) (Option (U (Listof Label) SIndex)) -> ISeries)]
  [iseries-iref (ISeries Index -> Fixnum)]
+ [iseries-label-ref (ISeries Label -> Integer)]
+ [iseries-range (ISeries Index -> (Vectorof Fixnum))]
  [iseries-length (ISeries -> Index)]
- [iseries-referencer (ISeries -> (Index -> Integer))]
+ [iseries-referencer (ISeries -> (Index -> Fixnum))]
  [iseries-data (ISeries -> (Vectorof Fixnum))]
  [map/is (ISeries (Fixnum -> Fixnum) -> ISeries)]
  [bop/is (ISeries ISeries (Fixnum Fixnum -> Fixnum) -> ISeries)]
@@ -103,7 +105,7 @@
 ; lambda function which consumes an index and provides the
 ; value of the data at that index in the series. It can be
 ; defined once and used repeatedly as a referencer.
-(: iseries-referencer (ISeries -> (Index -> Integer)))
+(: iseries-referencer (ISeries -> (Index -> Fixnum)))
 (define (iseries-referencer cseries)
   (let ((data (ISeries-data cseries)))
     (λ: ((idx : Index))
@@ -114,6 +116,19 @@
 (: iseries-iref (ISeries Index -> Fixnum))
 (define (iseries-iref series idx)
   (vector-ref (ISeries-data series) idx))
+
+; This function consumes an integer series and an index and
+; returns a vector of values in the range [0:index] in the series.
+(: iseries-range (ISeries Index -> (Vectorof Fixnum)))
+(define (iseries-range series pos)
+   (vector-take (ISeries-data series) pos))
+
+; This function consumes an integer series and a start index and
+; end index and returns a vector of values in the range [start:end]
+; in the series.
+;(: iseries-range-start (ISeries Index Index -> (Vectorof Fixnum)))
+;(define (iseries-range-start series start-pos end-pos)
+   ;(vector->values (ISeries-data series) start-pos end-pos))
 
 ; This function consumes an integer series and returns its
 ; data vector.
@@ -280,8 +295,8 @@
     [(eq? function-name 'mean) (mean (vector->list (ISeries-data series)))]
     ;[(eq? function-name 'median) (median (vector->list (ISeries-data series)))]
     [(eq? function-name 'count) (iseries-length series)]
-    ;[(eq? function-name 'min) (vector-argmin (lambda (x) x) (ISeries-data series))]
-    ;[(eq? function-name 'max) (vector-argmax (lambda (x) x) (ISeries-data series))]
+    [(eq? function-name 'min) (vector-argmin (lambda ([x : Fixnum]) x) (ISeries-data series))]
+    [(eq? function-name 'max) (vector-argmax (lambda ([x : Fixnum]) x) (ISeries-data series))]
     [else (error 'apply-agg "Unknown aggregate function.")]))
 
 ; ***********************************************************
@@ -377,6 +392,10 @@
 (check-equal? (apply-agg 'mean series-integer) 10/4)
 
 (check-equal? (apply-agg 'count series-integer) 4)
+
+(check-equal? (apply-agg 'min series-integer) 1)
+
+(check-equal? (apply-agg 'max series-integer) 4)
 
 ; statistics tests
 (check-equal? (apply-stat 'variance series-integer) 5/4)

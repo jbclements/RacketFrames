@@ -15,6 +15,8 @@
 	  vector-copy)
  (only-in "numeric-series.rkt"
 	  NSeries new-NSeries nseries-data nseries-length nseries-referencer nseries-iref flvector->list list->flvector)
+ (only-in "boolean-series.rkt"
+	  BSeries new-BSeries bseries-data bseries-length bseries-referencer bseries-iref)
  (only-in "numeric-series-builder.rkt"
 	  NSeriesBuilder
 	  new-NSeriesBuilder
@@ -82,12 +84,29 @@
   (complete-NSeriesBuilder builder))
 
 ; Series.isna()	Return a boolean same-sized object indicating if the values are NA.
-;(: nseries-isna (NSeries -> BSeries))
-   
+(: nseries-isna (NSeries -> BSeries))
+(define (nseries-isna nseries)
+  (define nref (nseries-referencer nseries))
+  (let ((rows (nseries-length nseries)))
+    (define data : (Vectorof Boolean) (make-vector (nseries-length nseries) #f))
+    (for ([i rows])
+      (if (= (nref (assert i index?)) -10000.0)
+          (vector-set! data i #t)
+          (vector-set! data i #f)))
+    (new-BSeries data #f)))
 
 
-; Series.notna()	Return a boolean same-sized object indicating if the values are not NA.
-;(: nseries-notna (NSeries -> BSeries))
+; Series.notna() Return a boolean same-sized object indicating if the values are not NA.
+(: nseries-notna (NSeries -> BSeries))
+(define (nseries-notna nseries)
+  (define nref (nseries-referencer nseries))
+  (let ((rows (nseries-length nseries)))
+    (define data : (Vectorof Boolean) (make-vector (nseries-length nseries) #f))
+    (for ([i rows])
+      (if (= (nref (assert i index?)) -10000.0)
+          (vector-set! data i #t)
+          (vector-set! data i #f)))
+    (new-BSeries data #f)))
 
 
 ; create integer series

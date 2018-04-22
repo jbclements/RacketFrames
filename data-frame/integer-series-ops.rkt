@@ -5,7 +5,9 @@
 (provide:
  [iseries-head (ISeries [#:rows Index] -> ISeries)]
  [iseries-unique (ISeries -> ISeries)] 
- [iseries-append (ISeries ISeries -> ISeries)])
+ [iseries-append (ISeries ISeries -> ISeries)]
+ [iseries-isna (ISeries -> BSeries)]
+ [iseries-notna (ISeries -> BSeries)])
 
 (require
  (only-in grip/data/format
@@ -14,6 +16,8 @@
 	  vector-copy)
  (only-in "integer-series.rkt"
 	  ISeries new-ISeries iseries-data iseries-length iseries-referencer iseries-iref)
+ (only-in "boolean-series.rkt"
+	  BSeries new-BSeries bseries-data bseries-length bseries-referencer bseries-iref)
  (only-in "integer-series-builder.rkt"
 	  ISeriesBuilder
 	  new-ISeriesBuilder
@@ -77,6 +81,30 @@
     (append-ISeriesBuilder builder (assert (abs (iref (assert i index?))) fixnum?)))
 
   (complete-ISeriesBuilder builder))
+
+; Series.isna()	Return a boolean same-sized object indicating if the values are NA.
+(: iseries-isna (ISeries -> BSeries))
+(define (iseries-isna iseries)
+  (define nref (iseries-referencer iseries))
+  (let ((rows (iseries-length iseries)))
+    (define data : (Vectorof Boolean) (make-vector (iseries-length iseries) #f))
+    (for ([i rows])
+      (if (= (nref (assert i index?)) -10000)
+          (vector-set! data i #t)
+          (vector-set! data i #f)))
+    (new-BSeries data #f)))
+
+; Series.notna() Return a boolean same-sized object indicating if the values are not NA.
+(: iseries-notna (ISeries -> BSeries))
+(define (iseries-notna iseries)
+  (define nref (iseries-referencer iseries))
+  (let ((rows (iseries-length iseries)))
+    (define data : (Vectorof Boolean) (make-vector (iseries-length iseries) #f))
+    (for ([i rows])
+      (if (= (nref (assert i index?)) -10000)
+          (vector-set! data i #t)
+          (vector-set! data i #f)))
+    (new-BSeries data #f)))
 
 ; create integer series
 (define series-integer (new-ISeries (vector 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20) #f))

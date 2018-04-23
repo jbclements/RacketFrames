@@ -122,3 +122,5 @@
 (define series-integer-negatives (new-ISeries (vector -5 -5 -5 -5 -5) #f))
 
 (iseries-data (iseries-abs series-integer-negatives))
+
+(bseries-data (iseries-isna series-integer))

@@ -36,6 +36,7 @@
  [iseries-data (ISeries -> (Vectorof Fixnum))]
  [map/is (ISeries (Fixnum -> Fixnum) -> ISeries)]
  [bop/is (ISeries ISeries (Fixnum Fixnum -> Fixnum) -> ISeries)]
+ [comp/is (ISeries ISeries (Fixnum Fixnum -> Boolean) -> BSeries)]
  [+/is (ISeries ISeries -> ISeries)]
  [-/is (ISeries ISeries -> ISeries)]
  [*/is (ISeries ISeries -> ISeries)]
@@ -60,7 +61,9 @@
  (only-in "indexed-series.rkt"
 	  build-index-from-labels
 	  Label SIndex LabelIndex
-          label-index label->idx))
+          label-index label->idx)
+ (only-in "boolean-series.rkt"
+          BSeries))
 ; ***********************************************************
 
 ; ***********************************************************
@@ -122,13 +125,6 @@
 (: iseries-range (ISeries Index -> (Vectorof Fixnum)))
 (define (iseries-range series pos)
    (vector-take (ISeries-data series) pos))
-
-; This function consumes an integer series and a start index and
-; end index and returns a vector of values in the range [start:end]
-; in the series.
-;(: iseries-range-start (ISeries Index Index -> (Vectorof Fixnum)))
-;(define (iseries-range-start series start-pos end-pos)
-   ;(vector->values (ISeries-data series) start-pos end-pos))
 
 ; This function consumes an integer series and returns its
 ; data vector.
@@ -280,6 +276,67 @@
 (: %./is (ISeries Fixnum -> ISeries))
 (define (%./is is fx)
   (bop./is fx is unsafe-fxmodulo))
+
+; ***********************************************************
+
+; ***********************************************************
+;; Binary ISeries comp
+
+; This function consumes 2 integer series and a function which
+; consumes 2 Fixnum's and produces a Boolean result for comparison.
+; This function is applied to each value in the 2 series at the same
+; index resulting in a new boolean point and at the end of the loop
+; a new data vector. This data vector is the data of the new ISeries
+; which is returned.
+(: comp/is (ISeries ISeries (Fixnum Fixnum -> Boolean) -> BSeries))
+(define (comp/is ns1 ns2 comp)
+  (define v1 (ISeries-data ns1))
+  (define v2 (ISeries-data ns2))
+  (define: len : Index (vector-length v1))
+  
+  (unless (eqv? len (vector-length v2))
+	  (error '+/is "Series must be of equal length."))
+  
+  (define: v-comp : (Vectorof Boolean) (make-vector len #f))
+
+  ; Do loop returns ISeries, idx to 0 and increments by 1 Fixnum on
+  ; each iteration (this is the step-exprs). When the loop has gone
+  ; through the whole vector, the resulting new ISeries is returned
+  ; which the v-bop as the data.
+  (do: : BSeries ([idx : Fixnum 0 (unsafe-fx+ idx #{1 : Fixnum})])
+       ((= idx len) (BSeries #f v-comp))
+       (vector-set! v-comp idx (comp (vector-ref v1 idx)
+				   (vector-ref v2 idx)))))
+
+; ***********************************************************
+
+; ***********************************************************
+; These functions apply various comparison operators using
+; unsafe-fx and the bop./is function defined above.
+
+(: >/is (ISeries ISeries -> BSeries))
+(define (>/is is1 is2)
+  (comp/is is1 is2 unsafe-fx>))
+
+(: </is (ISeries ISeries -> BSeries))
+(define (</is is1 is2)
+  (comp/is is1 is2 unsafe-fx<))
+
+(: >=/is (ISeries ISeries -> BSeries))
+(define (>=/is is1 is2)
+  (comp/is is1 is2 unsafe-fx>=))
+
+(: <=/is (ISeries ISeries -> BSeries))
+(define (<=/is is1 is2)
+  (comp/is is1 is2 unsafe-fx<=))
+
+(: =/is (ISeries ISeries -> BSeries))
+(define (=/is is1 is2)
+  (comp/is is1 is2 unsafe-fx=))
+
+(: !=/is (ISeries ISeries -> BSeries))
+(define (!=/is is1 is2)
+  (comp/is is1 is2 (lambda ([a : Fixnum] [b : Fixnum]) (not (unsafe-fx= a b)))))
 
 ; ***********************************************************
 

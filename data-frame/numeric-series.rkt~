@@ -3,7 +3,7 @@
 ;*    File: numeric-series.rkt
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-#lang typed/racket/base
+#lang typed/racket
 (require typed/rackunit)
 (require math/statistics)
 
@@ -27,6 +27,8 @@
 (provide:
  [nseries-iref (NSeries Index -> Float)]
  [nseries-label-ref (NSeries Label -> Float)]
+ [nseries-range (NSeries Index -> FlVector)]
+ [nseries-referencer (NSeries -> (Index -> Float))]
  [nseries-length (NSeries -> Index)]
  [nseries-data (NSeries -> FlVector)]
  [map/ns (NSeries (Float -> Float) -> NSeries)]
@@ -40,7 +42,9 @@
  [*./ns (NSeries Float -> NSeries)]
  [/./ns (NSeries Float -> NSeries)]
  [apply-agg (Symbol NSeries -> Real)]
- [apply-stat (Symbol NSeries -> Real)])
+ [apply-stat (Symbol NSeries -> Real)]
+ [flvector->list (FlVector Fixnum -> (Listof Float))]
+ [list->flvector ((Listof Float) -> FlVector)])
 
 (provide
  flvector-print
@@ -153,6 +157,18 @@
 (define (nseries-iref series idx)
   (flvector-ref (NSeries-data series) idx))
 
+; This function consumes an integer series and an index and
+; returns a vector of values in the range [0:index] in the series.
+; No flvector-take function available, so for loop was used.
+(: nseries-range (NSeries Index -> FlVector))
+(define (nseries-range series pos)
+  (define flvector-ranged (make-flvector pos))
+
+  (for [(idx (range pos))]
+    (flvector-set! flvector-ranged idx (flvector-ref (NSeries-data series) idx)))
+  
+  flvector-ranged)
+
 (: nseries-label-ref (NSeries Label -> Float))
 (define (nseries-label-ref series label)
   (nseries-iref series (label->idx series label)))
@@ -172,6 +188,20 @@
   (cond
     [(= idx (flvector-length flvec)) null]
     [else (cons (flvector-ref flvec idx) (flvector->list flvec (unsafe-fx+ idx 1)))]))
+
+(: list->flvector ((Listof Float) -> FlVector))
+(define (list->flvector float-list)
+  (define len : Index (length float-list))
+
+  (define result-flvector (make-flvector len))
+
+  (for([flo float-list]
+     [i (in-range len)])
+    (flvector-set! result-flvector i flo))
+
+  result-flvector)
+
+(check-equal? (list->flvector (list 1.5 2.5 3.5)) (flvector 1.5 2.5 3.5))
 
 ; ***********************************************************
 

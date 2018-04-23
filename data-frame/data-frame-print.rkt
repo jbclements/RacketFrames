@@ -45,6 +45,8 @@
 	  show-data-frame-description data-frame-description)
  (only-in "integer-series.rkt"
 	  new-ISeries ISeries ISeries? iseries-iref)
+ (only-in "boolean-series.rkt"
+	  new-BSeries BSeries BSeries? bseries-iref)
  (only-in "numeric-series.rkt"
 	  NSeries NSeries? nseries-iref)
  (only-in "categorical-series.rkt"
@@ -82,6 +84,8 @@
 	   (display (format-heading heading)))
 	  ((ISeries? series)
 	   (display (format-heading heading)))
+          ((BSeries? series)
+	   (display (format-heading heading)))
 	  (else
 	   (error 'frame-head "Heading for unknown series types ~s"
 		  (series-type series)))))
@@ -114,6 +118,14 @@
       #:precision 0
       #:min-width WIDTH))
 
+(: format-bseries (BSeries Index -> String))
+(define (format-bseries bseries row)
+  (~a (if (bseries-iref bseries row)
+          "#t"
+          "#f")
+      #:width WIDTH
+      #:align 'left))
+
 ; ***********************************************************
 
 ; ***********************************************************
@@ -131,6 +143,8 @@
 		 (display (format-cseries a-series row)))
 		((ISeries? a-series)
 		 (display (format-iseries a-series row)))
+                ((BSeries? a-series)
+		 (display (format-bseries a-series row)))
 		(else
 		 (error 'data-frame-head "Unknown series types ~s"
 			(series-type a-series)))))
@@ -176,6 +190,8 @@
 	     (display (cseries-iref a-series row) outp))
 	    ((ISeries? a-series)
 	     (display (iseries-iref a-series row) outp))
+            ((BSeries? a-series)
+	     (display (bseries-iref a-series row) outp))
 	    (else
 	     (error 'frame-head "Unknown series types ~s"
 		    (series-type a-series)))))))

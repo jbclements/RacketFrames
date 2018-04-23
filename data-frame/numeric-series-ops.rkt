@@ -5,7 +5,8 @@
 (provide:
  [nseries-head-display (NSeries [#:rows Index] -> Void)]
  [nseries-unique (NSeries -> NSeries)] 
- [nseries-append (NSeries NSeries -> NSeries)])
+ [nseries-append (NSeries NSeries -> NSeries)]
+ [nseries-abs (NSeries -> NSeries)])
 
 (require
  racket/flonum

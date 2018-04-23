@@ -6,6 +6,7 @@
  [iseries-head (ISeries [#:rows Index] -> ISeries)]
  [iseries-unique (ISeries -> ISeries)] 
  [iseries-append (ISeries ISeries -> ISeries)]
+ [iseries-abs (ISeries -> ISeries)]
  [iseries-isna (ISeries -> BSeries)]
  [iseries-notna (ISeries -> BSeries)])
 

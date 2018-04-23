@@ -53,6 +53,9 @@
  (only-in "integer-series.rkt"
 	  ISeries ISeries? iseries-iref new-ISeries
 	  iseries-referencer)
+ (only-in "boolean-series.rkt"
+	  BSeries BSeries? bseries-iref new-BSeries
+	  bseries-referencer)
  (only-in "categorical-series.rkt"
 	  cseries-referencer cseries-length cseries-iref
 	  CSeries CSeries? new-CSeries)
@@ -76,6 +79,10 @@
 	  NSeriesBuilder NSeriesBuilder?
 	  append-NSeriesBuilder complete-NSeriesBuilder
 	  new-NSeriesBuilder)
+ (only-in "boolean-series-builder.rkt"
+	  BSeriesBuilder BSeriesBuilder?
+	  append-BSeriesBuilder complete-BSeriesBuilder
+	  new-BSeriesBuilder)
  (only-in "data-frame-print.rkt"
           frame-write-tab))
 
@@ -105,6 +112,10 @@
           ((NSeries? series)
            (if (NSeriesBuilder? builder)
                (append-NSeriesBuilder builder -100000.0)
+               (copy-column-row-error series col)))
+          ((BSeries? series)
+           (if (BSeriesBuilder? builder)
+               (append-BSeriesBuilder builder #f)
                (copy-column-row-error series col)))))))
 
 

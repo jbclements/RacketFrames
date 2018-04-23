@@ -16,7 +16,10 @@
 	  complete-NSeriesBuilder)
  (only-in "integer-series-builder.rkt"
 	  ISeriesBuilder ISeriesBuilder?
-	  complete-ISeriesBuilder))
+	  complete-ISeriesBuilder)
+ (only-in "boolean-series-builder.rkt"
+	  BSeriesBuilder BSeriesBuilder?
+	  complete-BSeriesBuilder))
 
 
 (: series-complete (SeriesBuilder -> Series))
@@ -27,6 +30,8 @@
    ((CSeriesBuilder? builder)
     (complete-CSeriesBuilder builder))
    ((ISeriesBuilder? builder)
-    (complete-ISeriesBuilder builder))))
+    (complete-ISeriesBuilder builder))
+   ((BSeriesBuilder? builder)
+    (complete-BSeriesBuilder builder))))
 
 

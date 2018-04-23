@@ -49,6 +49,12 @@
  [/./is (ISeries Fixnum -> ISeries)]
  [%./is (ISeries Fixnum -> ISeries)]
  [r./is (ISeries Fixnum -> ISeries)]
+ [>/is (ISeries ISeries -> BSeries)]
+ [</is (ISeries ISeries -> BSeries)]
+ [>=/is (ISeries ISeries -> BSeries)]
+ [<=/is (ISeries ISeries -> BSeries)]
+ [=/is (ISeries ISeries -> BSeries)]
+ [!=/is (ISeries ISeries -> BSeries)]
  [apply-agg (Symbol ISeries -> Real)]
  [apply-stat (Symbol ISeries -> Real)])
 ; ***********************************************************
@@ -337,6 +343,59 @@
 (: !=/is (ISeries ISeries -> BSeries))
 (define (!=/is is1 is2)
   (comp/is is1 is2 (lambda ([a : Fixnum] [b : Fixnum]) (not (unsafe-fx= a b)))))
+
+; ***********************************************************
+
+; ***********************************************************
+;; Scalar ISeries bops
+
+; This function consumes a Fixnum and an integer series and
+; a binary operation function which
+; consumes 2 Fixnum's and produces a Fixnum result. This function
+; is applied to each value in the 2 series at the same index
+; resulting in a new data point and at the end of the loop a new
+; data vector. This data vector is the data of the new ISeries
+; which is returned.
+
+(: comp./is (Fixnum ISeries (Fixnum Fixnum -> Boolean) -> BSeries))
+(define (comp./is fx is comp)
+  (define: v1 : (Vectorof Fixnum) (ISeries-data is))
+  (define: len : Index (vector-length v1))
+  (define: v-bop : (Vectorof Boolean) (make-vector len #f))
+
+  (do: : BSeries ([idx : Fixnum 0 (unsafe-fx+ idx 1)])
+       ((= idx len) (BSeries #f v-bop))
+       (vector-set! v-bop idx (comp #{(vector-ref v1 idx) : Fixnum} fx))))
+
+; ***********************************************************
+
+; ***********************************************************
+; These functions apply comparison operations using unsafe-fx
+; and the comp./is function defined above.
+
+(: >./is (ISeries Fixnum -> BSeries))
+(define (>./is is fx)
+  (comp./is fx is unsafe-fx>))
+
+(: <./is (ISeries Fixnum -> BSeries))
+(define (<./is is fx)
+  (comp./is fx is unsafe-fx<))
+
+(: >=./is (ISeries Fixnum -> BSeries))
+(define (>=./is is fx)
+  (comp./is fx is unsafe-fx>=))
+
+(: <=./is (ISeries Fixnum -> BSeries))
+(define (<=./is is fx)
+  (comp./is fx is unsafe-fx<=))
+
+(: =./is (ISeries Fixnum -> BSeries))
+(define (=./is is fx)
+  (comp./is fx is unsafe-fx=))
+
+(: !=./is (ISeries Fixnum -> BSeries))
+(define (!=./is is fx)
+  (comp./is fx is (lambda ([a : Fixnum] [b : Fixnum]) (not (unsafe-fx= a b)))))
 
 ; ***********************************************************
 

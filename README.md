@@ -1,10 +1,16 @@
-# Project Title
+# RacketFrames
 
 One Paragraph of project description goes here
 
 ## Getting Started
 
-These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
+Remember FizzBuzz (of course you do!), well imagine you have just solved the puzzle (well done!) and you have written the results to a comma-delimited file for further analysis. Now you want to know how many times are the strings Fizz, Buzz, and FizzBuzz printed out.
+
+You could answer this question any number of ways, for example you could modify the original program, or reach for Python/pandas, or even (for the sadistic among us, you know who you are) type out a one-liner at the command prompt (probably including cut, sort, and uniq).
+
+Well, now you have one more option. This option is especially good if you are 1) using Racket already 2) may need to integrate your solution with other Racket applications in the future or 3) just plain love functional programming.
+
+You can answer this question and many others with RacketFrames.
 
 ### Prerequisites
 

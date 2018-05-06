@@ -18,6 +18,8 @@
 	  SIndex Label
 	  LabelIndex))
 
+(define-type CSeriesFn (Label -> Label))
+
 ;; Categorical Series
 ;; Encoded as an array of integer values with an associated nominal.
 ;; Custom Structure Writer
@@ -107,4 +109,4 @@
 
 (: cseries-data (CSeries -> (Vectorof Symbol)))
 (define (cseries-data series)
-  (CSeries-nominals series))
+  (CSeries-nominals series))	

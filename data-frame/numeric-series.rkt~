@@ -37,10 +37,36 @@
  [-/ns (NSeries NSeries -> NSeries)]
  [*/ns (NSeries NSeries -> NSeries)]
  [//ns (NSeries NSeries -> NSeries)]
+ [>/ns (NSeries NSeries -> BSeries)]
+ [</ns (NSeries NSeries -> BSeries)]
+ [>=/ns (NSeries NSeries -> BSeries)]
+ [<=/ns (NSeries NSeries -> BSeries)]
+ [=/ns (NSeries NSeries -> BSeries)]
+ [!=/ns (NSeries NSeries -> BSeries)]
  [+./ns (NSeries Float -> NSeries)]
  [-./ns (NSeries Float -> NSeries)]
  [*./ns (NSeries Float -> NSeries)]
  [/./ns (NSeries Float -> NSeries)]
+ [+/ns/is (NSeries ISeries -> NSeries)]
+ [-/ns/is (NSeries ISeries -> NSeries)]
+ [*/ns/is (NSeries ISeries -> NSeries)]
+ [//ns/is (NSeries ISeries -> NSeries)]
+ [+/is/ns (ISeries NSeries -> NSeries)]
+ [-/is/ns (ISeries NSeries -> NSeries)]
+ [*/is/ns (ISeries NSeries -> NSeries)]
+ [//is/ns (ISeries NSeries -> NSeries)]
+ [>/ns/is (NSeries ISeries -> BSeries)]
+ [</ns/is (NSeries ISeries -> BSeries)]
+ [>=/ns/is (NSeries ISeries -> BSeries)]
+ [<=/ns/is (NSeries ISeries -> BSeries)]
+ [=/ns/is (NSeries ISeries -> BSeries)]
+ [!=/ns/is (NSeries ISeries -> BSeries)]
+ [>/is/ns (ISeries NSeries -> BSeries)]
+ [</is/ns (ISeries NSeries -> BSeries)]
+ [>=/is/ns (ISeries NSeries -> BSeries)]
+ [<=/is/ns (ISeries NSeries -> BSeries)]
+ [=/is/ns (ISeries NSeries -> BSeries)]
+ [!=/is/ns (ISeries NSeries -> BSeries)]
  [apply-agg (Symbol NSeries -> Real)]
  [apply-stat (Symbol NSeries -> Real)]
  [flvector->list (FlVector Fixnum -> (Listof Float))]
@@ -67,7 +93,11 @@
 	  build-index-from-labels
 	  Label SIndex
 	  GSeries GSeries-data
-	  LabelIndex LabelIndex-index))
+	  LabelIndex LabelIndex-index)
+ (only-in "boolean-series.rkt"
+          BSeries BSeries-data)
+ (only-in "integer-series.rkt"
+          ISeries ISeries-data))
 
 ; ***********************************************************
 
@@ -239,7 +269,7 @@
   (unless (eqv? len (flvector-length v2))
 	  (error '+/ns "Series must be of equal length."))
   
-  (define: v-bop : FlVector(make-flvector len))
+  (define: v-bop : FlVector (make-flvector len))
 
   (do: : NSeries ([idx : Fixnum 0 (unsafe-fx+ idx 1)])
        ((= idx len) (NSeries #f v-bop))
@@ -261,6 +291,103 @@
 (: //ns (NSeries NSeries -> NSeries))
 (define (//ns ns1 ns2)
   (bop/ns ns1 ns2 fl/))
+
+; ***********************************************************
+
+; ***********************************************************
+
+;; Binary NSeries ISeries Ops
+
+(: bop/ns/is (NSeries ISeries (Float Float -> Float) -> NSeries))
+(define (bop/ns/is ns1 ns2 bop)
+  (define v1 (NSeries-data ns1))
+  (define v2 (ISeries-data ns2))
+  (define: len : Index (flvector-length v1))
+  
+  (unless (eqv? len (vector-length v2))
+	  (error 'bop/ns "Series must be of equal length."))
+  
+  (define: v-bop : FlVector (make-flvector len))
+
+  (do: : NSeries ([idx : Fixnum 0 (unsafe-fx+ idx 1)])
+       ((= idx len) (NSeries #f v-bop))
+       (flvector-set! v-bop idx (bop (flvector-ref v1 idx)
+				 (exact->inexact (vector-ref v2 idx))))))
+
+; caller functions
+(: +/ns/is (NSeries ISeries -> NSeries))
+(define (+/ns/is ns is)
+  (bop/ns/is ns is fl+))
+
+(: -/ns/is (NSeries ISeries -> NSeries))
+(define (-/ns/is ns is)
+  (bop/ns/is ns is fl-))
+
+(: */ns/is (NSeries ISeries -> NSeries))
+(define (*/ns/is ns is)
+  (bop/ns/is ns is fl*))
+
+(: //ns/is (NSeries ISeries -> NSeries))
+(define (//ns/is ns is)
+  (bop/ns/is ns is fl/))
+
+; tests
+(NSeries-data (+/ns/is (NSeries #f (flvector 1.5 2.5 3.5 4.5 5.5)) (ISeries #f (vector 2 2 2 2 2))))
+
+(NSeries-data (-/ns/is (NSeries #f (flvector 1.5 2.5 3.5 4.5 5.5)) (ISeries #f (vector 2 2 2 2 2))))
+
+(NSeries-data (*/ns/is (NSeries #f (flvector 1.5 2.5 3.5 4.5 5.5)) (ISeries #f (vector 2 2 2 2 2))))
+
+(NSeries-data (//ns/is (NSeries #f (flvector 1.5 2.5 3.5 4.5 5.5)) (ISeries #f (vector 2 2 2 2 2))))
+
+; ***********************************************************
+
+; ***********************************************************
+
+;; Binary ISeries NSeries Ops
+
+(: bop/is/ns (ISeries NSeries (Float Float -> Float) -> NSeries))
+(define (bop/is/ns ns1 ns2 bop)
+  (define v1 (ISeries-data ns1))
+  (define v2 (NSeries-data ns2))
+
+  (define: len : Index (vector-length v1))
+  
+  (unless (eqv? len (flvector-length v2))
+	  (error 'bop/ns "Series must be of equal length."))
+  
+  (define: v-bop : FlVector (make-flvector len))
+
+  (do: : NSeries ([idx : Fixnum 0 (unsafe-fx+ idx 1)])
+       ((= idx len) (NSeries #f v-bop))
+       (flvector-set! v-bop idx (bop (exact->inexact (vector-ref v1 idx))
+				 (flvector-ref v2 idx)))))
+
+; caller functions
+(: +/is/ns (ISeries NSeries -> NSeries))
+(define (+/is/ns is ns)
+  (bop/is/ns is ns fl+))
+
+(: -/is/ns (ISeries NSeries -> NSeries))
+(define (-/is/ns is ns)
+  (bop/is/ns is ns fl-))
+
+(: */is/ns (ISeries NSeries -> NSeries))
+(define (*/is/ns is ns)
+  (bop/is/ns is ns fl*))
+
+(: //is/ns (ISeries NSeries -> NSeries))
+(define (//is/ns is ns)
+  (bop/is/ns is ns fl/))
+
+; tests
+(NSeries-data (+/is/ns (ISeries #f (vector 2 2 2 2 2)) (NSeries #f (flvector 1.5 2.5 3.5 4.5 5.5))))
+
+(NSeries-data (-/is/ns (ISeries #f (vector 2 2 2 2 2)) (NSeries #f (flvector 1.5 2.5 3.5 4.5 5.5))))
+
+(NSeries-data (*/is/ns (ISeries #f (vector 2 2 2 2 2)) (NSeries #f (flvector 1.5 2.5 3.5 4.5 5.5))))
+
+(NSeries-data (//is/ns (ISeries #f (vector 2 2 2 2 2)) (NSeries #f (flvector 1.5 2.5 3.5 4.5 5.5))))
 
 ; ***********************************************************
 
@@ -292,6 +419,219 @@
 (: /./ns (NSeries Float -> NSeries))
 (define (/./ns ns fl)
   (bop./ns fl ns fl/))
+
+; ***********************************************************
+
+; ***********************************************************
+;; Binary NSeries comp
+
+; This function consumes 2 integer series and a function which
+; consumes 2 Fixnum's and produces a Boolean result for comparison.
+; This function is applied to each value in the 2 series at the same
+; index resulting in a new boolean point and at the end of the loop
+; a new data vector. This data vector is the data of the new ISeries
+; which is returned.
+(: comp/ns (NSeries NSeries (Float Float -> Boolean) -> BSeries))
+(define (comp/ns ns1 ns2 comp)
+  (define v1 (NSeries-data ns1))
+  (define v2 (NSeries-data ns2))
+  (define: len : Index (flvector-length v1))
+  
+  (unless (eqv? len (flvector-length v2))
+	  (error 'comp/ns "Series must be of equal length."))
+  
+  (define: v-comp : (Vectorof Boolean) (make-vector len #f))
+
+  ; Do loop returns ISeries, idx to 0 and increments by 1 Fixnum on
+  ; each iteration (this is the step-exprs). When the loop has gone
+  ; through the whole vector, the resulting new ISeries is returned
+  ; which the v-bop as the data.
+  (do: : BSeries ([idx : Fixnum 0 (unsafe-fx+ idx #{1 : Fixnum})])
+       ((= idx len) (BSeries #f v-comp))
+       (vector-set! v-comp idx (comp (flvector-ref v1 idx)
+				   (flvector-ref v2 idx)))))
+
+; ***********************************************************
+
+; ***********************************************************
+; These functions apply various comparison operators using
+; unsafe-fx and the bop./is function defined above.
+
+(: >/ns (NSeries NSeries -> BSeries))
+(define (>/ns ns1 ns2)
+  (comp/ns ns1 ns2 unsafe-fl>))
+
+(: </ns (NSeries NSeries -> BSeries))
+(define (</ns ns1 ns2)
+  (comp/ns ns1 ns2 unsafe-fl<))
+
+(: >=/ns (NSeries NSeries -> BSeries))
+(define (>=/ns ns1 ns2)
+  (comp/ns ns1 ns2 unsafe-fl>=))
+
+(: <=/ns (NSeries NSeries -> BSeries))
+(define (<=/ns ns1 ns2)
+  (comp/ns ns1 ns2 unsafe-fl<=))
+
+(: =/ns (NSeries NSeries -> BSeries))
+(define (=/ns ns1 ns2)
+  (comp/ns ns1 ns2 unsafe-fl=))
+
+(: !=/ns (NSeries NSeries -> BSeries))
+(define (!=/ns ns1 ns2)
+  (comp/ns ns1 ns2 (lambda ([a : Float] [b : Float]) (not (unsafe-fl= a b)))))
+
+; ***********************************************************
+
+
+; ***********************************************************
+;; Binary NSeries comp
+
+; This function consumes 2 integer series and a function which
+; consumes 2 Fixnum's and produces a Boolean result for comparison.
+; This function is applied to each value in the 2 series at the same
+; index resulting in a new boolean point and at the end of the loop
+; a new data vector. This data vector is the data of the new ISeries
+; which is returned.
+(: comp/ns/is (NSeries ISeries (Float Float -> Boolean) -> BSeries))
+(define (comp/ns/is ns is comp)
+  (define v1 (NSeries-data ns))
+  (define v2 (ISeries-data is))
+  (define: len : Index (flvector-length v1))
+  
+  (unless (eqv? len (vector-length v2))
+	  (error 'comp/ns/is "Series must be of equal length."))
+  
+  (define: v-comp : (Vectorof Boolean) (make-vector len #f))
+
+  ; Do loop returns ISeries, idx to 0 and increments by 1 Fixnum on
+  ; each iteration (this is the step-exprs). When the loop has gone
+  ; through the whole vector, the resulting new ISeries is returned
+  ; which the v-bop as the data.
+  (do: : BSeries ([idx : Fixnum 0 (unsafe-fx+ idx #{1 : Fixnum})])
+       ((= idx len) (BSeries #f v-comp))
+       (vector-set! v-comp idx (comp (flvector-ref v1 idx)
+				   (exact->inexact (vector-ref v2 idx))))))
+
+; ***********************************************************
+
+; ***********************************************************
+; These functions apply various comparison operators using
+; unsafe-fx and the bop./is function defined above.
+
+(: >/ns/is (NSeries ISeries -> BSeries))
+(define (>/ns/is ns is)
+  (comp/ns/is ns is unsafe-fl>))
+
+(: </ns/is (NSeries ISeries -> BSeries))
+(define (</ns/is ns is)
+  (comp/ns/is ns is unsafe-fl<))
+
+(: >=/ns/is (NSeries ISeries -> BSeries))
+(define (>=/ns/is ns is)
+  (comp/ns/is ns is unsafe-fl>=))
+
+(: <=/ns/is (NSeries ISeries -> BSeries))
+(define (<=/ns/is ns is)
+  (comp/ns/is ns is unsafe-fl<=))
+
+(: =/ns/is (NSeries ISeries -> BSeries))
+(define (=/ns/is ns is)
+  (comp/ns/is ns is unsafe-fl=))
+
+(: !=/ns/is (NSeries ISeries -> BSeries))
+(define (!=/ns/is ns is)
+  (comp/ns/is ns is (lambda ([a : Float] [b : Float]) (not (unsafe-fl= a b)))))
+
+(BSeries-data (>/ns/is (NSeries #f (flvector 1.5 2.5 3.5 4.5 5.5)) (ISeries #f (vector 2 2 2 2 2))))
+
+(BSeries-data (</ns/is (NSeries #f (flvector 1.5 2.5 3.5 4.5 5.5)) (ISeries #f (vector 2 2 2 2 2))))
+
+(BSeries-data (>=/ns/is (NSeries #f (flvector 1.5 2.5 3.5 4.5 5.5)) (ISeries #f (vector 2 2 2 2 2))))
+
+(BSeries-data (<=/ns/is (NSeries #f (flvector 1.5 2.5 3.5 4.5 5.5)) (ISeries #f (vector 2 2 2 2 2))))
+
+(BSeries-data (=/ns/is (NSeries #f (flvector 1.5 2.5 3.5 4.5 5.5)) (ISeries #f (vector 2 2 2 2 2))))
+
+(BSeries-data (=/ns/is (NSeries #f (flvector 2.0 2.0 2.0 2.0 2.0)) (ISeries #f (vector 2 2 2 2 2))))
+
+(BSeries-data (!=/ns/is (NSeries #f (flvector 1.5 2.5 3.5 4.5 5.5)) (ISeries #f (vector 2 2 2 2 2)) ))
+
+; ***********************************************************
+
+; ***********************************************************
+;; Binary NSeries comp
+
+; This function consumes 2 integer series and a function which
+; consumes 2 Fixnum's and produces a Boolean result for comparison.
+; This function is applied to each value in the 2 series at the same
+; index resulting in a new boolean point and at the end of the loop
+; a new data vector. This data vector is the data of the new ISeries
+; which is returned.
+(: comp/is/ns (ISeries NSeries (Float Float -> Boolean) -> BSeries))
+(define (comp/is/ns is ns comp)
+  (define v1 (ISeries-data is))
+  (define v2 (NSeries-data ns))
+  (define: len : Index (vector-length v1))
+  
+  (unless (eqv? len (flvector-length v2))
+	  (error 'comp/is/ns "Series must be of equal length."))
+  
+  (define: v-comp : (Vectorof Boolean) (make-vector len #f))
+
+  ; Do loop returns ISeries, idx to 0 and increments by 1 Fixnum on
+  ; each iteration (this is the step-exprs). When the loop has gone
+  ; through the whole vector, the resulting new ISeries is returned
+  ; which the v-bop as the data.
+  (do: : BSeries ([idx : Fixnum 0 (unsafe-fx+ idx #{1 : Fixnum})])
+       ((= idx len) (BSeries #f v-comp))
+       (vector-set! v-comp idx (comp (exact->inexact (vector-ref v1 idx))
+				   (flvector-ref v2 idx)))))
+
+; ***********************************************************
+
+; ***********************************************************
+; These functions apply various comparison operators using
+; unsafe-fx and the bop./is function defined above.
+
+(: >/is/ns (ISeries NSeries -> BSeries))
+(define (>/is/ns is ns)
+  (comp/is/ns is ns unsafe-fl>))
+
+(: </is/ns (ISeries NSeries -> BSeries))
+(define (</is/ns is ns)
+  (comp/is/ns is ns unsafe-fl<))
+
+(: >=/is/ns (ISeries NSeries -> BSeries))
+(define (>=/is/ns is ns)
+  (comp/is/ns is ns unsafe-fl>=))
+
+(: <=/is/ns (ISeries NSeries -> BSeries))
+(define (<=/is/ns is ns)
+  (comp/is/ns is ns unsafe-fl<=))
+
+(: =/is/ns (ISeries NSeries -> BSeries))
+(define (=/is/ns is ns)
+  (comp/is/ns is ns unsafe-fl=))
+
+(: !=/is/ns (ISeries NSeries -> BSeries))
+(define (!=/is/ns is ns)
+  (comp/is/ns is ns (lambda ([a : Float] [b : Float]) (not (unsafe-fl= a b)))))
+
+; tests
+(BSeries-data (>/is/ns (ISeries #f (vector 2 2 2 2 2)) (NSeries #f (flvector 1.5 2.5 3.5 4.5 5.5))))
+
+(BSeries-data (</is/ns (ISeries #f (vector 2 2 2 2 2)) (NSeries #f (flvector 1.5 2.5 3.5 4.5 5.5))))
+
+(BSeries-data (>=/is/ns (ISeries #f (vector 2 2 2 2 2)) (NSeries #f (flvector 1.5 2.5 3.5 4.5 5.5))))
+
+(BSeries-data (<=/is/ns (ISeries #f (vector 2 2 2 2 2)) (NSeries #f (flvector 1.5 2.5 3.5 4.5 5.5))))
+
+(BSeries-data (=/is/ns (ISeries #f (vector 2 2 2 2 2)) (NSeries #f (flvector 1.5 2.5 3.5 4.5 5.5))))
+
+(BSeries-data (=/is/ns (ISeries #f (vector 2 2 2 2 2)) (NSeries #f (flvector 2.0 2.0 2.0 2.0 2.0))))
+
+(BSeries-data (!=/is/ns (ISeries #f (vector 2 2 2 2 2)) (NSeries #f (flvector 1.5 2.5 3.5 4.5 5.5))))
 
 ; ***********************************************************
 

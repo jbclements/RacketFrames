@@ -67,8 +67,8 @@
  [<=/is/ns (ISeries NSeries -> BSeries)]
  [=/is/ns (ISeries NSeries -> BSeries)]
  [!=/is/ns (ISeries NSeries -> BSeries)]
- [apply-agg (Symbol NSeries -> Real)]
- [apply-stat (Symbol NSeries -> Real)]
+ [apply-agg-numeric (Symbol NSeries -> Real)]
+ [apply-stat-numeric (Symbol NSeries -> Real)]
  [flvector->list (FlVector Fixnum -> (Listof Float))]
  [list->flvector ((Listof Float) -> FlVector)])
 
@@ -640,8 +640,8 @@
 
 ; Applies the aggregate function specificed by function-name to the values in
 ; the column-name column. Currently supports 3: sum, avg, count.
-(: apply-agg (Symbol NSeries -> Real))
-(define (apply-agg function-name series)
+(: apply-agg-numeric (Symbol NSeries -> Real))
+(define (apply-agg-numeric function-name series)
   (cond 
     [(eq? function-name 'sum) (apply + (flvector->list (NSeries-data series) 0))]
     [(eq? function-name 'mean) (mean (flvector->list (NSeries-data series) 0))]
@@ -649,20 +649,20 @@
     [(eq? function-name 'count) (nseries-length series)]
     ;[(eq? function-name 'min) (flvector-argmin (lambda (x) x) (ISeries-data series))]
     ;[(eq? function-name 'max) (flvector-argmax (lambda (x) x) (ISeries-data series))]
-    [else (error 'apply-agg "Unknown aggregate function.")]))
+    [else (error 'apply-agg-numeric "Unknown aggregate function.")]))
 
 ; ***********************************************************
 
 ; ***********************************************************
 ;; NSeries stat ops
 
-(: apply-stat (Symbol NSeries -> Real))
-(define (apply-stat function-name series)
+(: apply-stat-numeric (Symbol NSeries -> Real))
+(define (apply-stat-numeric function-name series)
   (cond 
     [(eq? function-name 'variance) (variance (flvector->list (NSeries-data series) 0))]
     [(eq? function-name 'stddev) (stddev (flvector->list (NSeries-data series) 0))]
     [(eq? function-name 'skewness) (skewness (flvector->list (NSeries-data series) 0))]
-    [else (error 'apply-stat "Unknown stat function.")]))
+    [else (error 'apply-stat-numeric "Unknown stat function.")]))
 
 ; ***********************************************************
 
@@ -726,15 +726,15 @@
               (flvector 2.5 3.4 4.6 5.1))
 
 ; agg tests
-(check-equal? (apply-agg 'sum series-float) 11.6)
+(check-equal? (apply-agg-numeric 'sum series-float) 11.6)
 
-(check-equal? (apply-agg 'mean series-float) 2.9)
+(check-equal? (apply-agg-numeric 'mean series-float) 2.9)
 
-(check-equal? (apply-agg 'count series-float) 4)
+(check-equal? (apply-agg-numeric 'count series-float) 4)
 
 ; statistics tests
-(check-equal? (apply-stat 'variance series-float) 1.035)
+(check-equal? (apply-stat-numeric 'variance series-float) 1.035)
 
-(check-equal? (apply-stat 'stddev series-float) 1.0173494974687902)
+(check-equal? (apply-stat-numeric 'stddev series-float) 1.0173494974687902)
 
-(check-equal? (apply-stat 'skewness series-float) -0.18946647505895)
+(check-equal? (apply-stat-numeric 'skewness series-float) -0.18946647505895)

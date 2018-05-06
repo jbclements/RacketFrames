@@ -38,7 +38,7 @@
  LabelIndex LabelIndex-index
  (struct-out GSeries)
  new-GSeries 
- series-ref series-iref
+ series-ref gseries-iref
  map/GSeries 
  build-index-from-labels label-index label->idx)
 ; ***********************************************************
@@ -139,15 +139,15 @@
 ; ***********************************************************
 ; This function consumes a series and an index and returns
 ; the value at that index in the series.
-(: series-iref (All (A) (GSeries A) Index -> (U Float A)))
-(define (series-iref series idx)
+(: gseries-iref (All (A) (GSeries A) Index -> (U Float A)))
+(define (gseries-iref series idx)
   (vector-ref (GSeries-data series) idx))
 
 ; This function consumes a series and a Label and returns
 ; the value at that Label in the series.
 (: series-ref (All (A) (GSeries A) Label -> (U A Float)))
 (define (series-ref series label)
-  (series-iref series (label->idx series label)))
+  (gseries-iref series (label->idx series label)))
 
 ; This function consumes a series and returns the length
 ; of that series.
@@ -241,13 +241,13 @@
 (define g-series-symbol (new-GSeries (vector 'e 'f 'g 'h) (list 'a 'b 'c 'd)))
 
 ; integer series ref by index
-(check-equal? (series-iref g-series-integer 2) 3)
+(check-equal? (gseries-iref g-series-integer 2) 3)
 
 ; integer series ref by label
 (check-equal? (series-ref g-series-integer 'd) 4)
 
 ; symbol series ref by index
-(check-equal? (series-iref g-series-symbol 2) 'g)
+(check-equal? (gseries-iref g-series-symbol 2) 'g)
 
 ; symbol series ref by label
 (check-equal? (series-ref g-series-symbol 'd) 'h)
@@ -262,7 +262,7 @@
 (define g-series-struct (new-GSeries (vector (LabelIndex #f) (LabelIndex #f)) (build-index-from-labels (list 'a 'b))))
 
 ; struct series ref by index
-(check-equal? (LabelIndex-index (assert (series-iref g-series-struct 1) LabelIndex?)) (LabelIndex-index (LabelIndex #f)))
+(check-equal? (LabelIndex-index (assert (gseries-iref g-series-struct 1) LabelIndex?)) (LabelIndex-index (LabelIndex #f)))
 
 ; integer series ref by label
 ; checks labeling function which converts labels hash to list

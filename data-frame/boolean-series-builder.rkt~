@@ -1,35 +1,34 @@
 #lang typed/racket
 
 (provide
- (struct-out ISeriesBuilder))
+ (struct-out BSeriesBuilder))
 
 (provide:
- [new-ISeriesBuilder (case-> 
-		      (-> ISeriesBuilder)
-		      (Index -> ISeriesBuilder))]
- [append-ISeriesBuilder   (ISeriesBuilder (U Fixnum String) -> Void)]
- [complete-ISeriesBuilder (ISeriesBuilder -> ISeries)])
+ [new-BSeriesBuilder (case-> 
+		      (-> BSeriesBuilder)
+		      (Index -> BSeriesBuilder))]
+ [append-BSeriesBuilder   (BSeriesBuilder Boolean -> Void)]
+ [complete-BSeriesBuilder (BSeriesBuilder -> BSeries)])
 
 (require
- racket/fixnum
  (only-in racket/vector
 	  vector-copy)
- (only-in "integer-series.rkt"
-          ISeries))
+ (only-in "boolean-series.rkt"
+          BSeries))
 
-(struct: ISeriesBuilder ([index  : Index]
-			 [data : (Vectorof Fixnum)]) #:mutable)
+(struct: BSeriesBuilder ([index  : Index]
+			 [data : (Vectorof Boolean)]) #:mutable)
 
 (define base-len 512)
 
-(: new-ISeriesBuilder (case-> 
-		       (-> ISeriesBuilder)
-		       (Index -> ISeriesBuilder)))
-(define (new-ISeriesBuilder [len base-len])
-  (ISeriesBuilder 0 (make-vector len 0)))
+(: new-BSeriesBuilder (case-> 
+		       (-> BSeriesBuilder)
+		       (Index -> BSeriesBuilder)))
+(define (new-BSeriesBuilder [len base-len])
+  (BSeriesBuilder 0 (make-vector len #f)))
 
-(: append-ISeriesBuilder (ISeriesBuilder (U Fixnum String) -> Void))
-(define (append-ISeriesBuilder builder int/str-value)
+(: append-BSeriesBuilder (BSeriesBuilder Boolean -> Void))
+(define (append-BSeriesBuilder builder bool-value)
   
   (define-syntax bump
     (syntax-rules ()
@@ -37,35 +36,32 @@
        (assert (add1 x) index?)]))
   
   (define (bump-index)
-    (let ((idx (ISeriesBuilder-index builder)))
-      (set-ISeriesBuilder-index! builder (bump idx))
+    (let ((idx (BSeriesBuilder-index builder)))
+      (set-BSeriesBuilder-index! builder (bump idx))
       idx))
   
   (: extend-data (-> Void))
   (define (extend-data)
-    (let* ((data (ISeriesBuilder-data builder))
+    (let* ((data (BSeriesBuilder-data builder))
 	   (curr-len (vector-length data))
 	   (new-len  (assert (inexact->exact (round (* 1.5 curr-len))) exact-integer?)))
-      (let: ((new-data : (Vectorof Fixnum) ((inst make-vector Fixnum) new-len 0)))
+      (let: ((new-data : (Vectorof Boolean) ((inst make-vector Boolean) new-len #f)))
 	    (do ([idx 0 (add1 idx)])
-		([>= idx curr-len] (set-ISeriesBuilder-data! builder new-data))
+		([>= idx curr-len] (set-BSeriesBuilder-data! builder new-data))
 	      (vector-set! new-data idx (vector-ref data idx))))))
   
-  (if (< (ISeriesBuilder-index builder)         
-         (vector-length (ISeriesBuilder-data builder)))
-      (let ((num (if (string? int/str-value)
-		     (let ((num (string->number int/str-value)))
-		       (if num (assert num fixnum?) 0))
-		     int/str-value)))
-        (vector-set! (ISeriesBuilder-data builder)
+  (if (< (BSeriesBuilder-index builder)         
+         (vector-length (BSeriesBuilder-data builder)))
+      
+        (vector-set! (BSeriesBuilder-data builder)
 		     (bump-index)
-		     num))
+		     bool-value)
       (begin
         (extend-data)       
-        (append-ISeriesBuilder builder int/str-value))))
+        (append-BSeriesBuilder builder bool-value))))
 
-(: complete-ISeriesBuilder (ISeriesBuilder -> ISeries))
-(define (complete-ISeriesBuilder builder)  
-  (let* ((data (ISeriesBuilder-data builder))
-         (len (ISeriesBuilder-index builder)))
-    (ISeries #f (vector-copy data 0 len))))
+(: complete-BSeriesBuilder (BSeriesBuilder -> BSeries))
+(define (complete-BSeriesBuilder builder)  
+  (let* ((data (BSeriesBuilder-data builder))
+         (len (BSeriesBuilder-index builder)))
+    (BSeries #f (vector-copy data 0 len))))

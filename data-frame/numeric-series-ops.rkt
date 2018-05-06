@@ -132,4 +132,4 @@
 (check-equal? (nseries-data (nseries-abs series-float-negatives))
               (flvector 5.0 5.0 5.0 5.0 5.0))
 
-(bseries-data (nseries-isna series-float))
+;(bseries-data (nseries-isna series-float))

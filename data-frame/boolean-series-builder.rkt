@@ -7,7 +7,7 @@
  [new-BSeriesBuilder (case-> 
 		      (-> BSeriesBuilder)
 		      (Index -> BSeriesBuilder))]
- [append-BSeriesBuilder   (BSeriesBuilder Boolean -> Void)]
+ [append-BSeriesBuilder   (BSeriesBuilder (U Boolean String) -> Void)]
  [complete-BSeriesBuilder (BSeriesBuilder -> BSeries)])
 
 (require
@@ -27,8 +27,18 @@
 (define (new-BSeriesBuilder [len base-len])
   (BSeriesBuilder 0 (make-vector len #f)))
 
-(: append-BSeriesBuilder (BSeriesBuilder Boolean -> Void))
-(define (append-BSeriesBuilder builder bool-value)
+; Handle case insensitive boolean values.
+(: string->boolean (String -> Boolean))
+(define (string->boolean str)
+  (cond
+    [(string-ci=? str "#t") #t]
+    [(string-ci=? str "true") #t]
+    [(string-ci=? str "#f") #f]
+    [(string-ci=? str "false") #f]
+    [else #f]))
+
+(: append-BSeriesBuilder (BSeriesBuilder (U Boolean String) -> Void))
+(define (append-BSeriesBuilder builder bool/str-value)
   
   (define-syntax bump
     (syntax-rules ()
@@ -52,13 +62,18 @@
   
   (if (< (BSeriesBuilder-index builder)         
          (vector-length (BSeriesBuilder-data builder)))
+
+      (let ((bool (if (string? bool/str-value)
+                      (let ((bool (string->boolean bool/str-value)))
+                        (if bool bool #f))
+                      bool/str-value)))
       
         (vector-set! (BSeriesBuilder-data builder)
 		     (bump-index)
-		     bool-value)
+		     bool))
       (begin
         (extend-data)       
-        (append-BSeriesBuilder builder bool-value))))
+        (append-BSeriesBuilder builder bool/str-value))))
 
 (: complete-BSeriesBuilder (BSeriesBuilder -> BSeries))
 (define (complete-BSeriesBuilder builder)  

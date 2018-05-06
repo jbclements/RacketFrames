@@ -2,8 +2,8 @@
 
 (provide:
  [determine-schema (FilePath Integer -> Schema)]
- [load-csv-file (FilePath [#:schema (Option Schema)] -> Frame)]
- [load-tab-delimited-file (FilePath [#:schema (Option Schema)] -> Frame)])
+ [load-csv-file (FilePath [#:schema (Option Schema)] -> DataFrame)]
+ [load-tab-delimited-file (FilePath [#:schema (Option Schema)] -> DataFrame)])
 
 (require
  racket/match
@@ -15,29 +15,29 @@
 	  generate-anon-series-names
 	  Schema SeriesTypes Schema-has-headers
 	  Schema-SeriesTypes Schema-headers)
- (only-in "../frame/series-builder.rkt"
+ (only-in "../data-frame/series-builder.rkt"
 	  SeriesBuilder)
- (only-in "../frame/integer-series-builder.rkt"
+ (only-in "../data-frame/integer-series-builder.rkt"
 	  new-ISeriesBuilder
 	  ISeriesBuilder
 	  ISeriesBuilder?
 	  complete-ISeriesBuilder)
- (only-in "../frame/numeric-series-builder.rkt"
+ (only-in "../data-frame/numeric-series-builder.rkt"
 	  new-NSeriesBuilder
 	  NSeriesBuilder
 	  NSeriesBuilder?
 	  complete-NSeriesBuilder)
- (only-in "../frame/categorical-series-builder.rkt"
+ (only-in "../data-frame/categorical-series-builder.rkt"
 	  new-CSeriesBuilder
 	  CSeriesBuilder
 	  CSeriesBuilder?
 	  complete-CSeriesBuilder
 	  append-CSeriesBuilder)
- (only-in "../frame/series-description.rkt"
+ (only-in "../data-frame/series-description.rkt"
 	  Series)
- (only-in "../frame/frame.rkt"
-	  Frame
-	  new-frame)
+ (only-in "../data-frame/data-frame.rkt"
+	  DataFrame
+	  new-data-frame)
  "frame-builder.rkt"
  (only-in "delimited-common.rkt"
 	  sample-formatted-file
@@ -83,27 +83,27 @@
 (define (anon-headers cnt)
   (map string->symbol (generate-anon-series-names cnt)))
 
-(: make-frame (Schema FrameBuilder -> Frame))
+(: make-frame (Schema FrameBuilder -> DataFrame))
 (define (make-frame schema builder)
   (let ((cols (complete-SeriesBuilders builder)))
     (let ((headers (if (Schema-has-headers schema)
 		       (Schema-headers schema)
 		       (anon-headers (length cols)))))
-      (new-frame ((inst zip Symbol Series) headers cols)))))
+      (new-data-frame ((inst zip Symbol Series) headers cols)))))
 
 (: schema-if-needed ((Option Schema) FilePath -> Schema))
 (define (schema-if-needed schema fpath)
   (define SAMPLE-SIZE 20)
   (if schema schema (determine-schema fpath SAMPLE-SIZE)))
 
-(: load-csv-file (FilePath [#:schema (Option Schema)] -> Frame))
+(: load-csv-file (FilePath [#:schema (Option Schema)] -> DataFrame))
 (define (load-csv-file fpath #:schema [schema #f])
   (let ((schema (schema-if-needed schema fpath)))
     (make-frame schema (read-csv-file fpath
 				      (Schema-has-headers schema)
 				      (new-FrameBuilder-from-Schema schema)))))
 
-(: load-tab-delimited-file (FilePath [#:schema (Option Schema)] -> Frame))
+(: load-tab-delimited-file (FilePath [#:schema (Option Schema)] -> DataFrame))
 (define (load-tab-delimited-file fpath #:schema [schema #f])
   (let ((schema (schema-if-needed schema fpath)))
     (make-frame schema (read-tab-delimited-file fpath

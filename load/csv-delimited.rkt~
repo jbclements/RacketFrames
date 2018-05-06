@@ -4,7 +4,7 @@
  parse-csv-line)
 
 (provide:
- [read-csv-file (FilePath Boolean DataFrameBuilder -> DataFrameBuilder)])
+ [read-csv-file (FilePath Boolean FrameBuilder -> FrameBuilder)])
 
 (require
  (only-in grip/system/filepath
@@ -12,29 +12,24 @@
  (only-in "types.rkt"
 	  LineParser)
  (only-in "delimited-common.rkt"
-	  data-frame-builder-tank
+	  frame-builder-tank
 	  read-formatted-file)
- (only-in "data-frame-builder.rkt"
-	  DataFrameBuilder))
+ (only-in "frame-builder.rkt"
+	  FrameBuilder))
 
-; Self-Explanatory.
 (: double-quote? (Char -> Boolean))
 (define (double-quote? ch)
   (char=? #\" ch))
 
-; Self-Explanatory.
 (: comma-delimiter? (Char -> Boolean))
 (define (comma-delimiter? ch)
   (char=? #\, ch))
 
-; Self-Explanatory.
 (: whitespace? (Char -> Boolean))
 (define (whitespace? ch)
   (or (char=? ch #\space)
       (char=? ch #\tab)))
 
-; This function consumes comma-delimiters else it just
-; ignores and returns false.
 (: consume-delimiter (Input-Port -> Boolean))
 (define (consume-delimiter inp)
   (let ((ch (peek-char inp)))
@@ -46,9 +41,6 @@
 	    #f)
 	#f)))
 
-; This function consumes an Input-Port and consumes all
-; whitespace using a loop. If the character is not whitespace
-; then void is returned.
 (: maybe-consume-whitespace (Input-Port -> Void))
 (define (maybe-consume-whitespace inp)
   (let loop ((ch (peek-char inp)))
@@ -60,27 +52,6 @@
 	      (loop (peek-char inp)))
 	    (void)))))
 
-(: trim-right (String -> String))
-(define (trim-right s)
-  (let ((idx (string-length s)))
-    ;; No white space on right side of string, so just return string
-    (if (and (> idx 0)
-	     (not (whitespace? (string-ref s (sub1 idx))))) ;; fast path
-	s
-        ;; In loop keep looping as long as idx from end of string contains
-        ;; whitespace. Once it doesn't just return substring, which will
-        ;; be string with white space to the right trimmed off.
-	(let loop ((idx idx))
-	  (if (zero? idx)
-	      s
-	      (if (whitespace? (string-ref s (sub1 idx)))
-		  (loop (sub1 idx))
-		  (substring s 0 idx)))))))
-
-(displayln "trim-right")
-(trim-right "hello world      ")
-
-; This function consumes an Input-Port and Output-Port and 
 (: read-quoted-field (Input-Port Output-Port -> String))
 (define (read-quoted-field inp outp)
   (read-char inp) ;; toss opening quote
@@ -101,10 +72,18 @@
 		  (display ch outp)
 		  (loop (read-char inp)))))))
 
-(displayln "read-quoted-field")
-(read-quoted-field (open-input-string "\"hello world\"") (open-output-string))
-; input must have an opening quote, else the first character gets shaved off
-(read-quoted-field (open-input-string "hello world") (open-output-string))
+(: trim-right (String -> String))
+(define (trim-right s)
+  (let ((idx (string-length s)))
+    (if (and (> idx 0)
+	     (not (whitespace? (string-ref s (sub1 idx))))) ;; fast path
+	s
+	(let loop ((idx idx))
+	  (if (zero? idx)
+	      s
+	      (if (whitespace? (string-ref s (sub1 idx)))
+		  (loop (sub1 idx))
+		  (substring s 0 idx)))))))
 
 (: read-unquoted-field (Input-Port Output-Port -> String))
 (define (read-unquoted-field inp outp)
@@ -118,9 +97,6 @@
 		  (read-char inp)
 		  (loop (peek-char inp)))))))
 
-(displayln "read-unquoted-field")
-(read-unquoted-field (open-input-string "hello world  ") (open-output-string))
-
 (: read-field (Input-Port -> String))
 (define (read-field inp)
   (define outp (open-output-string))
@@ -132,12 +108,6 @@
       (read-quoted-field inp outp))
      (else (read-unquoted-field inp outp)))))
 
-(read-field (open-input-string "hello world  "))
-(read-field (open-input-string "\"hello world  \""))
-(read-field (open-input-string "   hello world  "))
-
-; This is the LineParser function, consume a String and
-; returns a Listof String.
 (: parse-csv-line LineParser)
 (define (parse-csv-line line)
   (let ((inp (open-input-string line)))
@@ -148,7 +118,7 @@
 	  (loop (cons (read-field inp) fields))
 	  (reverse fields)))))
 
-(: read-csv-file (FilePath Boolean DataFrameBuilder -> DataFrameBuilder))
-(define (read-csv-file fpath header? data-frame-builder)
+(: read-csv-file (FilePath Boolean FrameBuilder -> FrameBuilder))
+(define (read-csv-file fpath header? frame-builder)
   (read-formatted-file fpath header?
-		       (data-frame-builder-tank data-frame-builder parse-csv-line)))
+		       (frame-builder-tank frame-builder parse-csv-line)))

@@ -1,14 +1,10 @@
 # RacketFrames
 
-One Paragraph of project description goes here
+This is RacketFrames. DataFrames from the popular Pandas library implemented in Racket.
 
 ## Getting Started
 
-Remember FizzBuzz (of course you do!), well imagine you have just solved the puzzle (well done!) and you have written the results to a comma-delimited file for further analysis. Now you want to know how many times are the strings Fizz, Buzz, and FizzBuzz printed out.
-
-You could answer this question any number of ways, for example you could modify the original program, or reach for Python/pandas, or even (for the sadistic among us, you know who you are) type out a one-liner at the command prompt (probably including cut, sort, and uniq).
-
-Well, now you have one more option. This option is especially good if you are 1) using Racket already 2) may need to integrate your solution with other Racket applications in the future or 3) just plain love functional programming.
+In this day and age procedural and functional programmers alike are working with large amounts of data. Many analytical libraries have been developed for many domains. Python/pandas, R or even the command prompt can be used to accomplish theses taks, but this option is especially good if you are 1) using Racket already 2) may need to integrate your solution with other Racket applications in the future or 3) just plain love functional programming.
 
 You can answer this question and many others with RacketFrames.
 
@@ -58,27 +54,9 @@ Explain what these tests test and why
 Give an example
 ```
 
-## Deployment
-
-Add additional notes about how to deploy this on a live system
-
-## Built With
-
-* [Dropwizard](http://www.dropwizard.io/1.0.2/docs/) - The web framework used
-* [Maven](https://maven.apache.org/) - Dependency Management
-* [ROME](https://rometools.github.io/rome/) - Used to generate RSS Feeds
-
-## Contributing
-
-Please read [CONTRIBUTING.md](https://gist.github.com/PurpleBooth/b24679402957c63ec426) for details on our code of conduct, and the process for submitting pull requests to us.
-
-## Versioning
-
-We use [SemVer](http://semver.org/) for versioning. For the versions available, see the [tags on this repository](https://github.com/your/project/tags). 
-
 ## Authors
 
-* **Billie Thompson** - *Initial work* - [PurpleBooth](https://github.com/PurpleBooth)
+* **Shubham Kahal**
 
 See also the list of [contributors](https://github.com/your/project/contributors) who participated in this project.
 
@@ -91,4 +69,6 @@ This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md
 * Hat tip to anyone who's code was used
 * Inspiration
 * etc
+
+A huge thank you to https://github.com/RayRacine who's code was used as the starting point of this project. This project aims to add further functionality, test cases and performance benchmarks to this existing library.
 

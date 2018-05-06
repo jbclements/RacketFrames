@@ -19,7 +19,7 @@
 ;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-#lang typed/racket/base
+#lang typed/racket
 
 (provide
  (all-from-out "data-frame/types.rkt")
@@ -29,9 +29,9 @@
  (all-from-out "data-frame/indexed-series.rkt")
  (all-from-out "data-frame/series-description.rkt")
  (all-from-out "data-frame/series-iter.rkt")
- (all-from-out "data-frame/frame.rkt")
- (all-from-out "data-frame/frame-print.rkt")
- (all-from-out "data-frame/frame-join.rkt")
+ (all-from-out "data-frame/data-frame.rkt")
+ (all-from-out "data-frame/data-frame-print.rkt")
+ (all-from-out "data-frame/data-frame-join.rkt")
  (all-from-out "stats/tabulate.rkt")
  (all-from-out "stats/statistics.rkt")
  (all-from-out "data-frame/integer-series.rkt")
@@ -43,11 +43,11 @@
 (require
  (only-in "load/load.rkt"
 	  load-csv-file
-	  load-tab-delimited-file)
+	  load-delimited-file)
  "data-frame/types.rkt"
- "data-frame/frame.rkt"
- "data-frame/frame-print.rkt"
- "data-frame/frame-join.rkt"
+ "data-frame/data-frame.rkt"
+ "data-frame/data-frame-print.rkt"
+ "data-frame/data-frame-join.rkt"
  "data-frame/indexed-series.rkt"
  "data-frame/series-description.rkt"
  "data-frame/integer-series.rkt"
@@ -58,7 +58,7 @@
  (only-in "load/schema-syntax.rkt"
 	  schema)
  "stats/tabulate.rkt"
- ;; "plot/plot.rkt"
+ ;; "plot/plot.rkt" coming soon
  "stats/tabulate.rkt"
  "stats/statistics.rkt"
  (only-in "load/schema.rkt"

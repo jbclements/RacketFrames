@@ -13,15 +13,15 @@
 	  Tank Stream Continue Done
 	  pump/text-input-port
 	  drain head-n)
- (only-in "../frame/series-builder.rkt"
+ (only-in "../data-frame/series-builder.rkt"
 	  SeriesBuilder)
- (only-in "../frame/categorical-series-builder.rkt"
+ (only-in "../data-frame/categorical-series-builder.rkt"
 	  CSeriesBuilder CSeriesBuilder?
 	  append-CSeriesBuilder)
- (only-in "../frame/integer-series-builder.rkt"
+ (only-in "../data-frame/integer-series-builder.rkt"
 	  ISeriesBuilder ISeriesBuilder?
 	  append-ISeriesBuilder)
- (only-in "../frame/numeric-series-builder.rkt"
+ (only-in "../data-frame/numeric-series-builder.rkt"
 	  NSeriesBuilder NSeriesBuilder?
 	  append-NSeriesBuilder)
  (only-in "frame-builder.rkt"	  

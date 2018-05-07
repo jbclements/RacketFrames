@@ -200,16 +200,16 @@
 (define (label-sort-positional lindex #:project [project '()])
 
   (define: projection : (Setof Label) (if (list? project) (list->set project) project))
-
+  
   (let ((labels ((inst sort (Pair Symbol Index) (Pair Symbol Index))
-		 (labeling lindex)
-		 (λ: ((kv1 : (Pair Symbol Index)) 
-		      (kv2 : (Pair Symbol Index)))
-		     (< (cdr kv1) (cdr kv2))))))
+                 (labeling lindex)
+                 (λ: ((kv1 : (Pair Symbol Index)) 
+                      (kv2 : (Pair Symbol Index)))
+                   (< (cdr kv1) (cdr kv2))))))
 
     (if (set-empty? projection)
-	labels
-	(filter (λ: ((label : (Pair Label Index)))
+        labels
+        (filter (λ: ((label : (Pair Label Index)))
 		    (set-member? projection (car label)))
 		labels))))
 ; ***********************************************************

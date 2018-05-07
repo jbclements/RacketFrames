@@ -3,7 +3,7 @@
 ;*    File: data-frame.rkt
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-#lang typed/racket/base
+#lang typed/racket
 (require typed/rackunit)
 
 ; ***********************************************************
@@ -403,7 +403,7 @@
 ; ***********************************************************
 
 ; This functions consumes a DataFrame and either a Column,
-; Listof Column or a DataFrame adn extends the given DataFrame.
+; Listof Column or a DataFrame and extends the given DataFrame.
 ; If a DataFrame is passed for the second argument it is first
 ; exploded and appended on to the exploded given data frame. Then
 ; a new DataFrame is constructed and returned. The other cases
@@ -597,8 +597,8 @@
 (check-equal? (data-frame-names data-frame-mix) (list 'integer-col 'categorical-col))
 
 ; data-frame-explode tests
-(data-frame-explode data-frame-integer)
+;(data-frame-explode data-frame-integer)
 
-(data-frame-description data-frame-integer)
+;(data-frame-description data-frame-integer)
 
-(show-data-frame-description (data-frame-description data-frame-integer))
+;(show-data-frame-description (data-frame-description data-frame-integer))

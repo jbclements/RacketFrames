@@ -13,7 +13,7 @@
 	  FilePath FilePath->string)
  (only-in "schema.rkt"
 	  generate-anon-series-names
-	  Schema SeriesTypes Schema-has-headers
+	  Schema ColumnInfo SeriesTypes Schema-has-headers
 	  Schema-SeriesTypes Schema-headers)
  (only-in "../data-frame/series-builder.rkt"
 	  SeriesBuilder)
@@ -42,7 +42,10 @@
 	  Series)
  (only-in "../data-frame/data-frame.rkt"
 	  DataFrame
-	  new-data-frame)
+	  new-data-frame
+          data-frame-explode)
+ (only-in "../data-frame/data-frame-print.rkt"
+          frame-write-tab)
  "data-frame-builder.rkt"
  (only-in "delimited-common.rkt"
 	  sample-formatted-file
@@ -91,8 +94,8 @@
 (define (anon-headers cnt)
   (map string->symbol (generate-anon-series-names cnt)))
 
-(: make-frame (Schema DataFrameBuilder -> DataFrame))
-(define (make-frame schema builder)
+(: make-data-frame (Schema DataFrameBuilder -> DataFrame))
+(define (make-data-frame schema builder)
   (let ((cols (complete-SeriesBuilders builder)))
     (let ((headers (if (Schema-has-headers schema)
 		       (Schema-headers schema)
@@ -107,14 +110,14 @@
 (: load-csv-file (FilePath [#:schema (Option Schema)] -> DataFrame))
 (define (load-csv-file fpath #:schema [schema #f])
   (let ((schema (schema-if-needed schema fpath)))
-    (make-frame schema (read-csv-file fpath
+    (make-data-frame schema (read-csv-file fpath
 				      (Schema-has-headers schema)
 				      (new-DataFrameBuilder-from-Schema schema)))))
 
 (: load-delimited-file (FilePath String [#:schema (Option Schema)] -> DataFrame))
 (define (load-delimited-file fpath delim #:schema [schema #f])
   (let ((schema (schema-if-needed schema fpath)))
-    (make-frame schema (read-delimited-file fpath
+    (make-data-frame schema (read-delimited-file fpath
                                             (Schema-has-headers schema)
                                             (new-DataFrameBuilder-from-Schema schema)
                                             delim))))
@@ -123,3 +126,13 @@
 (define (determine-schema fpath cnt)
   (check-data-file-exists fpath)
   (determine-schema-from-sample (sample-formatted-file fpath cnt)))
+
+; test cases
+
+;(data-frame-explode fruits-data-frame)
+
+(define fruits-schema (Schema #t (list (ColumnInfo 'name 'CATEGORICAL) (ColumnInfo 'quantity 'CATEGORICAL) (ColumnInfo 'price 'CATEGORICAL))))
+
+(define fruits-data-frame (load-csv-file (FilePath "../data-frame/fruits.csv") #:schema fruits-schema))
+
+(frame-write-tab fruits-data-frame (current-output-port))

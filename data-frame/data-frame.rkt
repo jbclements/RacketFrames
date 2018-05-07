@@ -337,7 +337,7 @@
 ; ***********************************************************
 
 ; This function consumes a DataFrame and an optional LabelProjection
-; which indicates which columns to project and returns a Listof Column
+; which indicates which columns to project and returns a Listof Column.
 ; If no LabelProjection is given, all columns are projected. The
 ; label-sort-positional returns a labeling, which is a (Listof (Pair Label Index)).
 ; This list is looped through and only the items to project are filtered for.

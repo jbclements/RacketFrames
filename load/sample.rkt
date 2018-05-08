@@ -105,7 +105,7 @@
 
   (if (null? lines)
       (Schema #f '())
-      (let ((samples (map (set-delimiter "\t") lines)))
+      (let ((samples (map (set-delimiter ",") lines)))
 	(check-consistent-fields samples)
 	(let ((headers? (guess-if-headers (car samples))))
 	  (let ((headers (if headers?

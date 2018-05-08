@@ -5,10 +5,10 @@
 
 (require
  (only-in "schema.rkt"
-	  Schema ColumnInfo SeriesTypes
+	  Schema ColumnInfo SeriesTypes Schema-headers Schema-SeriesTypes
 	  generate-anon-series-names)
- (only-in "tab-delimited.rkt"
-	 parse-tab-line))
+ (only-in "delimited.rkt"
+	 set-delimiter))
 
 (: canonicalize-to-string-or-num ((Listof String) -> (Listof (U Number String))))
 (define (canonicalize-to-string-or-num strs)
@@ -105,7 +105,7 @@
 
   (if (null? lines)
       (Schema #f '())
-      (let ((samples (map parse-tab-line lines)))
+      (let ((samples (map (set-delimiter "\t") lines)))
 	(check-consistent-fields samples)
 	(let ((headers? (guess-if-headers (car samples))))
 	  (let ((headers (if headers?
@@ -115,3 +115,11 @@
 			  (transpose-rows-to-cols (cdr samples))
 			  (transpose-rows-to-cols samples))))
 	    (Schema headers? (guess-series-meta headers cols)))))))
+
+(define schema-1 (determine-schema-from-sample (list "categorical header" "world" "fizz" "buzz")))
+
+(Schema-headers schema-1)
+
+(Schema-SeriesTypes schema-1)
+
+(transpose-rows-to-cols (list (list "hello" "world") (list "fizz" "buzz")))

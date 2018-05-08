@@ -64,7 +64,7 @@
          (vector-length (BSeriesBuilder-data builder)))
 
       (let ((bool (if (string? bool/str-value)
-                      (let ((bool (string->boolean bool/str-value)))
+                      (let ((bool (string->boolean (string-trim bool/str-value))))
                         (if bool bool #f))
                       bool/str-value)))
       

@@ -88,7 +88,7 @@
       (vector-set! (CSeriesBuilder-data builder)
                    (bump-index)
                    (nominal-ordinal (if (string? nominal)
-					(nominalizer nominal)
+					(nominalizer (string-trim nominal))
 					nominal)))
       (begin
         (extend-data)

@@ -51,7 +51,7 @@
   (if (< (NSeriesBuilder-index builder)         
          (flvector-length (NSeriesBuilder-data builder)))
       (let ((num (if (string? flo/str-value)
-		     (let ((num (string->number flo/str-value)))
+		     (let ((num (string->number  (string-trim flo/str-value))))
 		       (if num (assert (exact->inexact num) flonum?) +nan.0))
 		     flo/str-value)))
         (flvector-set! (NSeriesBuilder-data builder)

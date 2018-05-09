@@ -125,7 +125,7 @@
 (: determine-schema (FilePath Integer -> Schema))
 (define (determine-schema fpath cnt)
   (check-data-file-exists fpath)
-  (determine-schema-from-sample (sample-formatted-file fpath cnt)))
+  (determine-schema-from-sample (sample-formatted-file fpath cnt) ","))
 
 ; test cases
 
@@ -133,6 +133,7 @@
 
 (define fruits-schema (Schema #t (list (ColumnInfo 'name 'CATEGORICAL) (ColumnInfo 'quantity 'CATEGORICAL) (ColumnInfo 'price 'CATEGORICAL))))
 
+; read csv
 (define fruits-data-frame-csv (load-csv-file (FilePath "../data-frame/fruits.csv") #:schema fruits-schema))
 
 (frame-write-tab fruits-data-frame-csv (current-output-port))
@@ -142,6 +143,12 @@
 
 (frame-write-tab fruits-data-frame-csv-no-schema (current-output-port))
 
+; read delimited
 (define fruits-data-frame-delimited (load-delimited-file (FilePath "../data-frame/fruits.csv") "," #:schema fruits-schema))
 
 (frame-write-tab fruits-data-frame-delimited (current-output-port))
+
+; no schema
+(define fruits-data-frame-delimited-no-schema (load-delimited-file (FilePath "../data-frame/fruits.csv") "," #:schema #f))
+
+(frame-write-tab fruits-data-frame-delimited-no-schema (current-output-port))

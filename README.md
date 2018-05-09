@@ -4,13 +4,17 @@ This is RacketFrames. DataFrames from the popular Pandas library implemented in 
 
 ## Getting Started
 
-In this day and age procedural and functional programmers alike are working with large amounts of data. Many analytical libraries have been developed for many domains. Python/pandas, R or even the command prompt can be used to accomplish theses taks, but this option is especially good if you are 1) using Racket already 2) may need to integrate your solution with other Racket applications in the future or 3) just plain love functional programming.
+In this day and age procedural and functional programmers alike are working with large amounts of data. Many analytical libraries have been developed for many domains to work with such data. Python/Pandas, R or even the command prompt can be used to accomplish theses taks, but this option is especially good if you are 1) using Racket already 2) may need to integrate your solution with other Racket applications in the future or 3) just plain love functional programming.
 
-You can answer this question and many others with RacketFrames.
+You can answer this question and many more with RacketFrames.
 
 ### Prerequisites
 
-What things you need to install the software and how to install them
+[Racket Version 6](http://racket-lang.org/download/)
+
+https://github.com/RayRacine/pipe.git
+
+https://github.com/RayRacine/grip.git
 
 ```
 Give examples
@@ -36,7 +40,7 @@ End with an example of getting some data out of the system or using it for a lit
 
 ## Running the tests
 
-Explain how to run the automated tests for this system
+Currently the tests are integrated into the fils themselves. 
 
 ### Break down into end to end tests
 
@@ -58,8 +62,6 @@ Give an example
 
 * **Shubham Kahal**
 
-See also the list of [contributors](https://github.com/your/project/contributors) who participated in this project.
-
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
@@ -70,5 +72,5 @@ This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md
 * Inspiration
 * etc
 
-A huge thank you to https://github.com/RayRacine who's code was used as the starting point of this project. This project aims to add further functionality, test cases and performance benchmarks to this existing library.
+A huge thank you to [Ray Racine](https://github.com/RayRacine) who's repo   was used as the starting point of this project. This project aims to add further functionality, test cases and performance benchmarks to this existing library.
 

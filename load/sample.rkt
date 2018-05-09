@@ -1,7 +1,7 @@
 #lang typed/racket/base
 
 (provide:
- [determine-schema-from-sample ((Listof String) -> Schema)])
+ [determine-schema-from-sample ((Listof String) String -> Schema)])
 
 (require
  (only-in "schema.rkt"
@@ -87,8 +87,8 @@
 		(deep-reverse cols)
 		(loop (cdr rows) (transpose-row-to-col (car rows) cols))))))
 
-(: determine-schema-from-sample ((Listof String) -> Schema))
-(define (determine-schema-from-sample lines)
+(: determine-schema-from-sample ((Listof String) String -> Schema))
+(define (determine-schema-from-sample lines delim)
 
   (: sample-length ((Listof String) -> Integer))
   (define (sample-length sample)
@@ -105,7 +105,7 @@
 
   (if (null? lines)
       (Schema #f '())
-      (let ((samples (map (set-delimiter ",") lines)))
+      (let ((samples (map (set-delimiter delim) lines)))
 	(check-consistent-fields samples)
 	(let ((headers? (guess-if-headers (car samples))))
 	  (let ((headers (if headers?
@@ -116,7 +116,7 @@
 			  (transpose-rows-to-cols samples))))
 	    (Schema headers? (guess-series-meta headers cols)))))))
 
-(define schema-1 (determine-schema-from-sample (list "categorical header" "world" "fizz" "buzz")))
+(define schema-1 (determine-schema-from-sample (list "categorical header" "world" "fizz" "buzz") ","))
 
 (Schema-headers schema-1)
 

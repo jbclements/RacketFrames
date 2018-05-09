@@ -6,86 +6,32 @@
 
 @author["Shubham" "Kahal"]
 
-All of this content is within ``maincolumn'', then ``main''.
+@"\U2192" A DataFrame implementation in the spirit of Pandas or R data frames.
 
-@"\U2192" A data frame implementation in the spirit of Pandas or R data frames.
+@"\U2192" In this day and age procedural and functional programmers alike are working
+with large amounts of data. Many analytical libraries have been developed for many
+domains to work with such data. Python/Pandas, R or even the command prompt can be
+used to accomplish theses tasks, but this option is especially good if you are 1)
+using Racket already 2) may need to integrate your solution with other Racket applications
+in the future or 3) just plain love functional programming.
 
-@"\U2192" Below is a simple motivating example. When working in Java, data operations
-like the following should be easy. The code below retrieves the S&P 500 daily market data
-for 2008 from Yahoo! Finance and returns the average monthly close for the three top months
-of the year.
-
-@margin-note{This note is in ``refpara'', then ``refcolumn'', then
-             ``refcontent''.}
-
-@itemlist[
-
- @item{The top panel is in ``tocview''.
-
-       The top panel can have multiple layers of the hierarchy. For a
-       single-page rendering, only one layer is present. For an
-       example of multiple layers when rendering this document to
-       multiple pages, go to @secref["deepest"].
-
-       Each layer is in a ``tocviewlist'' that also has the class
-       ``tocviewlisttopspace'' in the case of the first layer.  The
-       always-visible name of a layer is in a span ``tocviewtoggle'',
-       but that span is also in a ``tocviewtitle'' in the case of the
-       first layer. Each item under the title is in a
-       ``tocviewsublist'' or a variant: ``tocviewsublistonly'' if only
-       a single item is present, ``tocviewsublistfirst'' for the first
-       item of multi, ``tocviewsublistlast'' for the last item of
-       multiple.  Then, each item is in a span ``tocviewlink''.
-
-       Each section link in the panel is a span ``tocviewlink'' or a
-       span ``tocviewselflink'' if the link corresponds to the current
-       page or on the path to the current page.}
-
- @item{A bottom panel is visible here only for a single-page
-       rendering. See its description in @secref["h3"].}
-
-]
-
-
-@margin-note[#:left? #t]{This note is in ``refparaleft'', then
- ``refcolumnleft'', then ``refcontent''.}
-
-Table of contents uses ``toptoclink'' for the top layer, and
-``toclink'' for nested levels:
+Table of Contents
 
 @table-of-contents[]
 
-@margin-note*{This note is in ``refelem'', then ``refcolumn'', then
-              ``refcontent''.}
-@margin-note*[#:left? #t]{This note is in ``refelemleft'', then 
-              ``refcolumnleft'', then ``refcontent''.}
-
 @; ======================================================================
-@section[#:tag "h3"]{Section in ``H3''}
-
-@"\U2190" For either single-page or multi-page rendering, the
-table-of-contents column here has two panels. The top panel is
-described in the @seclink["h3"]{starting prose}. For the bottom panel:
+@section[#:tag "Series"]{Series}
 
 @itemlist[
 
- @item{The bottom panel is in a ``tocsub''. For a multi-page
-      rendering, the on-this-page title is in ``tocsubtitle''. The
-      rest is always in a table ``tocsublist''. For each entry, the
-      number part is in a span ``tocsublinknumber'', and the title
-      part in a span, one of the following: ``tocsubseclink'' if the
-      link represents a (sub)section, ``tocnonseclink'' if the link is
-      not a (sub)section but there are (sub)sections in the list (and
-      there is an example target in this section), or ``tocsublink''
-      if no links represent a (sub)section (see
-      @secref["all-non-sec"]).}
+ @item{One-dimensional ndarray with axis labels (including time series).
+
+Labels need not be unique but must be a hashable type. The object supports both integer- and label-based indexing and provides a host of methods for performing operations involving the index. Statistical methods from ndarray have been overridden to automatically exclude missing data (currently represented as NaN).
+
+Operations between Series (+, -, /, , *) align values based on their associated index values– they need not be the same length. The result index will be the sorted union of the two indexes.
+}
 
 ]
-
-When a part that corresponds to a page has a @racket['no-toc] style,
-the top panel of the table-of-contents column is missing and the
-bottom panel is in a ``tocview'' instead of ``tocsub''. See
-@secref["no-toc"].
 
 Here is the target for the
 @toc-target-element[#f @elem{``tocnonseclink''} `(demo (prefixable "non-sec"))]

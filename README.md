@@ -56,6 +56,27 @@ Example installation using git url in package manager.
 (frame-write-tab data-frame-mix (current-output-port))
 ```
 
+```
+; no schema
+(define salary-data-frame-csv-no-schema (load-csv-file "sample-csv/salary.csv" #:schema #f #:delim ","))
+
+(data-frame-head salary-data-frame-csv-no-schema)
+
+;; Output ;;
+     first           last             age           dollar           phone      
+	Evan            Lloyd             19           $3839.78        (771) 255-1133  
+	Etta            Griffith          50           $8158.60        (523) 731-6388  
+	William         Conner            50           $9966.70        (759) 504-6619  
+	Rhoda           Guerrero          20           $6480.10        (467) 431-4273  
+	Kyle            Klein             59           $6106.13        (760) 829-2093  
+	Benjamin        Patton            59           $3925.51        (488) 673-5745  
+	Georgie         Hansen            51           $8809.92        (579) 706-4402  
+	Gregory         Bowen             36           $5176.21        (533) 506-3845  
+	Cornelia        Peterson          46           $3626.31        (861) 316-5672  
+	Samuel          Cole              37           $7677.20        (760) 406-6331 
+;; Output ;;
+```
+
 ## Running the tests
 
 Currently the tests are integrated into the files themselves. A full test suite is in the works.

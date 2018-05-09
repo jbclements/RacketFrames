@@ -24,13 +24,11 @@ Step by step instructions on getting up and running.
 Download Racket Version 6 for your OS from the provided prerequisite link.
 ```
 
-```
 Add the pipe and grip packages using [DrRacket](http://docs.racket-lang.org/quick/index.html) which comes installed when you download Racket.
 
 ![Alt text](images/pipe.jpg?raw=true "Title")
 
 ![Alt text](images/grip.jpg?raw=true "Title")
-```
 
 ## Running the tests
 

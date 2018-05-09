@@ -12,45 +12,33 @@ You can answer this question and many more with RacketFrames.
 
 [Racket Version 6](http://racket-lang.org/download/)
 
-https://github.com/RayRacine/pipe.git
+[Pipe](https://github.com/RayRacine/pipe.git)
 
-https://github.com/RayRacine/grip.git
-
-```
-Give examples
-```
+[Grip](https://github.com/RayRacine/grip.git)
 
 ### Installing
 
-A step by step series of examples that tell you have to get a development env running
-
-Say what the step will be
+Step by step instructions on getting up and running.
 
 ```
-Give the example
+Download Racket Version 6 for your OS from the provided prerequisite link.
 ```
 
-And repeat
-
 ```
-until finished
+Add the pipe and grip packages using [DrRacket](http://docs.racket-lang.org/quick/index.html) which comes installed when you download Racket.
+
+![Alt text](relative/path/to/img.jpg?raw=true "Title")
+
+![Alt text](relative/path/to/img.jpg?raw=true "Title")
 ```
 
-End with an example of getting some data out of the system or using it for a little demo
+http://docs.racket-lang.org/quick/index.html
 
 ## Running the tests
 
-Currently the tests are integrated into the fils themselves. 
+Currently the tests are integrated into the files themselves. A full test suite is in the works.
 
-### Break down into end to end tests
-
-Explain what these tests test and why
-
-```
-Give an example
-```
-
-### And coding style tests
+### Benchmarks
 
 Explain what these tests test and why
 
@@ -67,10 +55,6 @@ Give an example
 This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
 
 ## Acknowledgments
-
-* Hat tip to anyone who's code was used
-* Inspiration
-* etc
 
 A huge thank you to [Ray Racine](https://github.com/RayRacine) who's repo   was used as the starting point of this project. This project aims to add further functionality, test cases and performance benchmarks to this existing library.
 

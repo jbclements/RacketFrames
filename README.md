@@ -26,7 +26,9 @@ Step by step instructions on getting up and running.
 Download Racket Version 6.8+ for your OS from the provided prerequisite link.
 ```
 
-Add the pipe and grip packages using [DrRacket](http://docs.racket-lang.org/quick/index.html) which comes installed when you download Racket.
+Add the pipe, grip and RacketFrame packages using [DrRacket](http://docs.racket-lang.org/quick/index.html) which is installed when you download Racket. The pipe and grip packages are available from the catalog, and can be installed that way as well.
+
+Example installation using git url in package manager.
 
 ![Alt text](images/pipe.png?raw=true "Title")
 

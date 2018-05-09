@@ -2,6 +2,8 @@
 @(require scribble/core
           scribble/manual)
 
+@require[(for-label racket/contract)]
+
 @title[#:tag "top" #:version "1.0" #:style 'toc-hidden]{RacketFrames}
 
 @author["Shubham" "Kahal"]
@@ -39,9 +41,544 @@ Operations between Series (+, -, /, , *) align values based on their associated 
 
 @subsubsection[#:tag "new-ISeries"]{new-ISeries}
 
-@"\U2190" This page has no on-this-page panel in a multi-page
-rendering, because there are no numbered subsections, but it has three
-levels shown in the table-of-contents panel.
+@defproc[#:link-target? #f
+ (make-sandwich [ingredients (listof ingredient?)])
+sandwich?]{
+Returns a sandwich given the right ingredients.
+}
+
+@defproc[#:kind "sandwich-maker"
+(make-reuben [ingredient sauerkraut?] ...
+[#:veggie? veggie? any/c #f])
+sandwich?]{
+Produces a reuben given some number of @racket[ingredient]s.
+80
+If @racket[veggie?] is @racket[#f], produces a standard
+reuben with corned beef. Otherwise, produces a vegetable
+reuben.
+}
+
+@subsubsection[#:tag "iseries-iref"]{iseries-iref}
+
+@defproc[(make-sandwich [ingredients (listof ingredient?)])
+sandwich?]{
+Returns a sandwich given the right ingredients.
+}
+
+@defproc[#:kind "sandwich-maker"
+(make-reuben [ingredient sauerkraut?] ...
+[#:veggie? veggie? any/c #f])
+sandwich?]{
+Produces a reuben given some number of @racket[ingredient]s.
+80
+If @racket[veggie?] is @racket[#f], produces a standard
+reuben with corned beef. Otherwise, produces a vegetable
+reuben.
+}
+
+@subsubsection[#:tag "iseries-label-ref"]{iseries-label-ref}
+
+@defproc[(make-sandwich [ingredients (listof ingredient?)])
+sandwich?]{
+Returns a sandwich given the right ingredients.
+}
+
+@defproc[#:kind "sandwich-maker"
+(make-reuben [ingredient sauerkraut?] ...
+[#:veggie? veggie? any/c #f])
+sandwich?]{
+Produces a reuben given some number of @racket[ingredient]s.
+80
+If @racket[veggie?] is @racket[#f], produces a standard
+reuben with corned beef. Otherwise, produces a vegetable
+reuben.
+}
+
+@subsubsection[#:tag "iseries-range"]{iseries-range}
+
+@defproc[(make-sandwich [ingredients (listof ingredient?)])
+sandwich?]{
+Returns a sandwich given the right ingredients.
+}
+
+@defproc[#:kind "sandwich-maker"
+(make-reuben [ingredient sauerkraut?] ...
+[#:veggie? veggie? any/c #f])
+sandwich?]{
+Produces a reuben given some number of @racket[ingredient]s.
+80
+If @racket[veggie?] is @racket[#f], produces a standard
+reuben with corned beef. Otherwise, produces a vegetable
+reuben.
+}
+
+@subsubsection[#:tag "iseries-length"]{iseries-length}
+
+@defproc[(make-sandwich [ingredients (listof ingredient?)])
+sandwich?]{
+Returns a sandwich given the right ingredients.
+}
+
+@defproc[#:kind "sandwich-maker"
+(make-reuben [ingredient sauerkraut?] ...
+[#:veggie? veggie? any/c #f])
+sandwich?]{
+Produces a reuben given some number of @racket[ingredient]s.
+80
+If @racket[veggie?] is @racket[#f], produces a standard
+reuben with corned beef. Otherwise, produces a vegetable
+reuben.
+}
+
+@subsubsection[#:tag "iseries-referencer"]{iseries-referencer}
+
+@defproc[(make-sandwich [ingredients (listof ingredient?)])
+sandwich?]{
+Returns a sandwich given the right ingredients.
+}
+
+@defproc[#:kind "sandwich-maker"
+(make-reuben [ingredient sauerkraut?] ...
+[#:veggie? veggie? any/c #f])
+sandwich?]{
+Produces a reuben given some number of @racket[ingredient]s.
+80
+If @racket[veggie?] is @racket[#f], produces a standard
+reuben with corned beef. Otherwise, produces a vegetable
+reuben.
+}
+
+@subsubsection[#:tag "iseries-data"]{iseries-data}
+
+@defproc[(make-sandwich [ingredients (listof ingredient?)])
+sandwich?]{
+Returns a sandwich given the right ingredients.
+}
+
+@defproc[#:kind "sandwich-maker"
+(make-reuben [ingredient sauerkraut?] ...
+[#:veggie? veggie? any/c #f])
+sandwich?]{
+Produces a reuben given some number of @racket[ingredient]s.
+80
+If @racket[veggie?] is @racket[#f], produces a standard
+reuben with corned beef. Otherwise, produces a vegetable
+reuben.
+}
+
+@subsubsection[#:tag "map/is"]{map/is}
+
+@defproc[(make-sandwich [ingredients (listof ingredient?)])
+sandwich?]{
+Returns a sandwich given the right ingredients.
+}
+
+@defproc[#:kind "sandwich-maker"
+(make-reuben [ingredient sauerkraut?] ...
+[#:veggie? veggie? any/c #f])
+sandwich?]{
+Produces a reuben given some number of @racket[ingredient]s.
+80
+If @racket[veggie?] is @racket[#f], produces a standard
+reuben with corned beef. Otherwise, produces a vegetable
+reuben.
+}
+
+@subsubsection[#:tag "bop/is"]{bop/is}
+
+@defproc[(make-sandwich [ingredients (listof ingredient?)])
+sandwich?]{
+Returns a sandwich given the right ingredients.
+}
+
+@defproc[#:kind "sandwich-maker"
+(make-reuben [ingredient sauerkraut?] ...
+[#:veggie? veggie? any/c #f])
+sandwich?]{
+Produces a reuben given some number of @racket[ingredient]s.
+80
+If @racket[veggie?] is @racket[#f], produces a standard
+reuben with corned beef. Otherwise, produces a vegetable
+reuben.
+}
+
+@subsubsection[#:tag "comp/is"]{comp/is}
+
+@defproc[(make-sandwich [ingredients (listof ingredient?)])
+sandwich?]{
+Returns a sandwich given the right ingredients.
+}
+
+@defproc[#:kind "sandwich-maker"
+(make-reuben [ingredient sauerkraut?] ...
+[#:veggie? veggie? any/c #f])
+sandwich?]{
+Produces a reuben given some number of @racket[ingredient]s.
+80
+If @racket[veggie?] is @racket[#f], produces a standard
+reuben with corned beef. Otherwise, produces a vegetable
+reuben.
+}
+
+@subsubsection[#:tag "+/is"]{+/is}
+
+@defproc[(make-sandwich [ingredients (listof ingredient?)])
+sandwich?]{
+Returns a sandwich given the right ingredients.
+}
+
+@defproc[#:kind "sandwich-maker"
+(make-reuben [ingredient sauerkraut?] ...
+[#:veggie? veggie? any/c #f])
+sandwich?]{
+Produces a reuben given some number of @racket[ingredient]s.
+80
+If @racket[veggie?] is @racket[#f], produces a standard
+reuben with corned beef. Otherwise, produces a vegetable
+reuben.
+}
+
+@subsubsection[#:tag "-/is"]{-/is}
+
+@defproc[(make-sandwich [ingredients (listof ingredient?)])
+sandwich?]{
+Returns a sandwich given the right ingredients.
+}
+
+@defproc[#:kind "sandwich-maker"
+(make-reuben [ingredient sauerkraut?] ...
+[#:veggie? veggie? any/c #f])
+sandwich?]{
+Produces a reuben given some number of @racket[ingredient]s.
+80
+If @racket[veggie?] is @racket[#f], produces a standard
+reuben with corned beef. Otherwise, produces a vegetable
+reuben.
+}
+
+@subsubsection[#:tag "*/is"]{*/is}
+
+@defproc[(make-sandwich [ingredients (listof ingredient?)])
+sandwich?]{
+Returns a sandwich given the right ingredients.
+}
+
+@defproc[#:kind "sandwich-maker"
+(make-reuben [ingredient sauerkraut?] ...
+[#:veggie? veggie? any/c #f])
+sandwich?]{
+Produces a reuben given some number of @racket[ingredient]s.
+80
+If @racket[veggie?] is @racket[#f], produces a standard
+reuben with corned beef. Otherwise, produces a vegetable
+reuben.
+}
+
+@subsubsection[#:tag "//is"]{//is}
+
+@defproc[(make-sandwich [ingredients (listof ingredient?)])
+sandwich?]{
+Returns a sandwich given the right ingredients.
+}
+
+@defproc[#:kind "sandwich-maker"
+(make-reuben [ingredient sauerkraut?] ...
+[#:veggie? veggie? any/c #f])
+sandwich?]{
+Produces a reuben given some number of @racket[ingredient]s.
+80
+If @racket[veggie?] is @racket[#f], produces a standard
+reuben with corned beef. Otherwise, produces a vegetable
+reuben.
+}
+
+@subsubsection[#:tag "iseries-data"]{%/is}
+
+@defproc[(make-sandwich [ingredients (listof ingredient?)])
+sandwich?]{
+Returns a sandwich given the right ingredients.
+}
+
+@defproc[#:kind "sandwich-maker"
+(make-reuben [ingredient sauerkraut?] ...
+[#:veggie? veggie? any/c #f])
+sandwich?]{
+Produces a reuben given some number of @racket[ingredient]s.
+80
+If @racket[veggie?] is @racket[#f], produces a standard
+reuben with corned beef. Otherwise, produces a vegetable
+reuben.
+}
+
+@subsubsection[#:tag "r/is"]{r/is}
+
+@defproc[(make-sandwich [ingredients (listof ingredient?)])
+sandwich?]{
+Returns a sandwich given the right ingredients.
+}
+
+@defproc[#:kind "sandwich-maker"
+(make-reuben [ingredient sauerkraut?] ...
+[#:veggie? veggie? any/c #f])
+sandwich?]{
+Produces a reuben given some number of @racket[ingredient]s.
+80
+If @racket[veggie?] is @racket[#f], produces a standard
+reuben with corned beef. Otherwise, produces a vegetable
+reuben.
+}
+
+@subsubsection[#:tag "+./is"]{+./is}
+
+@defproc[(make-sandwich [ingredients (listof ingredient?)])
+sandwich?]{
+Returns a sandwich given the right ingredients.
+}
+
+@defproc[#:kind "sandwich-maker"
+(make-reuben [ingredient sauerkraut?] ...
+[#:veggie? veggie? any/c #f])
+sandwich?]{
+Produces a reuben given some number of @racket[ingredient]s.
+80
+If @racket[veggie?] is @racket[#f], produces a standard
+reuben with corned beef. Otherwise, produces a vegetable
+reuben.
+}
+
+@subsubsection[#:tag "-./is"]{-./is}
+
+@defproc[(make-sandwich [ingredients (listof ingredient?)])
+sandwich?]{
+Returns a sandwich given the right ingredients.
+}
+
+@defproc[#:kind "sandwich-maker"
+(make-reuben [ingredient sauerkraut?] ...
+[#:veggie? veggie? any/c #f])
+sandwich?]{
+Produces a reuben given some number of @racket[ingredient]s.
+80
+If @racket[veggie?] is @racket[#f], produces a standard
+reuben with corned beef. Otherwise, produces a vegetable
+reuben.
+}
+
+@subsubsection[#:tag "*./is"]{*./is}
+
+@defproc[(make-sandwich [ingredients (listof ingredient?)])
+sandwich?]{
+Returns a sandwich given the right ingredients.
+}
+
+@defproc[#:kind "sandwich-maker"
+(make-reuben [ingredient sauerkraut?] ...
+[#:veggie? veggie? any/c #f])
+sandwich?]{
+Produces a reuben given some number of @racket[ingredient]s.
+80
+If @racket[veggie?] is @racket[#f], produces a standard
+reuben with corned beef. Otherwise, produces a vegetable
+reuben.
+}
+
+@subsubsection[#:tag "/./is"]{/./is}
+
+@defproc[(make-sandwich [ingredients (listof ingredient?)])
+sandwich?]{
+Returns a sandwich given the right ingredients.
+}
+
+@defproc[#:kind "sandwich-maker"
+(make-reuben [ingredient sauerkraut?] ...
+[#:veggie? veggie? any/c #f])
+sandwich?]{
+Produces a reuben given some number of @racket[ingredient]s.
+80
+If @racket[veggie?] is @racket[#f], produces a standard
+reuben with corned beef. Otherwise, produces a vegetable
+reuben.
+}
+
+@subsubsection[#:tag "%./is"]{%./is}
+
+@defproc[(make-sandwich [ingredients (listof ingredient?)])
+sandwich?]{
+Returns a sandwich given the right ingredients.
+}
+
+@defproc[#:kind "sandwich-maker"
+(make-reuben [ingredient sauerkraut?] ...
+[#:veggie? veggie? any/c #f])
+sandwich?]{
+Produces a reuben given some number of @racket[ingredient]s.
+80
+If @racket[veggie?] is @racket[#f], produces a standard
+reuben with corned beef. Otherwise, produces a vegetable
+reuben.
+}
+
+@subsubsection[#:tag "r./is"]{r./is}
+
+@defproc[(make-sandwich [ingredients (listof ingredient?)])
+sandwich?]{
+Returns a sandwich given the right ingredients.
+}
+
+@defproc[#:kind "sandwich-maker"
+(make-reuben [ingredient sauerkraut?] ...
+[#:veggie? veggie? any/c #f])
+sandwich?]{
+Produces a reuben given some number of @racket[ingredient]s.
+80
+If @racket[veggie?] is @racket[#f], produces a standard
+reuben with corned beef. Otherwise, produces a vegetable
+reuben.
+}
+
+@subsubsection[#:tag ">/is"]{>/is}
+
+@defproc[(make-sandwich [ingredients (listof ingredient?)])
+sandwich?]{
+Returns a sandwich given the right ingredients.
+}
+
+@defproc[#:kind "sandwich-maker"
+(make-reuben [ingredient sauerkraut?] ...
+[#:veggie? veggie? any/c #f])
+sandwich?]{
+Produces a reuben given some number of @racket[ingredient]s.
+80
+If @racket[veggie?] is @racket[#f], produces a standard
+reuben with corned beef. Otherwise, produces a vegetable
+reuben.
+}
+
+@subsubsection[#:tag "</is"]{</is}
+
+@defproc[(make-sandwich [ingredients (listof ingredient?)])
+sandwich?]{
+Returns a sandwich given the right ingredients.
+}
+
+@defproc[#:kind "sandwich-maker"
+(make-reuben [ingredient sauerkraut?] ...
+[#:veggie? veggie? any/c #f])
+sandwich?]{
+Produces a reuben given some number of @racket[ingredient]s.
+80
+If @racket[veggie?] is @racket[#f], produces a standard
+reuben with corned beef. Otherwise, produces a vegetable
+reuben.
+}
+
+@subsubsection[#:tag ">=/is"]{>=/is}
+
+@defproc[(make-sandwich [ingredients (listof ingredient?)])
+sandwich?]{
+Returns a sandwich given the right ingredients.
+}
+
+@defproc[#:kind "sandwich-maker"
+(make-reuben [ingredient sauerkraut?] ...
+[#:veggie? veggie? any/c #f])
+sandwich?]{
+Produces a reuben given some number of @racket[ingredient]s.
+80
+If @racket[veggie?] is @racket[#f], produces a standard
+reuben with corned beef. Otherwise, produces a vegetable
+reuben.
+}
+
+@subsubsection[#:tag "<=/is"]{<=/is}
+
+@defproc[(make-sandwich [ingredients (listof ingredient?)])
+sandwich?]{
+Returns a sandwich given the right ingredients.
+}
+
+@defproc[#:kind "sandwich-maker"
+(make-reuben [ingredient sauerkraut?] ...
+[#:veggie? veggie? any/c #f])
+sandwich?]{
+Produces a reuben given some number of @racket[ingredient]s.
+80
+If @racket[veggie?] is @racket[#f], produces a standard
+reuben with corned beef. Otherwise, produces a vegetable
+reuben.
+}
+
+@subsubsection[#:tag "=/is"]{=/is}
+
+@defproc[(make-sandwich [ingredients (listof ingredient?)])
+sandwich?]{
+Returns a sandwich given the right ingredients.
+}
+
+@defproc[#:kind "sandwich-maker"
+(make-reuben [ingredient sauerkraut?] ...
+[#:veggie? veggie? any/c #f])
+sandwich?]{
+Produces a reuben given some number of @racket[ingredient]s.
+80
+If @racket[veggie?] is @racket[#f], produces a standard
+reuben with corned beef. Otherwise, produces a vegetable
+reuben.
+}
+
+@subsubsection[#:tag "!=/is"]{!=/is}
+
+@defproc[(make-sandwich [ingredients (listof ingredient?)])
+sandwich?]{
+Returns a sandwich given the right ingredients.
+}
+
+@defproc[#:kind "sandwich-maker"
+(make-reuben [ingredient sauerkraut?] ...
+[#:veggie? veggie? any/c #f])
+sandwich?]{
+Produces a reuben given some number of @racket[ingredient]s.
+80
+If @racket[veggie?] is @racket[#f], produces a standard
+reuben with corned beef. Otherwise, produces a vegetable
+reuben.
+}
+
+@subsubsection[#:tag "{apply-agg-is"]{apply-agg-is}
+
+@defproc[(make-sandwich [ingredients (listof ingredient?)])
+sandwich?]{
+Returns a sandwich given the right ingredients.
+}
+
+@defproc[#:kind "sandwich-maker"
+(make-reuben [ingredient sauerkraut?] ...
+[#:veggie? veggie? any/c #f])
+sandwich?]{
+Produces a reuben given some number of @racket[ingredient]s.
+80
+If @racket[veggie?] is @racket[#f], produces a standard
+reuben with corned beef. Otherwise, produces a vegetable
+reuben.
+}
+
+@subsubsection[#:tag "apply-stat-is"]{apply-stat-is}
+
+@defproc[(make-sandwich [ingredients (listof ingredient?)])
+sandwich?]{
+Returns a sandwich given the right ingredients.
+}
+
+@defproc[#:kind "sandwich-maker"
+(make-reuben [ingredient sauerkraut?] ...
+[#:veggie? veggie? any/c #f])
+sandwich?]{
+Produces a reuben given some number of @racket[ingredient]s.
+80
+If @racket[veggie?] is @racket[#f], produces a standard
+reuben with corned beef. Otherwise, produces a vegetable
+reuben.
+}
 
 @subsection[#:style 'toc]{Numerical Series}
 
@@ -49,169 +586,580 @@ levels shown in the table-of-contents panel.
 
 @subsubsection[#:tag "new-NSeries"]{new-NSeries}
 
+@defproc[(make-sandwich [ingredients (listof ingredient?)])
+sandwich?]{
+Returns a sandwich given the right ingredients.
+}
+
+@defproc[#:kind "sandwich-maker"
+(make-reuben [ingredient sauerkraut?] ...
+[#:veggie? veggie? any/c #f])
+sandwich?]{
+Produces a reuben given some number of @racket[ingredient]s.
+80
+If @racket[veggie?] is @racket[#f], produces a standard
+reuben with corned beef. Otherwise, produces a vegetable
+reuben.
+}
+
+@subsubsection[#:tag "nseries-iref"]{nseries-iref}
+
+@defproc[(make-sandwich [ingredients (listof ingredient?)])
+sandwich?]{
+Returns a sandwich given the right ingredients.
+}
+
+@defproc[#:kind "sandwich-maker"
+(make-reuben [ingredient sauerkraut?] ...
+[#:veggie? veggie? any/c #f])
+sandwich?]{
+Produces a reuben given some number of @racket[ingredient]s.
+80
+If @racket[veggie?] is @racket[#f], produces a standard
+reuben with corned beef. Otherwise, produces a vegetable
+reuben.
+}
+
+@subsubsection[#:tag "nseries-label-ref"]{nseries-label-ref}
+
+@defproc[(make-sandwich [ingredients (listof ingredient?)])
+sandwich?]{
+Returns a sandwich given the right ingredients.
+}
+
+@defproc[#:kind "sandwich-maker"
+(make-reuben [ingredient sauerkraut?] ...
+[#:veggie? veggie? any/c #f])
+sandwich?]{
+Produces a reuben given some number of @racket[ingredient]s.
+80
+If @racket[veggie?] is @racket[#f], produces a standard
+reuben with corned beef. Otherwise, produces a vegetable
+reuben.
+}
+
+@subsubsection[#:tag "nseries-range"]{nseries-range}
+
+@defproc[(make-sandwich [ingredients (listof ingredient?)])
+sandwich?]{
+Returns a sandwich given the right ingredients.
+}
+
+@defproc[#:kind "sandwich-maker"
+(make-reuben [ingredient sauerkraut?] ...
+[#:veggie? veggie? any/c #f])
+sandwich?]{
+Produces a reuben given some number of @racket[ingredient]s.
+80
+If @racket[veggie?] is @racket[#f], produces a standard
+reuben with corned beef. Otherwise, produces a vegetable
+reuben.
+}
+
+@subsubsection[#:tag "nseries-length"]{nseries-length}
+
+@defproc[(make-sandwich [ingredients (listof ingredient?)])
+sandwich?]{
+Returns a sandwich given the right ingredients.
+}
+
+@defproc[#:kind "sandwich-maker"
+(make-reuben [ingredient sauerkraut?] ...
+[#:veggie? veggie? any/c #f])
+sandwich?]{
+Produces a reuben given some number of @racket[ingredient]s.
+80
+If @racket[veggie?] is @racket[#f], produces a standard
+reuben with corned beef. Otherwise, produces a vegetable
+reuben.
+}
+
+@subsubsection[#:tag "nseries-referencer"]{nseries-referencer}
+
+@defproc[(make-sandwich [ingredients (listof ingredient?)])
+sandwich?]{
+Returns a sandwich given the right ingredients.
+}
+
+@defproc[#:kind "sandwich-maker"
+(make-reuben [ingredient sauerkraut?] ...
+[#:veggie? veggie? any/c #f])
+sandwich?]{
+Produces a reuben given some number of @racket[ingredient]s.
+80
+If @racket[veggie?] is @racket[#f], produces a standard
+reuben with corned beef. Otherwise, produces a vegetable
+reuben.
+}
+
+@subsubsection[#:tag "nseries-data"]{nseries-data}
+
+@defproc[(make-sandwich [ingredients (listof ingredient?)])
+sandwich?]{
+Returns a sandwich given the right ingredients.
+}
+
+@defproc[#:kind "sandwich-maker"
+(make-reuben [ingredient sauerkraut?] ...
+[#:veggie? veggie? any/c #f])
+sandwich?]{
+Produces a reuben given some number of @racket[ingredient]s.
+80
+If @racket[veggie?] is @racket[#f], produces a standard
+reuben with corned beef. Otherwise, produces a vegetable
+reuben.
+}
+
+@subsubsection[#:tag "map/ns"]{map/ns}
+
+@defproc[(make-sandwich [ingredients (listof ingredient?)])
+sandwich?]{
+Returns a sandwich given the right ingredients.
+}
+
+@defproc[#:kind "sandwich-maker"
+(make-reuben [ingredient sauerkraut?] ...
+[#:veggie? veggie? any/c #f])
+sandwich?]{
+Produces a reuben given some number of @racket[ingredient]s.
+80
+If @racket[veggie?] is @racket[#f], produces a standard
+reuben with corned beef. Otherwise, produces a vegetable
+reuben.
+}
+
+@subsubsection[#:tag "bop/ns"]{bop/ns}
+
+@defproc[(make-sandwich [ingredients (listof ingredient?)])
+sandwich?]{
+Returns a sandwich given the right ingredients.
+}
+
+@defproc[#:kind "sandwich-maker"
+(make-reuben [ingredient sauerkraut?] ...
+[#:veggie? veggie? any/c #f])
+sandwich?]{
+Produces a reuben given some number of @racket[ingredient]s.
+80
+If @racket[veggie?] is @racket[#f], produces a standard
+reuben with corned beef. Otherwise, produces a vegetable
+reuben.
+}
+
+@subsubsection[#:tag "comp/ns"]{comp/ns}
+
+@defproc[(make-sandwich [ingredients (listof ingredient?)])
+sandwich?]{
+Returns a sandwich given the right ingredients.
+}
+
+@defproc[#:kind "sandwich-maker"
+(make-reuben [ingredient sauerkraut?] ...
+[#:veggie? veggie? any/c #f])
+sandwich?]{
+Produces a reuben given some number of @racket[ingredient]s.
+80
+If @racket[veggie?] is @racket[#f], produces a standard
+reuben with corned beef. Otherwise, produces a vegetable
+reuben.
+}
+
+@subsubsection[#:tag "+/ns"]{+/ns}
+
+@defproc[(make-sandwich [ingredients (listof ingredient?)])
+sandwich?]{
+Returns a sandwich given the right ingredients.
+}
+
+@defproc[#:kind "sandwich-maker"
+(make-reuben [ingredient sauerkraut?] ...
+[#:veggie? veggie? any/c #f])
+sandwich?]{
+Produces a reuben given some number of @racket[ingredient]s.
+80
+If @racket[veggie?] is @racket[#f], produces a standard
+reuben with corned beef. Otherwise, produces a vegetable
+reuben.
+}
+
+@subsubsection[#:tag "-/ns"]{-/ns}
+
+@defproc[(make-sandwich [ingredients (listof ingredient?)])
+sandwich?]{
+Returns a sandwich given the right ingredients.
+}
+
+@defproc[#:kind "sandwich-maker"
+(make-reuben [ingredient sauerkraut?] ...
+[#:veggie? veggie? any/c #f])
+sandwich?]{
+Produces a reuben given some number of @racket[ingredient]s.
+80
+If @racket[veggie?] is @racket[#f], produces a standard
+reuben with corned beef. Otherwise, produces a vegetable
+reuben.
+}
+
+@subsubsection[#:tag "*/ns"]{*/ns}
+
+@defproc[(make-sandwich [ingredients (listof ingredient?)])
+sandwich?]{
+Returns a sandwich given the right ingredients.
+}
+
+@defproc[#:kind "sandwich-maker"
+(make-reuben [ingredient sauerkraut?] ...
+[#:veggie? veggie? any/c #f])
+sandwich?]{
+Produces a reuben given some number of @racket[ingredient]s.
+80
+If @racket[veggie?] is @racket[#f], produces a standard
+reuben with corned beef. Otherwise, produces a vegetable
+reuben.
+}
+
+@subsubsection[#:tag "//ns"]{//ns}
+
+@defproc[(make-sandwich [ingredients (listof ingredient?)])
+sandwich?]{
+Returns a sandwich given the right ingredients.
+}
+
+@defproc[#:kind "sandwich-maker"
+(make-reuben [ingredient sauerkraut?] ...
+[#:veggie? veggie? any/c #f])
+sandwich?]{
+Produces a reuben given some number of @racket[ingredient]s.
+80
+If @racket[veggie?] is @racket[#f], produces a standard
+reuben with corned beef. Otherwise, produces a vegetable
+reuben.
+}
+
+@subsubsection[#:tag "nseries-data"]{%/ns}
+
+@defproc[(make-sandwich [ingredients (listof ingredient?)])
+sandwich?]{
+Returns a sandwich given the right ingredients.
+}
+
+@defproc[#:kind "sandwich-maker"
+(make-reuben [ingredient sauerkraut?] ...
+[#:veggie? veggie? any/c #f])
+sandwich?]{
+Produces a reuben given some number of @racket[ingredient]s.
+80
+If @racket[veggie?] is @racket[#f], produces a standard
+reuben with corned beef. Otherwise, produces a vegetable
+reuben.
+}
+
+@subsubsection[#:tag "r/ns"]{r/ns}
+
+@defproc[(make-sandwich [ingredients (listof ingredient?)])
+sandwich?]{
+Returns a sandwich given the right ingredients.
+}
+
+@defproc[#:kind "sandwich-maker"
+(make-reuben [ingredient sauerkraut?] ...
+[#:veggie? veggie? any/c #f])
+sandwich?]{
+Produces a reuben given some number of @racket[ingredient]s.
+80
+If @racket[veggie?] is @racket[#f], produces a standard
+reuben with corned beef. Otherwise, produces a vegetable
+reuben.
+}
+
+@subsubsection[#:tag "+./ns"]{+./ns}
+
+@defproc[(make-sandwich [ingredients (listof ingredient?)])
+sandwich?]{
+Returns a sandwich given the right ingredients.
+}
+
+@defproc[#:kind "sandwich-maker"
+(make-reuben [ingredient sauerkraut?] ...
+[#:veggie? veggie? any/c #f])
+sandwich?]{
+Produces a reuben given some number of @racket[ingredient]s.
+80
+If @racket[veggie?] is @racket[#f], produces a standard
+reuben with corned beef. Otherwise, produces a vegetable
+reuben.
+}
+
+@subsubsection[#:tag "-./ns"]{-./ns}
+
+@defproc[(make-sandwich [ingredients (listof ingredient?)])
+sandwich?]{
+Returns a sandwich given the right ingredients.
+}
+
+@defproc[#:kind "sandwich-maker"
+(make-reuben [ingredient sauerkraut?] ...
+[#:veggie? veggie? any/c #f])
+sandwich?]{
+Produces a reuben given some number of @racket[ingredient]s.
+80
+If @racket[veggie?] is @racket[#f], produces a standard
+reuben with corned beef. Otherwise, produces a vegetable
+reuben.
+}
+
+@subsubsection[#:tag "*./ns"]{*./ns}
+
+@defproc[(make-sandwich [ingredients (listof ingredient?)])
+sandwich?]{
+Returns a sandwich given the right ingredients.
+}
+
+@defproc[#:kind "sandwich-maker"
+(make-reuben [ingredient sauerkraut?] ...
+[#:veggie? veggie? any/c #f])
+sandwich?]{
+Produces a reuben given some number of @racket[ingredient]s.
+80
+If @racket[veggie?] is @racket[#f], produces a standard
+reuben with corned beef. Otherwise, produces a vegetable
+reuben.
+}
+
+@subsubsection[#:tag "/./ns"]{/./ns}
+
+@defproc[(make-sandwich [ingredients (listof ingredient?)])
+sandwich?]{
+Returns a sandwich given the right ingredients.
+}
+
+@defproc[#:kind "sandwich-maker"
+(make-reuben [ingredient sauerkraut?] ...
+[#:veggie? veggie? any/c #f])
+sandwich?]{
+Produces a reuben given some number of @racket[ingredient]s.
+80
+If @racket[veggie?] is @racket[#f], produces a standard
+reuben with corned beef. Otherwise, produces a vegetable
+reuben.
+}
+
+@subsubsection[#:tag "%./ns"]{%./ns}
+
+@defproc[(make-sandwich [ingredients (listof ingredient?)])
+sandwich?]{
+Returns a sandwich given the right ingredients.
+}
+
+@defproc[#:kind "sandwich-maker"
+(make-reuben [ingredient sauerkraut?] ...
+[#:veggie? veggie? any/c #f])
+sandwich?]{
+Produces a reuben given some number of @racket[ingredient]s.
+80
+If @racket[veggie?] is @racket[#f], produces a standard
+reuben with corned beef. Otherwise, produces a vegetable
+reuben.
+}
+
+@subsubsection[#:tag "r./ns"]{r./ns}
+
+@defproc[(make-sandwich [ingredients (listof ingredient?)])
+sandwich?]{
+Returns a sandwich given the right ingredients.
+}
+
+@defproc[#:kind "sandwich-maker"
+(make-reuben [ingredient sauerkraut?] ...
+[#:veggie? veggie? any/c #f])
+sandwich?]{
+Produces a reuben given some number of @racket[ingredient]s.
+80
+If @racket[veggie?] is @racket[#f], produces a standard
+reuben with corned beef. Otherwise, produces a vegetable
+reuben.
+}
+
+@subsubsection[#:tag ">/ns"]{>/ns}
+
+@defproc[(make-sandwich [ingredients (listof ingredient?)])
+sandwich?]{
+Returns a sandwich given the right ingredients.
+}
+
+@defproc[#:kind "sandwich-maker"
+(make-reuben [ingredient sauerkraut?] ...
+[#:veggie? veggie? any/c #f])
+sandwich?]{
+Produces a reuben given some number of @racket[ingredient]s.
+80
+If @racket[veggie?] is @racket[#f], produces a standard
+reuben with corned beef. Otherwise, produces a vegetable
+reuben.
+}
+
+@subsubsection[#:tag "</ns"]{</ns}
+
+@defproc[(make-sandwich [ingredients (listof ingredient?)])
+sandwich?]{
+Returns a sandwich given the right ingredients.
+}
+
+@defproc[#:kind "sandwich-maker"
+(make-reuben [ingredient sauerkraut?] ...
+[#:veggie? veggie? any/c #f])
+sandwich?]{
+Produces a reuben given some number of @racket[ingredient]s.
+80
+If @racket[veggie?] is @racket[#f], produces a standard
+reuben with corned beef. Otherwise, produces a vegetable
+reuben.
+}
+
+@subsubsection[#:tag ">=/ns"]{>=/ns}
+
+@defproc[(make-sandwich [ingredients (listof ingredient?)])
+sandwich?]{
+Returns a sandwich given the right ingredients.
+}
+
+@defproc[#:kind "sandwich-maker"
+(make-reuben [ingredient sauerkraut?] ...
+[#:veggie? veggie? any/c #f])
+sandwich?]{
+Produces a reuben given some number of @racket[ingredient]s.
+80
+If @racket[veggie?] is @racket[#f], produces a standard
+reuben with corned beef. Otherwise, produces a vegetable
+reuben.
+}
+
+@subsubsection[#:tag "<=/ns"]{<=/ns}
+
+@defproc[(make-sandwich [ingredients (listof ingredient?)])
+sandwich?]{
+Returns a sandwich given the right ingredients.
+}
+
+@defproc[#:kind "sandwich-maker"
+(make-reuben [ingredient sauerkraut?] ...
+[#:veggie? veggie? any/c #f])
+sandwich?]{
+Produces a reuben given some number of @racket[ingredient]s.
+80
+If @racket[veggie?] is @racket[#f], produces a standard
+reuben with corned beef. Otherwise, produces a vegetable
+reuben.
+}
+
+@subsubsection[#:tag "=/ns"]{=/ns}
+
+@defproc[(make-sandwich [ingredients (listof ingredient?)])
+sandwich?]{
+Returns a sandwich given the right ingredients.
+}
+
+@defproc[#:kind "sandwich-maker"
+(make-reuben [ingredient sauerkraut?] ...
+[#:veggie? veggie? any/c #f])
+sandwich?]{
+Produces a reuben given some number of @racket[ingredient]s.
+80
+If @racket[veggie?] is @racket[#f], produces a standard
+reuben with corned beef. Otherwise, produces a vegetable
+reuben.
+}
+
+@subsubsection[#:tag "!=/ns"]{!=/ns}
+
+@defproc[(make-sandwich [ingredients (listof ingredient?)])
+sandwich?]{
+Returns a sandwich given the right ingredients.
+}
+
+@defproc[#:kind "sandwich-maker"
+(make-reuben [ingredient sauerkraut?] ...
+[#:veggie? veggie? any/c #f])
+sandwich?]{
+Produces a reuben given some number of @racket[ingredient]s.
+80
+If @racket[veggie?] is @racket[#f], produces a standard
+reuben with corned beef. Otherwise, produces a vegetable
+reuben.
+}
+
+@subsubsection[#:tag "{apply-agg-ns"]{apply-agg-ns}
+
+@defproc[(make-sandwich [ingredients (listof ingredient?)])
+sandwich?]{
+Returns a sandwich given the right ingredients.
+}
+
+@defproc[#:kind "sandwich-maker"
+(make-reuben [ingredient sauerkraut?] ...
+[#:veggie? veggie? any/c #f])
+sandwich?]{
+Produces a reuben given some number of @racket[ingredient]s.
+80
+If @racket[veggie?] is @racket[#f], produces a standard
+reuben with corned beef. Otherwise, produces a vegetable
+reuben.
+}
+
+@subsubsection[#:tag "apply-stat-ns"]{apply-stat-ns}
+
+@defproc[(make-sandwich [ingredients (listof ingredient?)])
+sandwich?]{
+Returns a sandwich given the right ingredients.
+}
+
+@defproc[#:kind "sandwich-maker"
+(make-reuben [ingredient sauerkraut?] ...
+[#:veggie? veggie? any/c #f])
+sandwich?]{
+Produces a reuben given some number of @racket[ingredient]s.
+80
+If @racket[veggie?] is @racket[#f], produces a standard
+reuben with corned beef. Otherwise, produces a vegetable
+reuben.
+}
+
+@subsection[#:style 'toc]{Categorical Series}
+
+@local-table-of-contents[]
+
+@subsubsection[#:tag "new-CSeries"]{new-CSeries}
+
+@"\U2190" This page has no on-this-page panel in a multi-page
+rendering, because there are no numbered subsections, but it has three
+levels shown in the table-of-contents panel.
+
+@subsection[#:style 'toc]{Boolean Series}
+
+@local-table-of-contents[]
+
+@subsubsection[#:tag "new-BSeries"]{new-BSeries}
+
+@"\U2190" This page has no on-this-page panel in a multi-page
+rendering, because there are no numbered subsections, but it has three
+levels shown in the table-of-contents panel.
+
+
+@subsection[#:style 'toc]{General Series}
+
+@local-table-of-contents[]
+
+@subsubsection[#:tag "new-GSeries"]{new-GSeries}
+
 @"\U2190" This page has no on-this-page panel in a multi-page
 rendering, because there are no numbered subsections, but it has three
 levels shown in the table-of-contents panel.
 
 
 @; ======================================================================
-@section[#:tag "no-toc" #:style 'no-toc]{Suppressed ToC Panel}
-
-In multi-page rendering, this page has no gobal table-of-contents
-panel, because it is suppressed with @racket['no-toc].
-
-@subsection{Subsection}
-
-@subsection{Another Subsection}
-
 
 @; ======================================================================
-@section[#:tag "all-non-sec"]{Non-Section On-This-Page Links}
-
-This section has only non-section targets in the on-this-page
-panel of a multi-page rendering.
-Here is the target for the
-@toc-target-element[#f @elem{``tocsublink'' 1} `(demo (prefixable "non-sec 1"))]
-link.
-Here is the target for the
-@toc-target-element[#f @elem{``tocsublink'' 2} `(demo (prefixable "non-sec 2"))]
-link.
-
-Here is the target for the @as-index{``indexlink''} link in the
-@seclink["doc-index"]{index} (where ``indexlink'' is used for the
-index entry and not here).
-
-@; ======================================================================
-@section{Element Styles}
-
-Some spans:
-
-@itemlist[
-
- @item{@tt{``stt''}}
-
- @item{@elem[#:style 'roman]{``sroman''}}
-
- @item{@elem[#:style "slant"]{``slant''}}
-
- @item{@elem[#:style 'sf]{``ssanserif''}}
-
- @item{@smaller{``Smaller''}}
-
- @item{@larger{``Larger''}}
-
- @item{``hspace'' is used for forced @hspace[3] space}
-
- @item{``url'' is used for URLs: @url{http://racket-lang.org}}
-
- @item{@elem[#:style 'no-break]{``nobreak'', which is used to prevent
- line breaks anywhere in the element so that the element may run too
- far right}}
-
- @item{@italic{italic} directly sets @tt{font-style} to @tt{italic}}
-
- @item{@bold{bold} directly sets @tt{font-weight} to @tt{bold}}
-
- @item{@elem[#:style 'superscript]{superscript} directly sets
-        @tt{vertical-align} to @tt{super} and @tt{font-size} to @tt{80%}.}
-
- @item{@elem[#:style 'subscript]{subscript} directly sets
-        @tt{vertical-align} to @tt{sub} and @tt{font-size} to @tt{80%}.}
-
-]
-
-Link spans:
-
-@itemlist[
-
- @item{@elemref[#:underline? #f '(prefixable "plain-target")]{``plainlink''}
-       hyperlink to @elemtag['(prefixable "plain-target")]{here}}
-
- @item{@deftech{technical term} definitions are simply italicized by default}
-
- @item{@tech{technical term} references are in ``techoutside'', then ``techinside''}
-
-]
-
-@; ======================================================================
-@section{Block Styles}
-
-@nested{This paragraph is in a ``SubFlow'' @tt{<blockquote>}.}
-
-@nested[#:style 'inset]{This paragraph is in a plain @tt{<blockquote>}.}
-
-@nested[#:style 'code-inset]{This paragraph is in a ``SCodeFlow''
-@tt{<blockquote>}.}
-
-@nested[#:style 'vertical-inset]{This paragraph is in a
-``SVInsetFlow'' @tt{<blockquote>}. This style is useful when space is
-not normally included between blocks.}
-
-@centered{This paragraph is in a ``SCentered'' @tt{<blockquote>}.}
-
-@tabular[#:style 'boxed (list (list @t{A ``boxed'' table.}))]
-
-@; ======================================================================
-@section{Enumerations}
-
-This one is unordered, so it uses @tt{<ul>}:
-
-@itemlist[
-
- @item{six}
-
- @item{half-dozen}
-
-]
-
-This one is ordered, so it uses @tt{<ol>}:
-
-@itemlist[#:style 'ordered
-
- @item{First}
-
- @item{Second
-
-       @itemlist[#:style 'ordered
-
-          @item{Second, first half}
-
-          @item{Second, second half
-
-                @itemlist[#:style 'ordered
-
-                           @item{First half of that}
-
-                           @item{Second half of that
-
-                                 @itemlist[#:style 'ordered
-
-                                    @item{Thin-slice start}
-
-                                    @item{Thin-sliced end}
-
-                                 ]}
-                          ]}
-
-                ]}
-
- @item{Third}
-]
-
-This one is ``compact'':
-
-@itemlist[ #:style 'compact
-
- @item{six}
-
- @item{half-dozen}
-
-]
-
-This paragraph follows the enumeration above.
-
-@; ======================================================================
-@section{Paragraph Spacing}
+@section{DataFrames}
 
 This sentence is a paragraph all by itself.
 
@@ -255,29 +1203,4 @@ reuben with corned beef. Otherwise, produces a vegetable
 reuben.
 }
 
-
-@; ======================================================================
-@section{Navigation Bars}
-
-For multi-page rendering, this page will have a navigation bar at the
-top and bottom. The bars are within ``maincolumn'' and ``main''.
-
-The tap bar is in ``navsettop'', and the bottom one is in
-``navsetbottom''.  Within those divs, ``navsetleft'' wraps content to
-be left-aligned and ``navsetright'' wraps content to be right-aligned.
-
-Links that are disabled (such as a next-page link on the last page)
-are each in a span ``nonavigation''.
-
-When a search box is included, then it is in ``searchform'' and then
-``searchbox''. If no search box is included, then a ``nosearchform''
-@tt{div} is used.
-
-Finally, and not part of the nagivation bar, the bottom nagivation bar
-is followed by a @tt{div} with the name
-``contextindicator''. JavaScript code attached to the page copies the
-@tt{ctxtname} query argument, if any, to the @tt{div} and makes it
-visible.
-
-@; ======================================================================
 @index-section[]

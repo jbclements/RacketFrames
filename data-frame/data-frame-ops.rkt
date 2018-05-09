@@ -1,5 +1,24 @@
 #lang typed/racket
 
+; ***********************************************************
+; Provide functions in this file to other files.
+
+(provide:
+ [data-frame+ (DataFrame DataFrame -> DataFrame)]
+ [data-frame- (DataFrame DataFrame -> DataFrame)]
+ [data-frame* (DataFrame DataFrame -> DataFrame)]
+ [data-frame/ (DataFrame DataFrame -> DataFrame)]
+ [data-frame% (DataFrame DataFrame -> DataFrame)]
+ [data-frame-r (DataFrame DataFrame -> DataFrame)]
+ [data-frame= (DataFrame DataFrame -> DataFrame)]
+ [data-frame!= (DataFrame DataFrame -> DataFrame)]
+ [data-frame>= (DataFrame DataFrame -> DataFrame)]
+ [data-frame<= (DataFrame DataFrame -> DataFrame)]
+ [data-frame> (DataFrame DataFrame -> DataFrame)]
+ [data-frame< (DataFrame DataFrame -> DataFrame)]
+ [data-frame-abs (DataFrame -> DataFrame)])
+; ***********************************************************
+
 (require
  racket/pretty
  racket/unsafe/ops

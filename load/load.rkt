@@ -107,8 +107,9 @@
   (define SAMPLE-SIZE 20)
   (if schema schema (determine-schema fpath SAMPLE-SIZE)))
 
-(: load-csv-file (FilePath [#:schema (Option Schema)] -> DataFrame))
-(define (load-csv-file fpath #:schema [schema #f])
+; delimiter must be specified by user if no schema provided
+(: load-csv-file (FilePath [#:schema (Option Schema)] [#:delim (Option Fixnum)] -> DataFrame))
+(define (load-csv-file fpath #:schema [schema #f] #:delim [delim #f])
   (let ((schema (schema-if-needed schema fpath)))
     (make-data-frame schema (read-csv-file fpath
 				      (Schema-has-headers schema)
@@ -121,7 +122,6 @@
                                             (Schema-has-headers schema)
                                             (new-DataFrameBuilder-from-Schema schema)
                                             delim))))
-
 (: determine-schema (FilePath Integer -> Schema))
 (define (determine-schema fpath cnt)
   (check-data-file-exists fpath)

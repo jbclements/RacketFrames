@@ -12,16 +12,18 @@ You can answer this question and many more with RacketFrames.
 
 [Racket Version 6](http://racket-lang.org/download/)
 
-[Pipe](https://github.com/RayRacine/pipe.git)
+[Pipe](https://github.com/RayRacine/pipe.git) Also available from Racket catalog.
 
-[Grip](https://github.com/RayRacine/grip.git)
+[Grip](https://github.com/RayRacine/grip.git) Also available from Racket catalog.
+
+[RacketFrames](https://github.com/bommysk/RacketFrames.git)
 
 ### Installing
 
 Step by step instructions on getting up and running.
 
 ```
-Download Racket Version 6 for your OS from the provided prerequisite link.
+Download Racket Version 6.8+ for your OS from the provided prerequisite link.
 ```
 
 Add the pipe and grip packages using [DrRacket](http://docs.racket-lang.org/quick/index.html) which comes installed when you download Racket.
@@ -30,16 +32,21 @@ Add the pipe and grip packages using [DrRacket](http://docs.racket-lang.org/quic
 
 ![Alt text](images/grip.png?raw=true "Title")
 
+![Alt text](images/racket_frames.png?raw=true "Title")
+
 ## Running the tests
 
 Currently the tests are integrated into the files themselves. A full test suite is in the works.
 
 ### Benchmarks
 
-One of the purposes of this work is to compare performances with other DataFrame implementations. Currently benchmarks are being implemented for comparison against Pandas.
+One of the purposes of this work is to compare performance with other DataFrame implementations. Currently benchmarks are being implemented for comparison against Pandas.
 
+Benchmarks are located in the benchmark directory and separated into different directories by the type of benchmark. They are shells scripts that print the performance of the benchmark against that of Pandas.
+
+Example:
 ```
-Give an example
+sh benchmark/join_merge/join_merge.sh
 ```
 
 ## Authors

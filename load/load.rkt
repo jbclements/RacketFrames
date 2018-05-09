@@ -2,8 +2,8 @@
 
 (provide:
  [determine-schema (FilePath Integer -> Schema)]
- [load-csv-file (FilePath [#:schema (Option Schema)] -> DataFrame)]
- [load-delimited-file (FilePath String [#:schema (Option Schema)] -> DataFrame)])
+ [load-csv-file (String [#:schema (Option Schema)] [#:delim (Option String)] -> DataFrame)]
+ [load-delimited-file (String String [#:schema (Option Schema)] -> DataFrame)])
 
 (require
  racket/match
@@ -107,21 +107,24 @@
   (define SAMPLE-SIZE 20)
   (if schema schema (determine-schema fpath SAMPLE-SIZE)))
 
-; delimiter must be specified by user if no schema provided
-(: load-csv-file (FilePath [#:schema (Option Schema)] [#:delim (Option Fixnum)] -> DataFrame))
-(define (load-csv-file fpath #:schema [schema #f] #:delim [delim #f])
-  (let ((schema (schema-if-needed schema fpath)))
+; delimiter must be specified by user if no schema provided, need to still do this
+(: load-csv-file (String [#:schema (Option Schema)] [#:delim (Option String)] -> DataFrame))
+(define (load-csv-file fpath-str #:schema [schema #f] #:delim [delim #f])
+  (let* ((fpath (FilePath fpath-str))
+         (schema (schema-if-needed schema fpath)))
     (make-data-frame schema (read-csv-file fpath
 				      (Schema-has-headers schema)
 				      (new-DataFrameBuilder-from-Schema schema)))))
 
-(: load-delimited-file (FilePath String [#:schema (Option Schema)] -> DataFrame))
-(define (load-delimited-file fpath delim #:schema [schema #f])
-  (let ((schema (schema-if-needed schema fpath)))
+(: load-delimited-file (String String [#:schema (Option Schema)] -> DataFrame))
+(define (load-delimited-file fpath-str delim #:schema [schema #f])
+  (let* ((fpath (FilePath fpath-str))
+         (schema (schema-if-needed schema fpath)))
     (make-data-frame schema (read-delimited-file fpath
                                             (Schema-has-headers schema)
                                             (new-DataFrameBuilder-from-Schema schema)
                                             delim))))
+
 (: determine-schema (FilePath Integer -> Schema))
 (define (determine-schema fpath cnt)
   (check-data-file-exists fpath)

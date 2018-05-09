@@ -34,6 +34,11 @@ Example installation using git url in package manager.
 
 ![Alt text](images/racket_frames.png?raw=true "Title")
 
+### Documentation
+
+The documentation is a work in progress.
+
+[Documentation](documentation/documentation.html)
 
 #### Example Usage
 ```

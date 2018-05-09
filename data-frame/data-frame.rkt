@@ -473,7 +473,6 @@
 ;******************
 ;data-frame-mix
 ;******************
-; will define parse to automatically build this columns structure
 (define columns-mix
   (list
    (cons 'integer-col (new-ISeries (vector 1 2 3 4)

@@ -38,7 +38,7 @@ Example installation using git url in package manager.
 
 The documentation is a work in progress.
 
-[Documentation](documentation/documentation.html)
+[Documentation](http://htmlpreview.github.com/?https://github.com/bommysk/RacketFrames/blob/master/documentation/documentation.html)
 
 #### Example Usage
 ```

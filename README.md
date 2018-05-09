@@ -27,12 +27,10 @@ Download Racket Version 6 for your OS from the provided prerequisite link.
 ```
 Add the pipe and grip packages using [DrRacket](http://docs.racket-lang.org/quick/index.html) which comes installed when you download Racket.
 
-![Alt text](relative/path/to/img.jpg?raw=true "Title")
+![Alt text](images/pipe.jpg?raw=true "Title")
 
-![Alt text](relative/path/to/img.jpg?raw=true "Title")
+![Alt text](images/grip.jpg?raw=true "Title")
 ```
-
-http://docs.racket-lang.org/quick/index.html
 
 ## Running the tests
 
@@ -40,7 +38,7 @@ Currently the tests are integrated into the files themselves. A full test suite 
 
 ### Benchmarks
 
-Explain what these tests test and why
+One of the purposes of this work is to compare performances with other DataFrame implementations. Currently benchmarks are being implemented for comparison against Pandas.
 
 ```
 Give an example
@@ -56,5 +54,5 @@ This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md
 
 ## Acknowledgments
 
-A huge thank you to [Ray Racine](https://github.com/RayRacine) who's repo   was used as the starting point of this project. This project aims to add further functionality, test cases and performance benchmarks to this existing library.
+A huge thank you to [Ray Racine](https://github.com/RayRacine) who's repo [Munger](https://github.com/RayRacine/munger) was used as the starting point of this project. This project aims to add further functionality, test cases and performance benchmarks to this existing library.
 

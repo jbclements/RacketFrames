@@ -4,9 +4,7 @@ This is RacketFrames. DataFrames from the popular Pandas library implemented in 
 
 ## Getting Started
 
-In this day and age procedural and functional programmers alike are working with large amounts of data. Many analytical libraries have been developed for many domains to work with such data. Python/Pandas, R or even the command prompt can be used to accomplish theses taks, but this option is especially good if you are 1) using Racket already 2) may need to integrate your solution with other Racket applications in the future or 3) just plain love functional programming.
-
-You can answer this question and many more with RacketFrames.
+In this day and age procedural and functional programmers alike are working with large amounts of data. Many analytical libraries have been developed for many domains to work with such data. Python/Pandas, R or even the command prompt can be used to accomplish theses tasks, but this option is especially good if you are 1) using Racket already 2) may need to integrate your solution with other Racket applications in the future or 3) just plain love functional programming.
 
 ### Prerequisites
 

@@ -8,16 +8,12 @@
 
 All of this content is within ``maincolumn'', then ``main''.
 
-@"\U2192" The version on the top left of this page is in
-``versionbox'' and then either span ``versionNoNav'' (no navigation
-bar, as for single-page rendering) or ``version'' (with navigation
-bar, as for multi-page rendering).
+@"\U2192" A data frame implementation in the spirit of Pandas or R data frames.
 
-@"\U2192" The author on the top left of this page is in
-``SAuthorListBox'', then ``SAuthorList'', and then a span ``author'',
-where @tt{<br/>} separates multiple authors.
-
-@"\U2190" The table-of-contents panels are both in a table ``tocset'':
+@"\U2192" Below is a simple motivating example. When working in Java, data operations
+like the following should be easy. The code below retrieves the S&P 500 daily market data
+for 2008 from Yahoo! Finance and returns the average monthly close for the three top months
+of the year.
 
 @margin-note{This note is in ``refpara'', then ``refcolumn'', then
              ``refcontent''.}

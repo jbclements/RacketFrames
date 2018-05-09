@@ -66,4 +66,6 @@
 	  alter-schema-columns
 	  alter-schema-no-headers)
  (only-in "data-frame/gen-nseries.rkt"
-	  generate-NSeries))
+	  generate-NSeries)
+ (only-in grip/system/filepath
+	  FilePath FilePath->string))

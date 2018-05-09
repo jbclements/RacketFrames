@@ -33,20 +33,25 @@ Operations between Series (+, -, /, , *) align values based on their associated 
 
 ]
 
-@subsection[#:style 'toc]{Methods}
+@subsection[#:style 'toc]{Integer Series}
 
 @local-table-of-contents[]
 
-@subsubsection[#:tag "deepest"]{Subsubsection in ``H5''}
+@subsubsection[#:tag "new-ISeries"]{new-ISeries}
 
 @"\U2190" This page has no on-this-page panel in a multi-page
 rendering, because there are no numbered subsections, but it has three
 levels shown in the table-of-contents panel.
 
-@subsubsub*section{``SSubSubSubSection''}
+@subsection[#:style 'toc]{Numerical Series}
 
+@local-table-of-contents[]
 
-@subsection{Second Subsection in ``H4''}
+@subsubsection[#:tag "new-NSeries"]{new-NSeries}
+
+@"\U2190" This page has no on-this-page panel in a multi-page
+rendering, because there are no numbered subsections, but it has three
+levels shown in the table-of-contents panel.
 
 
 @; ======================================================================

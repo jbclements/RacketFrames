@@ -33,11 +33,7 @@ Operations between Series (+, -, /, , *) align values based on their associated 
 
 ]
 
-Here is the target for the
-@toc-target-element[#f @elem{``tocnonseclink''} `(demo (prefixable "non-sec"))]
-link.
-
-@subsection[#:style 'toc]{Subsection in ``H4''}
+@subsection[#:style 'toc]{Methods}
 
 @local-table-of-contents[]
 

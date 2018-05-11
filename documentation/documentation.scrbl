@@ -94,7 +94,7 @@ Returns the Fixnum value at the specified index in the series.
   (define series-integer (new-ISeries (vector 1 2 3 4)
   (build-index-from-labels (list 'a 'b 'c 'd))))
 
-  (iseries-range series-integer 2) ; (list 'a 'b)
+  (iseries-range series-integer 2) ; (vector 1 2)
   }|
 
 @subsubsection[#:tag "iseries-length"]{iseries-length}
@@ -181,925 +181,819 @@ Returns the Fixnum value at the specified index in the series.
 
 @subsubsection[#:tag "comp/is"]{comp/is}
 
-@defproc[(make-sandwich [ingredients (listof ingredient?)])
-sandwich?]{
-Returns a sandwich given the right ingredients.
+@defproc[#:link-target? #f
+ (comp/is [iseries ISeries] [iseries-2 ISeries] [fn (Fixnum Fixnum -> Boolean)])
+BSeries]{
+Returns the Fixnum value at the specified index in the series.
 }
 
-@defproc[#:kind "sandwich-maker"
-(make-reuben [ingredient sauerkraut?] ...
-[#:veggie? veggie? any/c #f])
-sandwich?]{
-Produces a reuben given some number of @racket[ingredient]s.
-80
-If @racket[veggie?] is @racket[#f], produces a standard
-reuben with corned beef. Otherwise, produces a vegetable
-reuben.
-}
+@codeblock|{
+  (define series-integer (new-ISeries (vector 1 2 3 4) #f))
+
+  (define series-integer-2 (new-ISeries (vector 5 6 7 8) #f))
+
+  (ISeries-data (comp/is series-integer series-integer-2 (λ: ((x : Fixnum) (y : Fixnum)) (unsafe-fx> x y)))) ; (new-BSeries #f #f #f #f)
+  }|
+
 
 @subsubsection[#:tag "+/is"]{+/is}
 
-@defproc[(make-sandwich [ingredients (listof ingredient?)])
-sandwich?]{
-Returns a sandwich given the right ingredients.
+@defproc[#:link-target? #f
+ (+/is [iseries ISeries] [iseries-2 ISeries])
+ISeries]{
+Returns the Fixnum value at the specified index in the series.
 }
 
-@defproc[#:kind "sandwich-maker"
-(make-reuben [ingredient sauerkraut?] ...
-[#:veggie? veggie? any/c #f])
-sandwich?]{
-Produces a reuben given some number of @racket[ingredient]s.
-80
-If @racket[veggie?] is @racket[#f], produces a standard
-reuben with corned beef. Otherwise, produces a vegetable
-reuben.
-}
+@codeblock|{
+  (define series-integer (new-ISeries (vector 1 2 3 4) #f))
+
+  (define series-integer-2 (new-ISeries (vector 5 6 7 8) #f))
+
+  (ISeries-data (+/is series-integer series-integer-2)) ; (vector 6 8 10 12)
+  }|
 
 @subsubsection[#:tag "-/is"]{-/is}
 
-@defproc[(make-sandwich [ingredients (listof ingredient?)])
-sandwich?]{
-Returns a sandwich given the right ingredients.
+@defproc[#:link-target? #f
+ (+/is [iseries ISeries] [iseries-2 ISeries])
+ISeries]{
+Returns the Fixnum value at the specified index in the series.
 }
 
-@defproc[#:kind "sandwich-maker"
-(make-reuben [ingredient sauerkraut?] ...
-[#:veggie? veggie? any/c #f])
-sandwich?]{
-Produces a reuben given some number of @racket[ingredient]s.
-80
-If @racket[veggie?] is @racket[#f], produces a standard
-reuben with corned beef. Otherwise, produces a vegetable
-reuben.
-}
+@codeblock|{
+  (define series-integer (new-ISeries (vector 1 2 3 4) #f))
+
+  (define series-integer-2 (new-ISeries (vector 5 6 7 8) #f))
+
+  (ISeries-data (-/is series-integer series-integer-2)) ; (vector -4 -4 -4 -4)
+  }|
 
 @subsubsection[#:tag "*/is"]{*/is}
 
-@defproc[(make-sandwich [ingredients (listof ingredient?)])
-sandwich?]{
-Returns a sandwich given the right ingredients.
+@defproc[#:link-target? #f
+ (*/is [iseries ISeries] [iseries-2 ISeries])
+ISeries]{
+Returns the Fixnum value at the specified index in the series.
 }
 
-@defproc[#:kind "sandwich-maker"
-(make-reuben [ingredient sauerkraut?] ...
-[#:veggie? veggie? any/c #f])
-sandwich?]{
-Produces a reuben given some number of @racket[ingredient]s.
-80
-If @racket[veggie?] is @racket[#f], produces a standard
-reuben with corned beef. Otherwise, produces a vegetable
-reuben.
-}
+@codeblock|{
+  (define series-integer (new-ISeries (vector 1 2 3 4) #f))
+
+  (define series-integer-2 (new-ISeries (vector 5 6 7 8) #f))
+
+  (ISeries-data (*/is series-integer series-integer-2)) ; (vector 5 12 21 32)
+  }|
 
 @subsubsection[#:tag "//is"]{//is}
 
-@defproc[(make-sandwich [ingredients (listof ingredient?)])
-sandwich?]{
-Returns a sandwich given the right ingredients.
+@defproc[#:link-target? #f
+ (//is [iseries ISeries] [iseries-2 ISeries])
+ISeries]{
+Returns the Fixnum value at the specified index in the series.
 }
 
-@defproc[#:kind "sandwich-maker"
-(make-reuben [ingredient sauerkraut?] ...
-[#:veggie? veggie? any/c #f])
-sandwich?]{
-Produces a reuben given some number of @racket[ingredient]s.
-80
-If @racket[veggie?] is @racket[#f], produces a standard
-reuben with corned beef. Otherwise, produces a vegetable
-reuben.
-}
+@codeblock|{
+  (define series-integer (new-ISeries (vector 1 2 3 4) #f))
+
+  (define series-integer-2 (new-ISeries (vector 5 6 7 8) #f))
+
+  (ISeries-data (//is series-integer series-integer-2)) ; (vector 0 0 0 0)
+  }|
 
 @subsubsection[#:tag "iseries-data"]{%/is}
 
-@defproc[(make-sandwich [ingredients (listof ingredient?)])
-sandwich?]{
-Returns a sandwich given the right ingredients.
+@defproc[#:link-target? #f
+ (%/is [iseries ISeries] [iseries-2 ISeries])
+ISeries]{
+Returns the Fixnum value at the specified index in the series.
 }
 
-@defproc[#:kind "sandwich-maker"
-(make-reuben [ingredient sauerkraut?] ...
-[#:veggie? veggie? any/c #f])
-sandwich?]{
-Produces a reuben given some number of @racket[ingredient]s.
-80
-If @racket[veggie?] is @racket[#f], produces a standard
-reuben with corned beef. Otherwise, produces a vegetable
-reuben.
-}
+@codeblock|{
+  (define series-integer (new-ISeries (vector 1 2 3 4) #f))
+
+  (define series-integer-2 (new-ISeries (vector 5 6 7 8) #f))
+
+  (ISeries-data (%/is series-integer series-integer-2)) ; (vector 1 2 3 4)
+  }|
 
 @subsubsection[#:tag "r/is"]{r/is}
 
-@defproc[(make-sandwich [ingredients (listof ingredient?)])
-sandwich?]{
-Returns a sandwich given the right ingredients.
+@defproc[#:link-target? #f
+ (r/is [iseries ISeries] [iseries-2 ISeries])
+ISeries]{
+Returns the Fixnum value at the specified index in the series.
 }
 
-@defproc[#:kind "sandwich-maker"
-(make-reuben [ingredient sauerkraut?] ...
-[#:veggie? veggie? any/c #f])
-sandwich?]{
-Produces a reuben given some number of @racket[ingredient]s.
-80
-If @racket[veggie?] is @racket[#f], produces a standard
-reuben with corned beef. Otherwise, produces a vegetable
-reuben.
-}
+@codeblock|{
+  (define series-integer (new-ISeries (vector 1 2 3 4) #f))
+
+  (define series-integer-2 (new-ISeries (vector 5 6 7 8) #f))
+
+  (ISeries-data (r/is series-integer series-integer-2)) ; (vector 1 2 3 4)
+  }|
 
 @subsubsection[#:tag "+./is"]{+./is}
 
-@defproc[(make-sandwich [ingredients (listof ingredient?)])
-sandwich?]{
-Returns a sandwich given the right ingredients.
+@defproc[#:link-target? #f
+ (+./is [iseries ISeries] [num Fixnum])
+ISeries]{
+Returns the Fixnum value at the specified index in the series.
 }
 
-@defproc[#:kind "sandwich-maker"
-(make-reuben [ingredient sauerkraut?] ...
-[#:veggie? veggie? any/c #f])
-sandwich?]{
-Produces a reuben given some number of @racket[ingredient]s.
-80
-If @racket[veggie?] is @racket[#f], produces a standard
-reuben with corned beef. Otherwise, produces a vegetable
-reuben.
-}
+@codeblock|{
+  (define series-integer (new-ISeries (vector 1 2 3 4) #f))
+
+  (ISeries-data (+./is series-integer 2)) ; (vector 3 4 5 6)
+  }|
 
 @subsubsection[#:tag "-./is"]{-./is}
 
-@defproc[(make-sandwich [ingredients (listof ingredient?)])
-sandwich?]{
-Returns a sandwich given the right ingredients.
+@defproc[#:link-target? #f
+ (-./is [iseries ISeries] [num Fixnum])
+ISeries]{
+Returns the Fixnum value at the specified index in the series.
 }
 
-@defproc[#:kind "sandwich-maker"
-(make-reuben [ingredient sauerkraut?] ...
-[#:veggie? veggie? any/c #f])
-sandwich?]{
-Produces a reuben given some number of @racket[ingredient]s.
-80
-If @racket[veggie?] is @racket[#f], produces a standard
-reuben with corned beef. Otherwise, produces a vegetable
-reuben.
-}
+@codeblock|{
+  (define series-integer (new-ISeries (vector 1 2 3 4) #f))
+
+  (ISeries-data (-./is series-integer 2)) ; (vector -1 0 1 2)
+  }|
 
 @subsubsection[#:tag "*./is"]{*./is}
 
-@defproc[(make-sandwich [ingredients (listof ingredient?)])
-sandwich?]{
-Returns a sandwich given the right ingredients.
+@defproc[#:link-target? #f
+ (*./is [iseries ISeries] [num Fixnum])
+ISeries]{
+Returns the Fixnum value at the specified index in the series.
 }
 
-@defproc[#:kind "sandwich-maker"
-(make-reuben [ingredient sauerkraut?] ...
-[#:veggie? veggie? any/c #f])
-sandwich?]{
-Produces a reuben given some number of @racket[ingredient]s.
-80
-If @racket[veggie?] is @racket[#f], produces a standard
-reuben with corned beef. Otherwise, produces a vegetable
-reuben.
-}
+@codeblock|{
+  (define series-integer (new-ISeries (vector 1 2 3 4) #f))
+
+  (ISeries-data (*./is series-integer 2)) ; (vector 2 3 6 8)
+  }|
 
 @subsubsection[#:tag "/./is"]{/./is}
 
-@defproc[(make-sandwich [ingredients (listof ingredient?)])
-sandwich?]{
-Returns a sandwich given the right ingredients.
+@defproc[#:link-target? #f
+ (/./is [iseries ISeries] [num Fixnum])
+ISeries]{
+Returns the Fixnum value at the specified index in the series.
 }
 
-@defproc[#:kind "sandwich-maker"
-(make-reuben [ingredient sauerkraut?] ...
-[#:veggie? veggie? any/c #f])
-sandwich?]{
-Produces a reuben given some number of @racket[ingredient]s.
-80
-If @racket[veggie?] is @racket[#f], produces a standard
-reuben with corned beef. Otherwise, produces a vegetable
-reuben.
-}
+@codeblock|{
+  (define series-integer (new-ISeries (vector 1 2 3 4) #f))
+
+  (ISeries-data (/./is series-integer 2)) ; (vector 0 1 1 2)
+  }|
 
 @subsubsection[#:tag "%./is"]{%./is}
 
-@defproc[(make-sandwich [ingredients (listof ingredient?)])
-sandwich?]{
-Returns a sandwich given the right ingredients.
+@defproc[#:link-target? #f
+ (%./is [iseries ISeries] [num Fixnum])
+ISeries]{
+Returns the Fixnum value at the specified index in the series.
 }
 
-@defproc[#:kind "sandwich-maker"
-(make-reuben [ingredient sauerkraut?] ...
-[#:veggie? veggie? any/c #f])
-sandwich?]{
-Produces a reuben given some number of @racket[ingredient]s.
-80
-If @racket[veggie?] is @racket[#f], produces a standard
-reuben with corned beef. Otherwise, produces a vegetable
-reuben.
-}
+@codeblock|{
+  (define series-integer (new-ISeries (vector 1 2 3 4) #f))
+
+  (ISeries-data (%./is series-integer 2)) ; (vector 1 0 1 0)
+  }|
 
 @subsubsection[#:tag "r./is"]{r./is}
 
-@defproc[(make-sandwich [ingredients (listof ingredient?)])
-sandwich?]{
-Returns a sandwich given the right ingredients.
+@defproc[#:link-target? #f
+ (r./is [iseries ISeries] [num Fixnum])
+ISeries]{
+Returns the Fixnum value at the specified index in the series.
 }
 
-@defproc[#:kind "sandwich-maker"
-(make-reuben [ingredient sauerkraut?] ...
-[#:veggie? veggie? any/c #f])
-sandwich?]{
-Produces a reuben given some number of @racket[ingredient]s.
-80
-If @racket[veggie?] is @racket[#f], produces a standard
-reuben with corned beef. Otherwise, produces a vegetable
-reuben.
-}
+@codeblock|{
+  (define series-integer (new-ISeries (vector 1 2 3 4) #f))
+
+  (ISeries-data (r./is series-integer 2)) ; (vector 1 0 1 0)
+  }|
 
 @subsubsection[#:tag ">/is"]{>/is}
 
-@defproc[(make-sandwich [ingredients (listof ingredient?)])
-sandwich?]{
-Returns a sandwich given the right ingredients.
+@defproc[#:link-target? #f
+ (>/is [iseries ISeries] [iseries-2 ISeries])
+BSeries]{
+Returns the Fixnum value at the specified index in the series.
 }
 
-@defproc[#:kind "sandwich-maker"
-(make-reuben [ingredient sauerkraut?] ...
-[#:veggie? veggie? any/c #f])
-sandwich?]{
-Produces a reuben given some number of @racket[ingredient]s.
-80
-If @racket[veggie?] is @racket[#f], produces a standard
-reuben with corned beef. Otherwise, produces a vegetable
-reuben.
-}
+@codeblock|{
+  (define series-integer (new-ISeries (vector 1 2 3 4) #f))
+
+  (define series-integer-2 (new-ISeries (vector 5 6 7 8) #f))
+
+  (BSeries-data (>/is series-integer series-integer-2)) ; (vector #f #f #f #f)
+  }|
 
 @subsubsection[#:tag "</is"]{</is}
 
-@defproc[(make-sandwich [ingredients (listof ingredient?)])
-sandwich?]{
-Returns a sandwich given the right ingredients.
+@defproc[#:link-target? #f
+ (</is [iseries ISeries] [iseries-2 ISeries])
+BSeries]{
+Returns the Fixnum value at the specified index in the series.
 }
 
-@defproc[#:kind "sandwich-maker"
-(make-reuben [ingredient sauerkraut?] ...
-[#:veggie? veggie? any/c #f])
-sandwich?]{
-Produces a reuben given some number of @racket[ingredient]s.
-80
-If @racket[veggie?] is @racket[#f], produces a standard
-reuben with corned beef. Otherwise, produces a vegetable
-reuben.
-}
+@codeblock|{
+  (define series-integer (new-ISeries (vector 1 2 3 4) #f))
+
+  (define series-integer-2 (new-ISeries (vector 5 6 7 8) #f))
+
+  (BSeries-data (</is series-integer series-integer-2)) ; (vector #f #f #f #f)
+  }|
 
 @subsubsection[#:tag ">=/is"]{>=/is}
 
-@defproc[(make-sandwich [ingredients (listof ingredient?)])
-sandwich?]{
-Returns a sandwich given the right ingredients.
+@defproc[#:link-target? #f
+ (>=/is [iseries ISeries] [iseries-2 ISeries])
+BSeries]{
+Returns the Fixnum value at the specified index in the series.
 }
 
-@defproc[#:kind "sandwich-maker"
-(make-reuben [ingredient sauerkraut?] ...
-[#:veggie? veggie? any/c #f])
-sandwich?]{
-Produces a reuben given some number of @racket[ingredient]s.
-80
-If @racket[veggie?] is @racket[#f], produces a standard
-reuben with corned beef. Otherwise, produces a vegetable
-reuben.
-}
+@codeblock|{
+  (define series-integer (new-ISeries (vector 1 2 3 4) #f))
+
+  (define series-integer-2 (new-ISeries (vector 5 6 7 8) #f))
+
+  (BSeries-data (>=/is series-integer series-integer-2)) ; (vector #f #f #f #f)
+  }|
 
 @subsubsection[#:tag "<=/is"]{<=/is}
 
-@defproc[(make-sandwich [ingredients (listof ingredient?)])
-sandwich?]{
-Returns a sandwich given the right ingredients.
+@defproc[#:link-target? #f
+ (<=/is [iseries ISeries] [iseries-2 ISeries])
+BSeries]{
+Returns the Fixnum value at the specified index in the series.
 }
 
-@defproc[#:kind "sandwich-maker"
-(make-reuben [ingredient sauerkraut?] ...
-[#:veggie? veggie? any/c #f])
-sandwich?]{
-Produces a reuben given some number of @racket[ingredient]s.
-80
-If @racket[veggie?] is @racket[#f], produces a standard
-reuben with corned beef. Otherwise, produces a vegetable
-reuben.
-}
+@codeblock|{
+  (define series-integer (new-ISeries (vector 1 2 3 4) #f))
+
+  (define series-integer-2 (new-ISeries (vector 5 6 7 8) #f))
+
+  (BSeries-data (<=/is series-integer series-integer-2)) ; (vector #t #t #t #t)
+  }|
 
 @subsubsection[#:tag "=/is"]{=/is}
 
-@defproc[(make-sandwich [ingredients (listof ingredient?)])
-sandwich?]{
-Returns a sandwich given the right ingredients.
+@defproc[#:link-target? #f
+ (=/is [iseries ISeries] [iseries-2 ISeries])
+BSeries]{
+Returns the Fixnum value at the specified index in the series.
 }
 
-@defproc[#:kind "sandwich-maker"
-(make-reuben [ingredient sauerkraut?] ...
-[#:veggie? veggie? any/c #f])
-sandwich?]{
-Produces a reuben given some number of @racket[ingredient]s.
-80
-If @racket[veggie?] is @racket[#f], produces a standard
-reuben with corned beef. Otherwise, produces a vegetable
-reuben.
-}
+@codeblock|{
+  (define series-integer (new-ISeries (vector 1 2 3 4) #f))
+
+  (define series-integer-2 (new-ISeries (vector 5 6 7 8) #f))
+
+  (BSeries-data (=/is series-integer series-integer-2)) ; (vector #f #f #f #f)
+  }|
 
 @subsubsection[#:tag "!=/is"]{!=/is}
 
-@defproc[(make-sandwich [ingredients (listof ingredient?)])
-sandwich?]{
-Returns a sandwich given the right ingredients.
+@defproc[#:link-target? #f
+ (!=/is [iseries ISeries] [iseries-2 ISeries])
+BSeries]{
+Returns the Fixnum value at the specified index in the series.
 }
 
-@defproc[#:kind "sandwich-maker"
-(make-reuben [ingredient sauerkraut?] ...
-[#:veggie? veggie? any/c #f])
-sandwich?]{
-Produces a reuben given some number of @racket[ingredient]s.
-80
-If @racket[veggie?] is @racket[#f], produces a standard
-reuben with corned beef. Otherwise, produces a vegetable
-reuben.
-}
+@codeblock|{
+  (define series-integer (new-ISeries (vector 1 2 3 4) #f))
+
+  (define series-integer-2 (new-ISeries (vector 5 6 7 8) #f))
+
+  (BSeries-data (!=/is series-integer series-integer-2)) ; (vector #t #t #t #t)
+  }|
 
 @subsubsection[#:tag "{apply-agg-is"]{apply-agg-is}
 
-@defproc[(make-sandwich [ingredients (listof ingredient?)])
-sandwich?]{
-Returns a sandwich given the right ingredients.
+@defproc[#:link-target? #f
+ (apply-agg-is [func Symbol] [iseries ISeries])
+Real]{
+Returns the Fixnum value at the specified index in the series.
 }
 
-@defproc[#:kind "sandwich-maker"
-(make-reuben [ingredient sauerkraut?] ...
-[#:veggie? veggie? any/c #f])
-sandwich?]{
-Produces a reuben given some number of @racket[ingredient]s.
-80
-If @racket[veggie?] is @racket[#f], produces a standard
-reuben with corned beef. Otherwise, produces a vegetable
-reuben.
-}
+@codeblock|{
+  (define series-integer (new-ISeries (vector 1 2 3 4) #f))
+
+  (apply-agg-is 'sum series-integer) ; 10
+
+  (apply-agg-is 'mean series-integer) ; 10/4
+
+  (apply-agg-is 'count series-integer) ; 4
+
+  (apply-agg-is 'min series-integer) ; 1
+
+  (apply-agg-is 'max series-integer) ; 4
+  }|
 
 @subsubsection[#:tag "apply-stat-is"]{apply-stat-is}
 
-@defproc[(make-sandwich [ingredients (listof ingredient?)])
-sandwich?]{
-Returns a sandwich given the right ingredients.
+@defproc[#:link-target? #f
+ (apply-stat-is [func Symbol] [iseries ISeries])
+Real]{
+Returns the Fixnum value at the specified index in the series.
 }
 
-@defproc[#:kind "sandwich-maker"
-(make-reuben [ingredient sauerkraut?] ...
-[#:veggie? veggie? any/c #f])
-sandwich?]{
-Produces a reuben given some number of @racket[ingredient]s.
-80
-If @racket[veggie?] is @racket[#f], produces a standard
-reuben with corned beef. Otherwise, produces a vegetable
-reuben.
-}
+@codeblock|{
+  (define series-integer (new-ISeries (vector 1 2 3 4) #f))
+
+  (apply-stat-is 'variance series-integer) ; 5/4
+
+  (apply-stat-is 'stddev series-integer) ; 1.118033988749895
+
+  (apply-stat-is 'skewness series-integer) ; 0.0
+  }|
 
 @subsection[#:style 'toc]{Numerical Series}
 
 @local-table-of-contents[]
 
 @subsubsection[#:tag "new-NSeries"]{new-NSeries}
-
-@defproc[(make-sandwich [ingredients (listof ingredient?)])
-sandwich?]{
-Returns a sandwich given the right ingredients.
+@defproc[#:link-target? #f
+ (new-NSeries [data (Vectorof Float)] [label (Option (U (Lnstof Label) SIndex))])
+NSeries?]{
+Returns a new NSeries.
 }
 
-@defproc[#:kind "sandwich-maker"
-(make-reuben [ingredient sauerkraut?] ...
-[#:veggie? veggie? any/c #f])
-sandwich?]{
-Produces a reuben given some number of @racket[ingredient]s.
-80
-If @racket[veggie?] is @racket[#f], produces a standard
-reuben with corned beef. Otherwise, produces a vegetable
-reuben.
-}
+@codeblock|{
+    (define series-float (new-NSeries (flvector 1.5 2.4 3.6 4.1)
+                                      (build-index-from-labels (list 'a 'b 'c 'd))))
+  }|
 
 @subsubsection[#:tag "nseries-iref"]{nseries-iref}
-
-@defproc[(make-sandwich [ingredients (listof ingredient?)])
-sandwich?]{
-Returns a sandwich given the right ingredients.
+@defproc[#:link-target? #f
+ (nseries-iref [nseries NSeries] [idx Index])
+Float?]{
+Returns the Float value at the specified index in the series.
 }
 
-@defproc[#:kind "sandwich-maker"
-(make-reuben [ingredient sauerkraut?] ...
-[#:veggie? veggie? any/c #f])
-sandwich?]{
-Produces a reuben given some number of @racket[ingredient]s.
-80
-If @racket[veggie?] is @racket[#f], produces a standard
-reuben with corned beef. Otherwise, produces a vegetable
-reuben.
-}
+@codeblock|{
+ 
+(define series-float (new-NSeries (flvector 1.5 2.4 3.6 4.1)
+                                      (build-index-from-labels (list 'a 'b 'c 'd))))
+                                      
+(nseries-iref series-float 0) ; 1.5
+
+(nseries-iref series-float 1) ; 2.4
+  }|
 
 @subsubsection[#:tag "nseries-label-ref"]{nseries-label-ref}
-
-@defproc[(make-sandwich [ingredients (listof ingredient?)])
-sandwich?]{
-Returns a sandwich given the right ingredients.
+@defproc[#:link-target? #f
+ (nseries-label-ref [nseries NSeries] [label Label])
+Float?]{
+Returns the Float value at the specified index in the series.
 }
 
-@defproc[#:kind "sandwich-maker"
-(make-reuben [ingredient sauerkraut?] ...
-[#:veggie? veggie? any/c #f])
-sandwich?]{
-Produces a reuben given some number of @racket[ingredient]s.
-80
-If @racket[veggie?] is @racket[#f], produces a standard
-reuben with corned beef. Otherwise, produces a vegetable
-reuben.
-}
+@codeblock|{
+  (define series-float (new-NSeries (flvector 1.5 2.4 3.6 4.1)
+                                      (build-index-from-labels (list 'a 'b 'c 'd))))
+
+  (nseries-label-ref series-float 'd) ; 4.1
+  
+  (nseries-label-ref series-float 'c) ; 3.6
+  }|
 
 @subsubsection[#:tag "nseries-range"]{nseries-range}
-
-@defproc[(make-sandwich [ingredients (listof ingredient?)])
-sandwich?]{
-Returns a sandwich given the right ingredients.
+@defproc[#:link-target? #f
+ (nseries-range [nseries NSeries] [pos Index])
+(Vectorof Float)]{
+Returns the Float value at the specified index in the series.
 }
 
-@defproc[#:kind "sandwich-maker"
-(make-reuben [ingredient sauerkraut?] ...
-[#:veggie? veggie? any/c #f])
-sandwich?]{
-Produces a reuben given some number of @racket[ingredient]s.
-80
-If @racket[veggie?] is @racket[#f], produces a standard
-reuben with corned beef. Otherwise, produces a vegetable
-reuben.
-}
+@codeblock|{
+  (define series-float (new-NSeries (flvector 1.5 2.4 3.6 4.1)
+                                      (build-index-from-labels (list 'a 'b 'c 'd))))
+
+  (nseries-range series-float 2) ; (flvector 1.5 2.4)
+  }|
 
 @subsubsection[#:tag "nseries-length"]{nseries-length}
-
-@defproc[(make-sandwich [ingredients (listof ingredient?)])
-sandwich?]{
-Returns a sandwich given the right ingredients.
+@defproc[#:link-target? #f
+ (nseries-length [nseries NSeries])
+Index]{
+Returns the Float value at the specified index in the series.
 }
 
-@defproc[#:kind "sandwich-maker"
-(make-reuben [ingredient sauerkraut?] ...
-[#:veggie? veggie? any/c #f])
-sandwich?]{
-Produces a reuben given some number of @racket[ingredient]s.
-80
-If @racket[veggie?] is @racket[#f], produces a standard
-reuben with corned beef. Otherwise, produces a vegetable
-reuben.
-}
+@codeblock|{
+  (define series-float (new-NSeries (flvector 1.5 2.4 3.6 4.1)
+  (build-index-from-labels (list 'a 'b 'c 'd))))
+
+  (nseries-length series-float) ; 4
+  }|
 
 @subsubsection[#:tag "nseries-referencer"]{nseries-referencer}
-
-@defproc[(make-sandwich [ingredients (listof ingredient?)])
-sandwich?]{
-Returns a sandwich given the right ingredients.
+@defproc[#:link-target? #f
+ (nseries-referencer [nseries NSeries])
+(Index -> Float)]{
+Returns the Float value at the specified index in the series.
 }
 
-@defproc[#:kind "sandwich-maker"
-(make-reuben [ingredient sauerkraut?] ...
-[#:veggie? veggie? any/c #f])
-sandwich?]{
-Produces a reuben given some number of @racket[ingredient]s.
-80
-If @racket[veggie?] is @racket[#f], produces a standard
-reuben with corned beef. Otherwise, produces a vegetable
-reuben.
-}
+@codeblock|{
+  (define series-float (new-NSeries (flvector 1.5 2.4 3.6 4.1)
+  (build-index-from-labels (list 'a 'b 'c 'd))))
+
+  ((nseries-referencer series-float) 0) ; 1.5
+
+  ((nseries-referencer series-float) 1) ; 2.4
+  }|
+
 
 @subsubsection[#:tag "nseries-data"]{nseries-data}
 
-@defproc[(make-sandwich [ingredients (listof ingredient?)])
-sandwich?]{
-Returns a sandwich given the right ingredients.
+@defproc[#:link-target? #f
+ (nseries-data [nseries NSeries])
+(Vectorof Float)]{
+Returns the Float value at the specified index in the series.
 }
 
-@defproc[#:kind "sandwich-maker"
-(make-reuben [ingredient sauerkraut?] ...
-[#:veggie? veggie? any/c #f])
-sandwich?]{
-Produces a reuben given some number of @racket[ingredient]s.
-80
-If @racket[veggie?] is @racket[#f], produces a standard
-reuben with corned beef. Otherwise, produces a vegetable
-reuben.
-}
+@codeblock|{
+  (define series-float (new-NSeries (flvector 1.5 2.4 3.6 4.1)
+  (build-index-from-labels (list 'a 'b 'c 'd))))
+
+  (nseries-data series-foat) ; (flvector 1.5 2.4 3.6 4.1)ap
+  }|
 
 @subsubsection[#:tag "map/ns"]{map/ns}
 
-@defproc[(make-sandwich [ingredients (listof ingredient?)])
-sandwich?]{
-Returns a sandwich given the right ingredients.
+@defproc[#:link-target? #f
+ (map/ns [nseries NSeries] [fn (Float -> Float)])
+NSeries]{
+Returns the Float value at the specified index in the series.
 }
 
-@defproc[#:kind "sandwich-maker"
-(make-reuben [ingredient sauerkraut?] ...
-[#:veggie? veggie? any/c #f])
-sandwich?]{
-Produces a reuben given some number of @racket[ingredient]s.
-80
-If @racket[veggie?] is @racket[#f], produces a standard
-reuben with corned beef. Otherwise, produces a vegetable
-reuben.
-}
+@codeblock|{
+  (define series-float (new-NSeries (flvector 1.5 2.4 3.6 4.1)
+  (build-index-from-labels (list 'a 'b 'c 'd))))
+
+  (NSeries-data (map/ns series-float (λ: ((x : Float)) (fl+ x 1.0)))) ; (flvector 2.5 3.4 4.6 5.1)
+  }|
 
 @subsubsection[#:tag "bop/ns"]{bop/ns}
+(NSeries NSeries (Float Float -> Float) -> NSeries)
 
-@defproc[(make-sandwich [ingredients (listof ingredient?)])
-sandwich?]{
-Returns a sandwich given the right ingredients.
+@defproc[#:link-target? #f
+ (bop/ns [nseries NSeries] [nseries-2 NSeries] [fn (Float Float -> Float)])
+NSeries]{
+Returns the Float value at the specified index in the series.
 }
 
-@defproc[#:kind "sandwich-maker"
-(make-reuben [ingredient sauerkraut?] ...
-[#:veggie? veggie? any/c #f])
-sandwich?]{
-Produces a reuben given some number of @racket[ingredient]s.
-80
-If @racket[veggie?] is @racket[#f], produces a standard
-reuben with corned beef. Otherwise, produces a vegetable
-reuben.
-}
+@codeblock|{
+  (define series-integer (new-NSeries (vector 1 2 3 4) #f))
+
+  (define series-integer-2 (new-NSeries (vector 5 6 7 8) #f))
+
+  (NSeries-data (bop/ns series-integer series-integer-2 (λ: ((x : Float) (y : Float)) (unsafe-fx+ x y)))) ; (new-NSeries 6 8 10 12)
+  }|
 
 @subsubsection[#:tag "comp/ns"]{comp/ns}
 
-@defproc[(make-sandwich [ingredients (listof ingredient?)])
-sandwich?]{
-Returns a sandwich given the right ingredients.
+@defproc[#:link-target? #f
+ (comp/ns [nseries NSeries] [nseries-2 NSeries] [fn (Float Float -> Boolean)])
+BSeries]{
+Returns the Float value at the specified index in the series.
 }
 
-@defproc[#:kind "sandwich-maker"
-(make-reuben [ingredient sauerkraut?] ...
-[#:veggie? veggie? any/c #f])
-sandwich?]{
-Produces a reuben given some number of @racket[ingredient]s.
-80
-If @racket[veggie?] is @racket[#f], produces a standard
-reuben with corned beef. Otherwise, produces a vegetable
-reuben.
-}
+@codeblock|{
+  (define series-integer (new-NSeries (vector 1 2 3 4) #f))
+
+  (define series-integer-2 (new-NSeries (vector 5 6 7 8) #f))
+
+  (NSeries-data (comp/ns series-integer series-integer-2 (λ: ((x : Float) (y : Float)) (unsafe-fx> x y)))) ; (new-BSeries #f #f #f #f)
+  }|
+
 
 @subsubsection[#:tag "+/ns"]{+/ns}
 
-@defproc[(make-sandwich [ingredients (listof ingredient?)])
-sandwich?]{
-Returns a sandwich given the right ingredients.
+@defproc[#:link-target? #f
+ (+/ns [nseries NSeries] [nseries-2 NSeries])
+NSeries]{
+Returns the Float value at the specified index in the series.
 }
 
-@defproc[#:kind "sandwich-maker"
-(make-reuben [ingredient sauerkraut?] ...
-[#:veggie? veggie? any/c #f])
-sandwich?]{
-Produces a reuben given some number of @racket[ingredient]s.
-80
-If @racket[veggie?] is @racket[#f], produces a standard
-reuben with corned beef. Otherwise, produces a vegetable
-reuben.
-}
+@codeblock|{
+  (define series-float (new-NSeries (flvector 1.5 2.4 3.6 4.1)
+                                      (build-index-from-labels (list 'a 'b 'c 'd))))
+
+  (define series-float-2 (new-NSeries (flvector 5.0 6.0 7.0 8.0)
+                                      (build-index-from-labels (list 'a 'b 'c 'd))))
+
+  (NSeries-data (+/ns series-float series-float-2)) ; (flvector 6.5 8.4 10.6 12.1))
+  }|
 
 @subsubsection[#:tag "-/ns"]{-/ns}
 
-@defproc[(make-sandwich [ingredients (listof ingredient?)])
-sandwich?]{
-Returns a sandwich given the right ingredients.
+@defproc[#:link-target? #f
+ (+/ns [nseries NSeries] [nseries-2 NSeries])
+NSeries]{
+Returns the Float value at the specified index in the series.
 }
 
-@defproc[#:kind "sandwich-maker"
-(make-reuben [ingredient sauerkraut?] ...
-[#:veggie? veggie? any/c #f])
-sandwich?]{
-Produces a reuben given some number of @racket[ingredient]s.
-80
-If @racket[veggie?] is @racket[#f], produces a standard
-reuben with corned beef. Otherwise, produces a vegetable
-reuben.
-}
+@codeblock|{
+  (define series-float (new-NSeries (flvector 1.5 2.4 3.6 4.1)
+                                      (build-index-from-labels (list 'a 'b 'c 'd))))
+
+  (define series-float-2 (new-NSeries (flvector 5.0 6.0 7.0 8.0)
+                                      (build-index-from-labels (list 'a 'b 'c 'd))))
+
+  (NSeries-data (-/ns series-float series-float-2)) ; (flvector -3.5 -3.6 -3.4 -3.9000000000000004)
+  }|
 
 @subsubsection[#:tag "*/ns"]{*/ns}
 
-@defproc[(make-sandwich [ingredients (listof ingredient?)])
-sandwich?]{
-Returns a sandwich given the right ingredients.
+@defproc[#:link-target? #f
+ (*/ns [nseries NSeries] [nseries-2 NSeries])
+NSeries]{
+Returns the Float value at the specified index in the series.
 }
 
-@defproc[#:kind "sandwich-maker"
-(make-reuben [ingredient sauerkraut?] ...
-[#:veggie? veggie? any/c #f])
-sandwich?]{
-Produces a reuben given some number of @racket[ingredient]s.
-80
-If @racket[veggie?] is @racket[#f], produces a standard
-reuben with corned beef. Otherwise, produces a vegetable
-reuben.
-}
+@codeblock|{
+  (define series-float (new-NSeries (flvector 1.5 2.4 3.6 4.1)
+                                      (build-index-from-labels (list 'a 'b 'c 'd))))
+
+  (define series-float-2 (new-NSeries (flvector 5.0 6.0 7.0 8.0)
+                                      (build-index-from-labels (list 'a 'b 'c 'd))))
+
+  (NSeries-data (*/ns series-float series-float-2)) ; (flvector 7.5 14.399999999999999 25.2 32.8)
+  }|
 
 @subsubsection[#:tag "//ns"]{//ns}
 
-@defproc[(make-sandwich [ingredients (listof ingredient?)])
-sandwich?]{
-Returns a sandwich given the right ingredients.
+@defproc[#:link-target? #f
+ (//ns [nseries NSeries] [nseries-2 NSeries])
+NSeries]{
+Returns the Float value at the specified index in the series.
 }
 
-@defproc[#:kind "sandwich-maker"
-(make-reuben [ingredient sauerkraut?] ...
-[#:veggie? veggie? any/c #f])
-sandwich?]{
-Produces a reuben given some number of @racket[ingredient]s.
-80
-If @racket[veggie?] is @racket[#f], produces a standard
-reuben with corned beef. Otherwise, produces a vegetable
-reuben.
-}
+@codeblock|{
+  (define series-float (new-NSeries (flvector 1.5 2.4 3.6 4.1)
+                                      (build-index-from-labels (list 'a 'b 'c 'd))))
+
+  (define series-float-2 (new-NSeries (flvector 5.0 6.0 7.0 8.0)
+                                      (build-index-from-labels (list 'a 'b 'c 'd))))
+
+  (NSeries-data (//ns series-float series-float-2)) ; (flvector 0.3 0.39999999999999997 0.5142857142857143 0.5125)
+  }|
 
 @subsubsection[#:tag "nseries-data"]{%/ns}
 
-@defproc[(make-sandwich [ingredients (listof ingredient?)])
-sandwich?]{
-Returns a sandwich given the right ingredients.
+@defproc[#:link-target? #f
+ (%/ns [nseries NSeries] [nseries-2 NSeries])
+NSeries]{
+Returns the Float value at the specified index in the series.
 }
 
-@defproc[#:kind "sandwich-maker"
-(make-reuben [ingredient sauerkraut?] ...
-[#:veggie? veggie? any/c #f])
-sandwich?]{
-Produces a reuben given some number of @racket[ingredient]s.
-80
-If @racket[veggie?] is @racket[#f], produces a standard
-reuben with corned beef. Otherwise, produces a vegetable
-reuben.
-}
+@codeblock|{
+  (define series-integer (new-NSeries (vector 1 2 3 4) #f))
+
+  (define series-integer-2 (new-NSeries (vector 5 6 7 8) #f))
+
+  (NSeries-data (%/ns series-integer series-integer-2)) ; (vector 1 2 3 4)
+  }|
 
 @subsubsection[#:tag "r/ns"]{r/ns}
 
-@defproc[(make-sandwich [ingredients (listof ingredient?)])
-sandwich?]{
-Returns a sandwich given the right ingredients.
+@defproc[#:link-target? #f
+ (r/ns [nseries NSeries] [nseries-2 NSeries])
+NSeries]{
+Returns the Float value at the specified index in the series.
 }
 
-@defproc[#:kind "sandwich-maker"
-(make-reuben [ingredient sauerkraut?] ...
-[#:veggie? veggie? any/c #f])
-sandwich?]{
-Produces a reuben given some number of @racket[ingredient]s.
-80
-If @racket[veggie?] is @racket[#f], produces a standard
-reuben with corned beef. Otherwise, produces a vegetable
-reuben.
-}
+@codeblock|{
+  (define series-integer (new-NSeries (vector 1 2 3 4) #f))
+
+  (define series-integer-2 (new-NSeries (vector 5 6 7 8) #f))
+
+  (NSeries-data (r/ns series-integer series-integer-2)) ; (vector 1 2 3 4)
+  }|
 
 @subsubsection[#:tag "+./ns"]{+./ns}
 
-@defproc[(make-sandwich [ingredients (listof ingredient?)])
-sandwich?]{
-Returns a sandwich given the right ingredients.
+@defproc[#:link-target? #f
+ (+./ns [nseries NSeries] [num Float])
+NSeries]{
+Returns the Float value at the specified index in the series.
 }
 
-@defproc[#:kind "sandwich-maker"
-(make-reuben [ingredient sauerkraut?] ...
-[#:veggie? veggie? any/c #f])
-sandwich?]{
-Produces a reuben given some number of @racket[ingredient]s.
-80
-If @racket[veggie?] is @racket[#f], produces a standard
-reuben with corned beef. Otherwise, produces a vegetable
-reuben.
-}
+@codeblock|{
+  (define series-integer (new-NSeries (vector 1 2 3 4) #f))
+
+  (NSeries-data (+./ns series-integer 2)) ; (vector 3 4 5 6)
+  }|
 
 @subsubsection[#:tag "-./ns"]{-./ns}
 
-@defproc[(make-sandwich [ingredients (listof ingredient?)])
-sandwich?]{
-Returns a sandwich given the right ingredients.
+@defproc[#:link-target? #f
+ (-./ns [nseries NSeries] [num Float])
+NSeries]{
+Returns the Float value at the specified index in the series.
 }
 
-@defproc[#:kind "sandwich-maker"
-(make-reuben [ingredient sauerkraut?] ...
-[#:veggie? veggie? any/c #f])
-sandwich?]{
-Produces a reuben given some number of @racket[ingredient]s.
-80
-If @racket[veggie?] is @racket[#f], produces a standard
-reuben with corned beef. Otherwise, produces a vegetable
-reuben.
-}
+@codeblock|{
+  (define series-integer (new-NSeries (vector 1 2 3 4) #f))
+
+  (NSeries-data (-./ns series-integer 2)) ; (vector -1 0 1 2)
+  }|
 
 @subsubsection[#:tag "*./ns"]{*./ns}
 
-@defproc[(make-sandwich [ingredients (listof ingredient?)])
-sandwich?]{
-Returns a sandwich given the right ingredients.
+@defproc[#:link-target? #f
+ (*./ns [nseries NSeries] [num Float])
+NSeries]{
+Returns the Float value at the specified index in the series.
 }
 
-@defproc[#:kind "sandwich-maker"
-(make-reuben [ingredient sauerkraut?] ...
-[#:veggie? veggie? any/c #f])
-sandwich?]{
-Produces a reuben given some number of @racket[ingredient]s.
-80
-If @racket[veggie?] is @racket[#f], produces a standard
-reuben with corned beef. Otherwise, produces a vegetable
-reuben.
-}
+@codeblock|{
+  (define series-integer (new-NSeries (vector 1 2 3 4) #f))
+
+  (NSeries-data (*./ns series-integer 2)) ; (vector 2 3 6 8)
+  }|
 
 @subsubsection[#:tag "/./ns"]{/./ns}
 
-@defproc[(make-sandwich [ingredients (listof ingredient?)])
-sandwich?]{
-Returns a sandwich given the right ingredients.
+@defproc[#:link-target? #f
+ (/./ns [nseries NSeries] [num Float])
+NSeries]{
+Returns the Float value at the specified index in the series.
 }
 
-@defproc[#:kind "sandwich-maker"
-(make-reuben [ingredient sauerkraut?] ...
-[#:veggie? veggie? any/c #f])
-sandwich?]{
-Produces a reuben given some number of @racket[ingredient]s.
-80
-If @racket[veggie?] is @racket[#f], produces a standard
-reuben with corned beef. Otherwise, produces a vegetable
-reuben.
-}
+@codeblock|{
+  (define series-integer (new-NSeries (vector 1 2 3 4) #f))
+
+  (NSeries-data (/./ns series-integer 2)) ; (vector 0 1 1 2)
+  }|
 
 @subsubsection[#:tag "%./ns"]{%./ns}
 
-@defproc[(make-sandwich [ingredients (listof ingredient?)])
-sandwich?]{
-Returns a sandwich given the right ingredients.
+@defproc[#:link-target? #f
+ (%./ns [nseries NSeries] [num Float])
+NSeries]{
+Returns the Float value at the specified index in the series.
 }
 
-@defproc[#:kind "sandwich-maker"
-(make-reuben [ingredient sauerkraut?] ...
-[#:veggie? veggie? any/c #f])
-sandwich?]{
-Produces a reuben given some number of @racket[ingredient]s.
-80
-If @racket[veggie?] is @racket[#f], produces a standard
-reuben with corned beef. Otherwise, produces a vegetable
-reuben.
-}
+@codeblock|{
+  (define series-integer (new-NSeries (vector 1 2 3 4) #f))
+
+  (NSeries-data (%./ns series-integer 2)) ; (vector 1 0 1 0)
+  }|
 
 @subsubsection[#:tag "r./ns"]{r./ns}
 
-@defproc[(make-sandwich [ingredients (listof ingredient?)])
-sandwich?]{
-Returns a sandwich given the right ingredients.
+@defproc[#:link-target? #f
+ (r./ns [nseries NSeries] [num Float])
+NSeries]{
+Returns the Float value at the specified index in the series.
 }
 
-@defproc[#:kind "sandwich-maker"
-(make-reuben [ingredient sauerkraut?] ...
-[#:veggie? veggie? any/c #f])
-sandwich?]{
-Produces a reuben given some number of @racket[ingredient]s.
-80
-If @racket[veggie?] is @racket[#f], produces a standard
-reuben with corned beef. Otherwise, produces a vegetable
-reuben.
-}
+@codeblock|{
+  (define series-integer (new-NSeries (vector 1 2 3 4) #f))
+
+  (NSeries-data (r./ns series-integer 2)) ; (vector 1 0 1 0)
+  }|
 
 @subsubsection[#:tag ">/ns"]{>/ns}
 
-@defproc[(make-sandwich [ingredients (listof ingredient?)])
-sandwich?]{
-Returns a sandwich given the right ingredients.
+@defproc[#:link-target? #f
+ (>/ns [nseries NSeries] [nseries-2 NSeries])
+BSeries]{
+Returns the Float value at the specified index in the series.
 }
 
-@defproc[#:kind "sandwich-maker"
-(make-reuben [ingredient sauerkraut?] ...
-[#:veggie? veggie? any/c #f])
-sandwich?]{
-Produces a reuben given some number of @racket[ingredient]s.
-80
-If @racket[veggie?] is @racket[#f], produces a standard
-reuben with corned beef. Otherwise, produces a vegetable
-reuben.
-}
+@codeblock|{
+  (define series-integer (new-NSeries (vector 1 2 3 4) #f))
+
+  (define series-integer-2 (new-NSeries (vector 5 6 7 8) #f))
+
+  (BSeries-data (>/ns series-integer series-integer-2)) ; (vector #f #f #f #f)
+  }|
 
 @subsubsection[#:tag "</ns"]{</ns}
 
-@defproc[(make-sandwich [ingredients (listof ingredient?)])
-sandwich?]{
-Returns a sandwich given the right ingredients.
+@defproc[#:link-target? #f
+ (</ns [nseries NSeries] [nseries-2 NSeries])
+BSeries]{
+Returns the Float value at the specified index in the series.
 }
 
-@defproc[#:kind "sandwich-maker"
-(make-reuben [ingredient sauerkraut?] ...
-[#:veggie? veggie? any/c #f])
-sandwich?]{
-Produces a reuben given some number of @racket[ingredient]s.
-80
-If @racket[veggie?] is @racket[#f], produces a standard
-reuben with corned beef. Otherwise, produces a vegetable
-reuben.
-}
+@codeblock|{
+  (define series-integer (new-NSeries (vector 1 2 3 4) #f))
+
+  (define series-integer-2 (new-NSeries (vector 5 6 7 8) #f))
+
+  (BSeries-data (</ns series-integer series-integer-2)) ; (vector #f #f #f #f)
+  }|
 
 @subsubsection[#:tag ">=/ns"]{>=/ns}
 
-@defproc[(make-sandwich [ingredients (listof ingredient?)])
-sandwich?]{
-Returns a sandwich given the right ingredients.
+@defproc[#:link-target? #f
+ (>=/ns [nseries NSeries] [nseries-2 NSeries])
+BSeries]{
+Returns the Float value at the specified index in the series.
 }
 
-@defproc[#:kind "sandwich-maker"
-(make-reuben [ingredient sauerkraut?] ...
-[#:veggie? veggie? any/c #f])
-sandwich?]{
-Produces a reuben given some number of @racket[ingredient]s.
-80
-If @racket[veggie?] is @racket[#f], produces a standard
-reuben with corned beef. Otherwise, produces a vegetable
-reuben.
-}
+@codeblock|{
+  (define series-integer (new-NSeries (vector 1 2 3 4) #f))
+
+  (define series-integer-2 (new-NSeries (vector 5 6 7 8) #f))
+
+  (BSeries-data (>=/ns series-integer series-integer-2)) ; (vector #f #f #f #f)
+  }|
 
 @subsubsection[#:tag "<=/ns"]{<=/ns}
 
-@defproc[(make-sandwich [ingredients (listof ingredient?)])
-sandwich?]{
-Returns a sandwich given the right ingredients.
+@defproc[#:link-target? #f
+ (<=/ns [nseries NSeries] [nseries-2 NSeries])
+BSeries]{
+Returns the Float value at the specified index in the series.
 }
 
-@defproc[#:kind "sandwich-maker"
-(make-reuben [ingredient sauerkraut?] ...
-[#:veggie? veggie? any/c #f])
-sandwich?]{
-Produces a reuben given some number of @racket[ingredient]s.
-80
-If @racket[veggie?] is @racket[#f], produces a standard
-reuben with corned beef. Otherwise, produces a vegetable
-reuben.
-}
+@codeblock|{
+  (define series-integer (new-NSeries (vector 1 2 3 4) #f))
+
+  (define series-integer-2 (new-NSeries (vector 5 6 7 8) #f))
+
+  (BSeries-data (<=/ns series-integer series-integer-2)) ; (vector #t #t #t #t)
+  }|
 
 @subsubsection[#:tag "=/ns"]{=/ns}
 
-@defproc[(make-sandwich [ingredients (listof ingredient?)])
-sandwich?]{
-Returns a sandwich given the right ingredients.
+@defproc[#:link-target? #f
+ (=/ns [nseries NSeries] [nseries-2 NSeries])
+BSeries]{
+Returns the Float value at the specified index in the series.
 }
 
-@defproc[#:kind "sandwich-maker"
-(make-reuben [ingredient sauerkraut?] ...
-[#:veggie? veggie? any/c #f])
-sandwich?]{
-Produces a reuben given some number of @racket[ingredient]s.
-80
-If @racket[veggie?] is @racket[#f], produces a standard
-reuben with corned beef. Otherwise, produces a vegetable
-reuben.
-}
+@codeblock|{
+  (define series-integer (new-NSeries (vector 1 2 3 4) #f))
+
+  (define series-integer-2 (new-NSeries (vector 5 6 7 8) #f))
+
+  (BSeries-data (=/ns series-integer series-integer-2)) ; (vector #f #f #f #f)
+  }|
 
 @subsubsection[#:tag "!=/ns"]{!=/ns}
 
-@defproc[(make-sandwich [ingredients (listof ingredient?)])
-sandwich?]{
-Returns a sandwich given the right ingredients.
+@defproc[#:link-target? #f
+ (!=/ns [nseries NSeries] [nseries-2 NSeries])
+BSeries]{
+Returns the Float value at the specified index in the series.
 }
 
-@defproc[#:kind "sandwich-maker"
-(make-reuben [ingredient sauerkraut?] ...
-[#:veggie? veggie? any/c #f])
-sandwich?]{
-Produces a reuben given some number of @racket[ingredient]s.
-80
-If @racket[veggie?] is @racket[#f], produces a standard
-reuben with corned beef. Otherwise, produces a vegetable
-reuben.
-}
+@codeblock|{
+  (define series-integer (new-NSeries (vector 1 2 3 4) #f))
+
+  (define series-integer-2 (new-NSeries (vector 5 6 7 8) #f))
+
+  (BSeries-data (!=/ns series-integer series-integer-2)) ; (vector #t #t #t #t)
+  }|
 
 @subsubsection[#:tag "{apply-agg-ns"]{apply-agg-ns}
 
-@defproc[(make-sandwich [ingredients (listof ingredient?)])
-sandwich?]{
-Returns a sandwich given the right ingredients.
+@defproc[#:link-target? #f
+ (apply-agg-ns [func Symbol] [nseries NSeries])
+Real]{
+Returns the Float value at the specified index in the series.
 }
 
-@defproc[#:kind "sandwich-maker"
-(make-reuben [ingredient sauerkraut?] ...
-[#:veggie? veggie? any/c #f])
-sandwich?]{
-Produces a reuben given some number of @racket[ingredient]s.
-80
-If @racket[veggie?] is @racket[#f], produces a standard
-reuben with corned beef. Otherwise, produces a vegetable
-reuben.
-}
+@codeblock|{
+  (define series-integer (new-NSeries (vector 1 2 3 4) #f))
+
+  (apply-agg-ns 'sum series-integer) ; 10
+
+  (apply-agg-ns 'mean series-integer) ; 10/4
+
+  (apply-agg-ns 'count series-integer) ; 4
+
+  (apply-agg-ns 'min series-integer) ; 1
+
+  (apply-agg-ns 'max series-integer) ; 4
+  }|
 
 @subsubsection[#:tag "apply-stat-ns"]{apply-stat-ns}
 
-@defproc[(make-sandwich [ingredients (listof ingredient?)])
-sandwich?]{
-Returns a sandwich given the right ingredients.
+@defproc[#:link-target? #f
+ (apply-stat-ns [func Symbol] [nseries NSeries])
+Real]{
+Returns the Float value at the specified index in the series.
 }
 
-@defproc[#:kind "sandwich-maker"
-(make-reuben [ingredient sauerkraut?] ...
-[#:veggie? veggie? any/c #f])
-sandwich?]{
-Produces a reuben given some number of @racket[ingredient]s.
-80
-If @racket[veggie?] is @racket[#f], produces a standard
-reuben with corned beef. Otherwise, produces a vegetable
-reuben.
-}
+@codeblock|{
+  (define series-integer (new-NSeries (vector 1 2 3 4) #f))
+
+  (apply-stat-ns 'variance series-integer) ; 5/4
+
+  (apply-stat-ns 'stddev series-integer) ; 1.118033988749895
+
+  (apply-stat-ns 'skewness series-integer) ; 0.0
+  }|
+
 
 @subsection[#:style 'toc]{Categorical Series}
 

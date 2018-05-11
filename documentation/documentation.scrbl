@@ -1,6 +1,5 @@
-#lang scribble/base
-@(require scribble/core
-          scribble/manual)
+#lang scribble/manual
+@(require scribble/core)
 
 @require[(for-label racket/contract)]
 

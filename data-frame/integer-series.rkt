@@ -55,8 +55,8 @@
  [<=/is (ISeries ISeries -> BSeries)]
  [=/is (ISeries ISeries -> BSeries)]
  [!=/is (ISeries ISeries -> BSeries)]
- [apply-agg-integer (Symbol ISeries -> Real)]
- [apply-stat-integer (Symbol ISeries -> Real)])
+ [apply-agg-is (Symbol ISeries -> Real)]
+ [apply-stat-is (Symbol ISeries -> Real)])
 ; ***********************************************************
 
 ; ***********************************************************
@@ -404,8 +404,8 @@
 
 ; Applies the aggregate function specificed by function-name to the values in
 ; the column-name column. Currently supports 3: sum, avg, count.
-(: apply-agg-integer (Symbol ISeries -> Real))
-(define (apply-agg-integer function-name series)
+(: apply-agg-is (Symbol ISeries -> Real))
+(define (apply-agg-is function-name series)
   (cond 
     [(eq? function-name 'sum) (apply + (vector->list (ISeries-data series)))]
     [(eq? function-name 'mean) (mean (vector->list (ISeries-data series)))]
@@ -414,20 +414,20 @@
     [(eq? function-name 'count) (iseries-length series)]
     [(eq? function-name 'min) (vector-argmin (lambda ([x : Fixnum]) x) (ISeries-data series))]
     [(eq? function-name 'max) (vector-argmax (lambda ([x : Fixnum]) x) (ISeries-data series))]
-    [else (error 'apply-agg-integer "Unknown aggregate function.")]))
+    [else (error 'apply-agg-is "Unknown aggregate function.")]))
 
 ; ***********************************************************
 
 ; ***********************************************************
 ;; ISeries stat ops
 
-(: apply-stat-integer (Symbol ISeries -> Real))
-(define (apply-stat-integer function-name series)
+(: apply-stat-is (Symbol ISeries -> Real))
+(define (apply-stat-is function-name series)
   (cond 
     [(eq? function-name 'variance) (variance (vector->list (ISeries-data series)))]
     [(eq? function-name 'stddev) (stddev (vector->list (ISeries-data series)))]
     [(eq? function-name 'skewness) (skewness (vector->list (ISeries-data series)))]
-    [else (error 'apply-stat-integer "Unknown stat function.")]))
+    [else (error 'apply-stat-is "Unknown stat function.")]))
 
 ; ***********************************************************
 
@@ -504,19 +504,19 @@
               (vector 2 3 4 5))
 
 ; agg tests
-(check-equal? (apply-agg-integer 'sum series-integer) 10)
+(check-equal? (apply-agg-is 'sum series-integer) 10)
 
-(check-equal? (apply-agg-integer 'mean series-integer) 10/4)
+(check-equal? (apply-agg-is 'mean series-integer) 10/4)
 
-(check-equal? (apply-agg-integer 'count series-integer) 4)
+(check-equal? (apply-agg-is 'count series-integer) 4)
 
-(check-equal? (apply-agg-integer 'min series-integer) 1)
+(check-equal? (apply-agg-is 'min series-integer) 1)
 
-(check-equal? (apply-agg-integer 'max series-integer) 4)
+(check-equal? (apply-agg-is 'max series-integer) 4)
 
 ; statistics tests
-(check-equal? (apply-stat-integer 'variance series-integer) 5/4)
+(check-equal? (apply-stat-is 'variance series-integer) 5/4)
 
-(check-equal? (apply-stat-integer 'stddev series-integer) 1.118033988749895)
+(check-equal? (apply-stat-is 'stddev series-integer) 1.118033988749895)
 
-(check-equal? (apply-stat-integer 'skewness series-integer) 0.0)
+(check-equal? (apply-stat-is 'skewness series-integer) 0.0)

@@ -1,4 +1,4 @@
-#lang typed/racket/base
+#lang typed/racket
 
 (provide:
  [as-julian-day-numbers (CSeries -> ISeries)])

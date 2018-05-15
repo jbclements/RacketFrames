@@ -14,8 +14,6 @@ In this day and age procedural and functional programmers alike are working with
 
 [Grip](https://github.com/RayRacine/grip.git) Also available from Racket catalog.
 
-[RacketFrames](https://github.com/bommysk/RacketFrames.git)
-
 ### Installing
 
 Step by step instructions on getting up and running.

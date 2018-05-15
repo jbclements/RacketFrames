@@ -30,7 +30,8 @@
  [is-labeled? (LabelIndex -> Boolean)]
  [label-sort-positional (LabelIndex [#:project LabelProjection] -> Labeling)]
  [label-sort-lexical (LabelIndex -> Labeling)]
- [gseries-length (GSeries -> Index)])
+ [gseries-length (GSeries -> Index)]
+ [gseries-data (All (A) (GSeries A) -> (Vectorof A))])
 
 (provide
  SIndex Labeling
@@ -92,6 +93,10 @@
 ; General Series parameterized by A, allows for generic types.
 ; Numeric and categorical series will be further optimized.
 (struct (A) GSeries LabelIndex ([data : (Vectorof A)]))
+
+(: gseries-data (All (A) (GSeries A) -> (Vectorof A)))
+(define (gseries-data gseries)
+  (GSeries-data gseries))
 
 ; Consumes a Vector of generic type and a list of Labels which
 ; can come in list form or SIndex form and produces a GSeries
@@ -235,10 +240,32 @@
 (check-equal? (is-labeled? (LabelIndex #f)) #f)
 
 ; generic series tests
+
 ; create integer series
 (define g-series-integer (new-GSeries (vector 1 2 3 4) (build-index-from-labels (list 'a 'b 'c 'd))))
+
+; create float series
+(define g-series-float (new-GSeries (vector 1.5 2.5 3.5 4.5 5.5) (build-index-from-labels (list 'a 'b 'c 'd 'e))))
+
 ; create symbol series
 (define g-series-symbol (new-GSeries (vector 'e 'f 'g 'h) (list 'a 'b 'c 'd)))
+
+; point struct
+(struct point ([x : Integer] [y : Integer]) #:transparent)
+
+; create point struct series
+(define g-series-point (new-GSeries (vector (point 1 2) (point 3 4) (point 5 6) (point 7 8) (point 9 10)) (build-index-from-labels (list 'a 'b 'c 'd 'e))))
+
+;(gseries-data g-series-point)
+
+; point series ref by index
+;(gseries-iref g-series-point 2)
+
+; point series ref by label
+;(series-ref g-series-point 'd)
+
+;(gseries-data (map/GSeries g-series-point (λ: ((p : point))
+;                                (point-x p))))
 
 ; integer series ref by index
 (check-equal? (gseries-iref g-series-integer 2) 3)

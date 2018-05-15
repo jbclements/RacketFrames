@@ -16,9 +16,20 @@
 ; ***********************************************************
 ; Provide functions in this file to other files.
 (provide
- (struct-out GenSeries))
+ (struct-out GenSeries)
+ GenericType)
 
 (define-type GenericType Any)
+
+(provide:
+ [new-GenSeries ((Vectorof GenericType) (Option (U (Listof Label) SIndex)) -> GenSeries)]
+ [gen-series-iref (GenSeries Index -> GenericType)]
+ [gen-series-label-ref (GenSeries Label -> GenericType)]
+ [gen-series-range (GenSeries Index -> (Vectorof GenericType))]
+ [gen-series-length (GenSeries -> Index)]
+ [gen-series-referencer (GenSeries -> (Index -> GenericType))]
+ [gen-series-data (GenSeries -> (Vectorof GenericType))]
+ [map/gen-s (GenSeries (GenericType -> GenericType) -> GenSeries)])
 
 ;; Integer series optimized with use of Fixnum.
 (struct GenSeries LabelIndex ([data : (Vectorof GenericType)]))
@@ -89,8 +100,8 @@
 ; ***********************************************************
 
 ; ***********************************************************
-(: map/gs (GenSeries (GenericType -> GenericType) -> GenSeries))
-(define (map/gs series fn)
+(: map/gen-s (GenSeries (GenericType -> GenericType) -> GenSeries))
+(define (map/gen-s series fn)
   (let ((old-data (GenSeries-data series)))
     (GenSeries #f (build-vector (vector-length old-data)
                               (λ: ((idx : Natural))

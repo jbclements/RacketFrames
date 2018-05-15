@@ -7,7 +7,7 @@
  [new-GenSeriesBuilder (case-> 
 		      (-> GenSeriesBuilder)
 		      (Index -> GenSeriesBuilder))]
- [append-GenSeriesBuilder   (GenSeriesBuilder (U Fixnum String) -> Void)]
+ [append-GenSeriesBuilder   (GenSeriesBuilder Any -> Void)]
  [complete-GenSeriesBuilder (GenSeriesBuilder -> GenSeries)])
 
 (require

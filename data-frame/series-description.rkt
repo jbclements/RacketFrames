@@ -27,7 +27,7 @@
  [series-description (Label Series -> SeriesDescription)]
  [series-type (Series -> SeriesType)]
  [series-length (Series -> Index)]
- [series-data (Series -> (U FlVector (Vectorof Symbol) (Vectorof Fixnum) (Vectorof Boolean)))]
+ [series-data (Series -> (U (Vectorof GenericType) FlVector (Vectorof Symbol) (Vectorof Fixnum) (Vectorof Boolean)))]
  [series-iref (Series Index -> (U Float Symbol Fixnum Boolean))])
 
 ; ***********************************************************
@@ -38,8 +38,9 @@
  (only-in racket/flonum
           flvector-length)
  (only-in "indexed-series.rkt"
-          Label
-          GSeries GSeries? GSeries-data new-GSeries gseries-length gseries-data gseries-iref)         
+          Label)
+ (only-in "generic-series.rkt"
+          GenericType GenSeries GenSeries? GenSeries-data gen-series-length gen-series-data gen-series-iref)
  (only-in "categorical-series.rkt"
           CSeries CSeries? CSeries-data cseries-length cseries-data cseries-iref)
  (only-in "numeric-series.rkt"
@@ -68,20 +69,22 @@
 (: series-type (Series -> SeriesType))
 (define (series-type series)
   (cond
+   ((GenSeries? series) 'GenericSeries)
    ((NSeries? series) 'NumericSeries)
    ((CSeries? series) 'CategoricalSeries)
    ((ISeries? series) 'IntegerSeries)
    ((BSeries? series) 'BooleanSeries)
-   (else 'GenericSeries)))
+   (else (error "Unknown Series type in DataFrame"))))
 
 (: series-length (Series -> Index))
 (define (series-length series)
   (cond
+    [(GenSeries? series) (gen-series-length series)]
     [(NSeries? series) (nseries-length series)]
     [(CSeries? series) (cseries-length series)]    
     [(ISeries? series) (iseries-length series)]
     [(BSeries? series) (bseries-length series)]
-    [else (gseries-length series)]))
+    [else (error "Unknown Series type in DataFrame")]))
 
 (: series-description  (Label Series -> SeriesDescription))
 (define (series-description name series)
@@ -92,10 +95,10 @@
 ; ***********************************************************
 ; Get series data
 
-(: series-data (Series -> (U FlVector (Vectorof Symbol) (Vectorof Fixnum) (Vectorof Boolean))))
+(: series-data (Series -> (U (Vectorof GenericType) FlVector (Vectorof Symbol) (Vectorof Fixnum) (Vectorof Boolean))))
 (define (series-data series)
   (cond
-    ;[(GSeries? series) (gseries-data series)]
+    [(GenSeries? series) (gen-series-data series)]
     [(NSeries? series) (nseries-data series)]    
     [(CSeries? series) (cseries-data series)]    
     [(ISeries? series) (iseries-data series)]
@@ -105,7 +108,7 @@
 (: series-iref (Series Index -> (U Float Symbol Fixnum Boolean)))
 (define (series-iref series idx)
   (cond
-    ;[(GSeries? series) (gseries-iref series idx)]
+    [(GenSeries? series) (gen-series-iref series idx)]
     [(NSeries? series) (nseries-iref series idx)]    
     [(CSeries? series) (cseries-iref series idx)]    
     [(ISeries? series) (iseries-iref series idx)]

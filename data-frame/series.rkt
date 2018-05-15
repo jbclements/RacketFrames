@@ -8,6 +8,9 @@
 	  Series)
  (only-in "series-builder.rkt"
 	  SeriesBuilder)
+ (only-in "generic-series-builder.rkt"
+          GenSeriesBuilder GenSeriesBuilder?
+          complete-GenSeriesBuilder)
  (only-in "categorical-series-builder.rkt"
 	  CSeriesBuilder CSeriesBuilder?
 	  complete-CSeriesBuilder)
@@ -25,13 +28,15 @@
 (: series-complete (SeriesBuilder -> Series))
 (define (series-complete builder)
   (cond
-   ((NSeriesBuilder? builder)
-    (complete-NSeriesBuilder builder))
-   ((CSeriesBuilder? builder)
-    (complete-CSeriesBuilder builder))
-   ((ISeriesBuilder? builder)
-    (complete-ISeriesBuilder builder))
-   ((BSeriesBuilder? builder)
-    (complete-BSeriesBuilder builder))))
+    ((GenSeriesBuilder? builder)
+     (complete-GenSeriesBuilder builder))
+    ((NSeriesBuilder? builder)
+     (complete-NSeriesBuilder builder))
+    ((CSeriesBuilder? builder)
+     (complete-CSeriesBuilder builder))
+    ((ISeriesBuilder? builder)
+     (complete-ISeriesBuilder builder))
+    ((BSeriesBuilder? builder)
+     (complete-BSeriesBuilder builder))))
 
 

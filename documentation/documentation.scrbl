@@ -1031,46 +1031,474 @@ levels shown in the table-of-contents panel.
 @; ======================================================================
 @section{DataFrames}
 
-This sentence is a paragraph all by itself.
+@itemlist[
 
-@t{This sentence is a paragraph.}
-@t{This sentence is also a paragraph, but it is connected to the
-   previous paragraph as a compound paragraph by virtue of having no
-   paragraph-breaking space before it, and each paragraph is in a
-   ``SIntraPara'' @tt{<div>} instead of a @tt{<p>}.}
+ @item{One-dimensional ndarray with axis labels (including time series).
 
-This sentence is a paragraph, as is each of A1, B1, A2, B2, A3, B3a,
-and B2a in the following table, but B3a and B2a form a compound paragraph.
-@;
-@tabular[(list (list "A1"
-                     "B1") 
-               (list "A2"
-                     "B2") 
-               (list "A3" 
-                     @compound-paragraph[plain (list @t{B3a} @t{B3b})]))]
-@;
-This sentence is a paragraph, and with the preceding table and
-  paragraph forms a compound paragraph.
+Labels need not be unique but must be a hashable type. The object supports both integer- and label-based indexing and provides a host of methods for performing operations involving the index. Statistical methods from ndarray have been overridden to automatically exclude missing data (currently represented as NaN).
 
-@nested{
- @t{This is a first paragraph in a @tt{<blockquote>}.}
- @t{This is a second paragraph in a @tt{<blockquote>}.}
+Operations between Series (+, -, /, , *) align values based on their associated index values– they need not be the same length. The result index will be the sorted union of the two indexes.
 }
 
-@defproc[(make-sandwich [ingredients (listof ingredient?)])
-sandwich?]{
-Returns a sandwich given the right ingredients.
+]
+
+@subsection[#:style 'toc]{DataFrame}
+
+@local-table-of-contents[]
+
+@subsubsection[#:tag "new-data-frame"]{new-data-frame}
+@defproc[#:link-target? #f
+ (new-data-frame [columns Columns])
+DataFrame?]{
+Returns a new DataFrame.
 }
 
-@defproc[#:kind "sandwich-maker"
-(make-reuben [ingredient sauerkraut?] ...
-[#:veggie? veggie? any/c #f])
-sandwich?]{
-Produces a reuben given some number of @racket[ingredient]s.
-80
-If @racket[veggie?] is @racket[#f], produces a standard
-reuben with corned beef. Otherwise, produces a vegetable
-reuben.
+@codeblock|{
+    ;******************
+  ;data-frame-integer
+  ;******************
+  ; will define parse to automatically build this columns structure
+  (define columns-integer
+  (list 
+  (cons 'col1 (new-ISeries (vector 1 2 3 4)
+  (build-index-from-labels (list 'a 'b 'c 'd))))
+  (cons 'col2 (new-ISeries (vector 5 6 7 8)
+  (build-index-from-labels (list 'e 'f 'g 'h))))
+  (cons 'col3 (new-ISeries (vector 9 10 11 12)
+  (build-index-from-labels (list 'i 'j 'k 'l))))))
+
+  ; create new data-frame-integer
+  (define data-frame-integer (new-data-frame columns-integer))
+  }|
+
+@subsubsection[#:tag "data-frame-rename"]{data-frame-rename}
+@defproc[#:link-target? #f
+ (data-frame-rename [df DataFrame] [col Label] [new-col Label])
+DataFrame?]{
+ This function consumes a DataFrame and two labels. It locates
+ the index of the column in the DataFrame LabelIndex and creates
+ a new LabelIndex with the new column name mapped to this index.
+ Then a new DataFrame is created and returned.
 }
+
+@codeblock|{
+    (data-frame-rename)
+  }|
+
+@subsubsection[#:tag "data-frame-drop"]{data-frame-drop}
+@defproc[#:link-target? #f
+ (data-frame-drop [df DataFrame] [col-name Label])
+DataFrame?]{
+ This function consumes a DataFrame and a Label for the column
+ to drop from the DataFrame. Using the data-frame-explode
+ function, this column is filtered out of the DataFrame, and a
+ new DataFrame is returned.
+}
+
+@codeblock|{
+    (data-frame-drop)
+  }|
+
+@subsubsection[#:tag "data-frame-series"]{data-frame-series}
+@defproc[#:link-target? #f
+ (data-frame-drop [df DataFrame] [col-name Label])
+Series?]{
+ This function consumes a DataFrame and a Symbol representing
+ the column name and returns the Series of that column.
+}
+
+@codeblock|{
+    (data-frame-series)
+  }|
+
+@subsubsection[#:tag "data-frame-names"]{data-frame-names}
+@defproc[#:link-target? #f
+ (data-frame-names [df DataFrame] [col-name Label])
+Series?]{
+ This function consumes a DataFrame and returns of Listof
+ Symbol representing all the column names.
+}
+
+@codeblock|{
+    (data-frame-names)
+  }|
+
+@subsubsection[#:tag "data-frame-dim"]{data-frame-dim}
+@defproc[#:link-target? #f
+ (data-frame-dim [df DataFrame])
+Dim?]{
+ This function consumes a DataFrame and calculates the dimensions.
+ It does so by calculating the length of a column series, thus
+ getting the number of rows and the total number of columns. It
+ then stores these two values in the Dim struct and returns it.
+}
+
+@codeblock|{
+    (data-frame-dim)
+  }|
+
+
+@subsubsection[#:tag "data-frame-description"]{data-frame-description}
+@defproc[#:link-target? #f
+ (data-frame-description [df DataFrame] [project LabelProjection])
+DataFrameDescription?]{
+ This function consumes a DataFrame and an optional LabelProjection
+ and constructs a DataFrameDescription struct which contains the
+ DataFrame Dim and a list of SeriesDecriptions for each series of
+ each column.
+}
+
+@codeblock|{
+    (data-frame-description)
+  }|
+
+@subsubsection[#:tag "show-data-frame-description"]{show-data-frame-description}
+@defproc[#:link-target? #f
+ (show-data-frame-description [dfd DataFrameDescription])
+Void?]{
+ This function consumes a DataFrameDescription struct and displays
+ the DataFrame Dim and Series Descriptions in formated form.
+}
+
+@codeblock|{
+    (show-data-frame-description)
+  }|
+
+@subsubsection[#:tag "data-frame-explode"]{data-frame-explode}
+@defproc[#:link-target? #f
+ (data-frame-explode [df DataFrame] [project LabelProjection])
+Columns?]{
+ This function consumes a DataFrame and an optional LabelProjection
+ which indicates which columns to project and returns a Listof Column.
+ If no LabelProjection is given, all columns are projected. The
+ label-sort-positional returns a labeling, which is a (Listof (Pair Label Index)).
+ This list is looped through and only the items to project are filtered for.
+ In the end an appropriate Listof Column is returned.
+}
+
+@codeblock|{
+    (data-frame-explode)
+  }|
+
+@subsubsection[#:tag "data-frame-remove"]{data-frame-remove}
+@defproc[#:link-target? #f
+ (data-frame-remove [df DataFrame] [project LabelProjection])
+DataFrame?]{
+ This function consumes a DataFrame and LabelProjection indicating
+ which columns to remove from the DataFrame. The column names in
+ the DataFrame are put into a set called all-labels. The drop-projection
+ is converted to a set as well. The labels to be kept are calculated
+ by substracting the drop-projection from all of the possible labels.
+ Then the DataFrame is exploded retaining only the columns to keep.
+ A new data frame is constructed fomr these column and returned.
+}
+
+@codeblock|{
+    (data-frame-remove)
+  }|
+
+@subsubsection[#:tag "data-frame-project"]{data-frame-project}
+@defproc[#:link-target? #f
+ (data-frame-project [df DataFrame] [project LabelProjection])
+DataFrame?]{
+ This function consumes a DataFrame and LabelProjection and
+ creates a new DataFrame only containing the columns to project.
+}
+
+@codeblock|{
+    (data-frame-project)
+  }|
+
+@subsubsection[#:tag "data-frame-replace"]{data-frame-replace}
+@defproc[#:link-target? #f
+ (data-frame-replace [df DataFrame] [col Column])
+DataFrame?]{
+ This function consumes a DataFrame and Column and replaces
+ the old column with the same column heading with this new
+ column.
+}
+
+@codeblock|{
+    (data-frame-replace)
+  }|
+
+@subsubsection[#:tag "data-frame-extend"]{data-frame-extend}
+@defproc[#:link-target? #f
+ (data-frame-extend [df DataFrame] [col (U Column Columns DataFrame)])
+DataFrame?]{
+ This functions consumes a DataFrame and either a Column,
+ Listof Column or a DataFrame and extends the given DataFrame.
+ If a DataFrame is passed for the second argument it is first
+ exploded and appended on to the exploded given data frame. Then
+ a new DataFrame is constructed and returned. The other cases
+ are self-explanatory.
+}
+
+@codeblock|{
+    (data-frame-extend)
+  }|
+
+@subsection[#:style 'toc]{DataFrame Operations}
+
+@local-table-of-contents[]
+
+@subsubsection[#:tag "data-frame+"]{data-frame+}
+@defproc[#:link-target? #f
+ (data-frame+ [dfa DataFrame] [dfb DataFrame])
+DataFrame?]{
+Returns a new DataFrame.
+}
+
+@codeblock|{
+  (define columns-integer-1
+  (list 
+  (cons 'col1 (new-ISeries (vector 1 2 3 4) #f))
+  (cons 'col2 (new-ISeries (vector 5 6 7 8) #f))
+  (cons 'col3 (new-ISeries (vector 9 10 11 12) #f))
+  (cons 'col4 (new-ISeries (vector 21 22 23 24) #f))))
+
+  (define columns-integer-2
+  (list 
+  (cons 'col1 (new-ISeries (vector 1 2 3 4) #f))
+  (cons 'col2 (new-ISeries (vector 25 26 27 28) #f))
+  (cons 'col3 (new-ISeries (vector 29 30 31 32) #f))
+  (cons 'col4 (new-ISeries (vector 1 2 3 4) #f))))
+
+  ; create new data-frame-integer-1
+  (define data-frame-integer-1 (new-data-frame columns-integer-1))
+
+  ; create new data-frame-integer-2
+  (define data-frame-integer-2 (new-data-frame columns-integer-2))
+
+  (displayln "data-frame+")
+
+  (frame-write-tab data-frame-integer-1 (current-output-port))
+
+  (frame-write-tab data-frame-integer-2 (current-output-port))
+
+  (frame-write-tab (data-frame+ data-frame-integer-1 data-frame-integer-2) (current-output-port))
+  }|
+
+@subsubsection[#:tag "data-frame-"]{data-frame-}
+@defproc[#:link-target? #f
+ (data-frame- [dfa DataFrame] [dfb DataFrame])
+DataFrame?]{
+Returns a new DataFrame.
+}
+
+@codeblock|{
+  (define columns-integer-1
+  (list 
+  (cons 'col1 (new-ISeries (vector 1 2 3 4) #f))
+  (cons 'col2 (new-ISeries (vector 5 6 7 8) #f))
+  (cons 'col3 (new-ISeries (vector 9 10 11 12) #f))
+  (cons 'col4 (new-ISeries (vector 21 22 23 24) #f))))
+
+  (define columns-integer-2
+  (list 
+  (cons 'col1 (new-ISeries (vector 1 2 3 4) #f))
+  (cons 'col2 (new-ISeries (vector 25 26 27 28) #f))
+  (cons 'col3 (new-ISeries (vector 29 30 31 32) #f))
+  (cons 'col4 (new-ISeries (vector 1 2 3 4) #f))))
+
+  ; create new data-frame-integer-1
+  (define data-frame-integer-1 (new-data-frame columns-integer-1))
+
+  ; create new data-frame-integer-2
+  (define data-frame-integer-2 (new-data-frame columns-integer-2))
+
+  (displayln "data-frame-")
+
+  (frame-write-tab data-frame-integer-1 (current-output-port))
+
+  (frame-write-tab data-frame-integer-2 (current-output-port))
+
+  (frame-write-tab (data-frame- data-frame-integer-1 data-frame-integer-2) (current-output-port))
+  }|
+
+@subsubsection[#:tag "data-frame*"]{data-frame*}
+@defproc[#:link-target? #f
+ (data-frame* [dfa DataFrame] [dfb DataFrame])
+DataFrame?]{
+Returns a new DataFrame.
+}
+
+@codeblock|{
+  (define columns-integer-1
+  (list 
+  (cons 'col1 (new-ISeries (vector 1 2 3 4) #f))
+  (cons 'col2 (new-ISeries (vector 5 6 7 8) #f))
+  (cons 'col3 (new-ISeries (vector 9 10 11 12) #f))
+  (cons 'col4 (new-ISeries (vector 21 22 23 24) #f))))
+
+  (define columns-integer-2
+  (list 
+  (cons 'col1 (new-ISeries (vector 1 2 3 4) #f))
+  (cons 'col2 (new-ISeries (vector 25 26 27 28) #f))
+  (cons 'col3 (new-ISeries (vector 29 30 31 32) #f))
+  (cons 'col4 (new-ISeries (vector 1 2 3 4) #f))))
+
+  ; create new data-frame-integer-1
+  (define data-frame-integer-1 (new-data-frame columns-integer-1))
+
+  ; create new data-frame-integer-2
+  (define data-frame-integer-2 (new-data-frame columns-integer-2))
+
+  (displayln "data-frame*")
+
+  (frame-write-tab data-frame-integer-1 (current-output-port))
+
+  (frame-write-tab data-frame-integer-2 (current-output-port))
+
+  (frame-write-tab (data-frame* data-frame-integer-1 data-frame-integer-2) (current-output-port))
+  }|
+
+@subsubsection[#:tag "data-frame/"]{data-frame/}
+@defproc[#:link-target? #f
+ (data-frame/ [dfa DataFrame] [dfb DataFrame])
+DataFrame?]{
+Returns a new DataFrame.
+}
+
+@codeblock|{
+  (define columns-integer-1
+  (list 
+  (cons 'col1 (new-ISeries (vector 1 2 3 4) #f))
+  (cons 'col2 (new-ISeries (vector 5 6 7 8) #f))
+  (cons 'col3 (new-ISeries (vector 9 10 11 12) #f))
+  (cons 'col4 (new-ISeries (vector 21 22 23 24) #f))))
+
+  (define columns-integer-2
+  (list 
+  (cons 'col1 (new-ISeries (vector 1 2 3 4) #f))
+  (cons 'col2 (new-ISeries (vector 25 26 27 28) #f))
+  (cons 'col3 (new-ISeries (vector 29 30 31 32) #f))
+  (cons 'col4 (new-ISeries (vector 1 2 3 4) #f))))
+
+  ; create new data-frame-integer-1
+  (define data-frame-integer-1 (new-data-frame columns-integer-1))
+
+  ; create new data-frame-integer-2
+  (define data-frame-integer-2 (new-data-frame columns-integer-2))
+
+  (displayln "data-frame/")
+
+  (frame-write-tab data-frame-integer-1 (current-output-port))
+
+  (frame-write-tab data-frame-integer-2 (current-output-port))
+
+  (frame-write-tab (data-frame/ data-frame-integer-1 data-frame-integer-2) (current-output-port))
+  }|
+
+@subsubsection[#:tag "data-frame%"]{data-frame%}
+@defproc[#:link-target? #f
+ (data-frame% [dfa DataFrame] [dfb DataFrame])
+DataFrame?]{
+Returns a new DataFrame.
+}
+
+@subsubsection[#:tag "data-frame-r"]{data-frame-r}
+@defproc[#:link-target? #f
+ (data-frame-r [dfa DataFrame] [dfb DataFrame])
+DataFrame?]{
+Returns a new DataFrame.
+}
+
+@subsubsection[#:tag "data-frame="]{data-frame=}
+@defproc[#:link-target? #f
+ (data-frame= [dfa DataFrame] [dfb DataFrame])
+DataFrame?]{
+Returns a new DataFrame.
+}
+
+@subsubsection[#:tag "data-frame!="]{data-frame!=}
+@defproc[#:link-target? #f
+ (data-frame!= [dfa DataFrame] [dfb DataFrame])
+DataFrame?]{
+Returns a new DataFrame.
+}
+
+@subsubsection[#:tag "data-frame<"]{data-frame<}
+@defproc[#:link-target? #f
+ (data-frame< [dfa DataFrame] [dfb DataFrame])
+DataFrame?]{
+Returns a new DataFrame.
+}
+
+@subsubsection[#:tag "data-frame>"]{data-frame>}
+@defproc[#:link-target? #f
+ (data-frame> [dfa DataFrame] [dfb DataFrame])
+DataFrame?]{
+Returns a new DataFrame.
+}
+
+@subsubsection[#:tag "data-frame<="]{data-frame<=}
+@defproc[#:link-target? #f
+ (data-frame<= [dfa DataFrame] [dfb DataFrame])
+DataFrame?]{
+Returns a new DataFrame.
+}
+
+@subsubsection[#:tag "data-frame>="]{data-frame>=}
+@defproc[#:link-target? #f
+ (data-frame>= [dfa DataFrame] [dfb DataFrame])
+DataFrame?]{
+Returns a new DataFrame.
+}
+
+@subsubsection[#:tag "data-frame-abs"]{data-frame-abs}
+@defproc[#:link-target? #f
+ (data-frame-abs [df DataFrame])
+DataFrame?]{
+Returns a new DataFrame.
+}
+
+@subsection[#:style 'toc]{DataFrame Join}
+
+@local-table-of-contents[]
+
+@subsubsection[#:tag "data-frame-join-left"]{data-frame-join-left}
+@defproc[#:link-target? #f
+ (data-frame-join-left [dfa DataFrame] [dfb DataFrame] [on (Listof Symbol)])
+DataFrame?]{
+Returns a new DataFrame.
+}
+
+@codeblock|{
+   (data-frame-join-left)
+  }|
+
+@subsubsection[#:tag "data-frame-join-right"]{data-frame-join-right}
+@defproc[#:link-target? #f
+ (data-frame-join-right [dfa DataFrame] [dfb DataFrame] [on (Listof Symbol)])
+DataFrame?]{
+Returns a new DataFrame.
+}
+
+@codeblock|{
+   (data-frame-join-right)
+  }|
+
+@subsubsection[#:tag "data-frame-join-inner"]{data-frame-join-inner}
+@defproc[#:link-target? #f
+ (data-frame-join-inner [dfa DataFrame] [dfb DataFrame] [on (Listof Symbol)])
+DataFrame?]{
+Returns a new DataFrame.
+}
+
+@codeblock|{
+   (data-frame-join-inner)
+  }|
+
+@subsubsection[#:tag "data-frame-join-outer"]{data-frame-join-outer}
+@defproc[#:link-target? #f
+ (data-frame-join-outer [dfa DataFrame] [dfb DataFrame] [on (Listof Symbol)])
+DataFrame?]{
+Returns a new DataFrame.
+}
+
+@codeblock|{
+   (data-frame-join-outer)
+  }|
 
 @index-section[]

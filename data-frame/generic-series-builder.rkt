@@ -22,6 +22,11 @@
 
 (define base-len 512)
 
+(: string-to-symbol-or-num (String -> (U Number Symbol)))
+(define (string-to-symbol-or-num str)
+  (let ((num (string->number str)))
+    (if num num (string->symbol str))))
+
 (: new-GenSeriesBuilder (case-> 
 		       (-> GenSeriesBuilder)
 		       (Index -> GenSeriesBuilder)))
@@ -55,7 +60,7 @@
          (vector-length (GenSeriesBuilder-data builder)))
         (vector-set! (GenSeriesBuilder-data builder)
 		     (bump-index)
-		     value)
+		     (string-to-symbol-or-num (assert value string?)))                    
       (begin
         (extend-data)       
         (append-GenSeriesBuilder builder value))))

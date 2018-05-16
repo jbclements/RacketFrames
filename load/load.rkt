@@ -44,12 +44,11 @@
 	  complete-CSeriesBuilder
 	  append-CSeriesBuilder)
  (only-in "../data-frame/series-description.rkt"
-	  Series series-data)
+	  Series)
  (only-in "../data-frame/data-frame.rkt"
 	  DataFrame
 	  new-data-frame
-          data-frame-explode
-          data-frame-series)
+          data-frame-explode)
  (only-in "../data-frame/data-frame-print.rkt"
           frame-write-tab
           data-frame-head)
@@ -163,7 +162,7 @@
 
 (data-frame-head random-demographic-data-frame-delimited)
 
-(series-data (data-frame-series random-demographic-data-frame-delimited 'char))
+;(series-data (data-frame-series random-demographic-data-frame-delimited 'char))
 
 ; no schema
 ;(define fruits-data-frame-delimited-no-schema (load-delimited-file (FilePath "../data-frame/fruits.csv") "," #:schema #f))

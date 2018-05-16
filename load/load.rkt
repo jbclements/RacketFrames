@@ -17,6 +17,11 @@
 	  Schema-SeriesTypes Schema-headers)
  (only-in "../data-frame/series-builder.rkt"
 	  SeriesBuilder)
+ (only-in "../data-frame/generic-series-builder.rkt"
+	  new-GenSeriesBuilder
+	  GenSeriesBuilder
+	  GenSeriesBuilder?
+	  complete-GenSeriesBuilder)
  (only-in "../data-frame/integer-series-builder.rkt"
 	  new-ISeriesBuilder
 	  ISeriesBuilder
@@ -39,13 +44,15 @@
 	  complete-CSeriesBuilder
 	  append-CSeriesBuilder)
  (only-in "../data-frame/series-description.rkt"
-	  Series)
+	  Series series-data)
  (only-in "../data-frame/data-frame.rkt"
 	  DataFrame
 	  new-data-frame
-          data-frame-explode)
+          data-frame-explode
+          data-frame-series)
  (only-in "../data-frame/data-frame-print.rkt"
-          frame-write-tab)
+          frame-write-tab
+          data-frame-head)
  "data-frame-builder.rkt"
  (only-in "delimited-common.rkt"
 	  sample-formatted-file
@@ -66,6 +73,7 @@
   (: determine-SeriesBuilder (SeriesTypes -> SeriesBuilder))
   (define (determine-SeriesBuilder stypes)
     (match stypes
+      ['GENERIC (new-GenSeriesBuilder)]
       ['CATEGORICAL (new-CSeriesBuilder)]
       ['INTEGER     (new-ISeriesBuilder)]
       ['NUMERIC     (new-NSeriesBuilder)]
@@ -78,16 +86,18 @@
 (: complete-SeriesBuilders (DataFrameBuilder -> (Listof Series)))
 (define (complete-SeriesBuilders frame-builder)
   (map (λ: ((builder : SeriesBuilder))
-	   (cond
-	    [(CSeriesBuilder? builder)
-	     (complete-CSeriesBuilder builder)]
-	    [(ISeriesBuilder? builder)
-	     (complete-ISeriesBuilder builder)]
-            [(BSeriesBuilder? builder)
-	     (complete-BSeriesBuilder builder)]
-	    [(NSeriesBuilder? builder)
-	     (complete-NSeriesBuilder builder)]
-	    [else (error "Inconsistent DataFrameBuilder")]))
+         (cond
+           [(GenSeriesBuilder? builder)
+            (complete-GenSeriesBuilder builder)]
+           [(CSeriesBuilder? builder)
+            (complete-CSeriesBuilder builder)]
+           [(ISeriesBuilder? builder)
+            (complete-ISeriesBuilder builder)]
+           [(BSeriesBuilder? builder)
+            (complete-BSeriesBuilder builder)]
+           [(NSeriesBuilder? builder)
+            (complete-NSeriesBuilder builder)]
+           [else (error "Inconsistent DataFrameBuilder")]))
        (DataFrameBuilder-builders frame-builder)))
 
 (: anon-headers (Integer -> (Listof Symbol)))
@@ -121,9 +131,9 @@
   (let* ((fpath (FilePath fpath-str))
          (schema (schema-if-needed schema fpath)))
     (make-data-frame schema (read-delimited-file fpath
-                                            (Schema-has-headers schema)
-                                            (new-DataFrameBuilder-from-Schema schema)
-                                            delim))))
+                                                 (Schema-has-headers schema)
+                                                 (new-DataFrameBuilder-from-Schema schema)
+                                                 delim))))
 
 (: determine-schema (FilePath Integer -> Schema))
 (define (determine-schema fpath cnt)
@@ -134,7 +144,9 @@
 
 ;(data-frame-explode fruits-data-frame)
 
-;(define fruits-schema (Schema #t (list (ColumnInfo 'name 'CATEGORICAL) (ColumnInfo 'quantity 'CATEGORICAL) (ColumnInfo 'price 'CATEGORICAL))))
+(define random-demographic-schema (Schema #t (list (ColumnInfo 'first 'CATEGORICAL) (ColumnInfo 'last 'CATEGORICAL)
+                                                   (ColumnInfo 'gender 'CATEGORICAL) (ColumnInfo 'yn 'CATEGORICAL)
+                                                   (ColumnInfo 'char 'GENERIC) (ColumnInfo 'float 'NUMERIC))))
 
 ; read csv
 ;(define fruits-data-frame-csv (load-csv-file (FilePath "../data-frame/fruits.csv") #:schema fruits-schema))
@@ -147,9 +159,11 @@
 ;(frame-write-tab fruits-data-frame-csv-no-schema (current-output-port))
 
 ; read delimited
-;(define fruits-data-frame-delimited (load-delimited-file (FilePath "../data-frame/fruits.csv") "," #:schema fruits-schema))
+(define random-demographic-data-frame-delimited (load-delimited-file "../sample-csv/random_demographic.csv" "|" #:schema random-demographic-schema))
 
-;(frame-write-tab fruits-data-frame-delimited (current-output-port))
+(data-frame-head random-demographic-data-frame-delimited)
+
+(series-data (data-frame-series random-demographic-data-frame-delimited 'char))
 
 ; no schema
 ;(define fruits-data-frame-delimited-no-schema (load-delimited-file (FilePath "../data-frame/fruits.csv") "," #:schema #f))

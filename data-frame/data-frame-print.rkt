@@ -5,6 +5,8 @@
 
 #lang typed/racket
 (require typed/rackunit)
+(require racket/struct)
+(require racket/pretty)
 
 ; ***********************************************************
 ; This module provides data frame printing functionality.
@@ -43,6 +45,8 @@
 	  data-frame-cseries data-frame-explode data-frame-dim
 	  DataFrameDescription DataFrameDescription-series
 	  show-data-frame-description data-frame-description)
+(only-in "generic-series.rkt"
+	  new-GenSeries GenSeries GenSeries? gen-series-iref)
  (only-in "integer-series.rkt"
 	  new-ISeries ISeries ISeries? iseries-iref)
  (only-in "boolean-series.rkt"
@@ -78,16 +82,18 @@
        (let ((heading (column-heading col))
 	     (series  (column-series col)))
 	 (cond
-	  ((NSeries? series)
-	   (display (format-heading heading)))
-	  ((CSeries? series)
-	   (display (format-heading heading)))
-	  ((ISeries? series)
-	   (display (format-heading heading)))
-          ((BSeries? series)
-	   (display (format-heading heading)))
+           ((GenSeries? series)
+            (display (format-heading heading)))
+           ((NSeries? series)
+            (display (format-heading heading)))
+           ((CSeries? series)
+            (display (format-heading heading)))
+           ((ISeries? series)
+            (display (format-heading heading)))
+           ((BSeries? series)
+            (display (format-heading heading)))
 	  (else
-	   (error 'frame-head "Heading for unknown series types ~s"
+	   (error 'data-frame-head "Heading for unknown series types ~s"
 		  (series-type series)))))
        (display " "))
 
@@ -96,6 +102,31 @@
 ; ***********************************************************
 
 ; ***********************************************************
+
+(: format-gen-series (GenSeries Index -> String))
+(define (format-gen-series gen-series row)
+  (let ((data (gen-series-iref gen-series row)))
+    (cond
+      [(symbol? data)
+          (~a (symbol->string data)
+              #:width WIDTH
+              #:align 'left)]
+      [(integer? data)
+          (~r data
+              #:precision 0
+              #:min-width WIDTH)]
+      [(rational? data)
+       (~r data
+           #:precision '(= 4)
+           #:min-width WIDTH)]
+      [(boolean? data)
+       (~a (if data
+               "#t"
+               "#f")
+           #:width WIDTH
+           #:align 'left)]
+      ; pretty-format struct
+      [else (pretty-format data)])))
 
 (: format-cseries (CSeries Index -> String))
 (define (format-cseries cseries row)
@@ -137,19 +168,21 @@
 	(for ([col (in-range (vector-length series))])
 	     (let ((a-series (vector-ref series col)))
 	       (cond
-		((NSeries? a-series)
-		 (display (format-nseries a-series row)))
-		((CSeries? a-series)
-		 (display (format-cseries a-series row)))
-		((ISeries? a-series)
-		 (display (format-iseries a-series row)))
-                ((BSeries? a-series)
-		 (display (format-bseries a-series row)))
-		(else
-		 (error 'data-frame-head "Unknown series types ~s"
-			(series-type a-series)))))
-	     (display " "))
-	(newline)))
+                 ((GenSeries? a-series)
+                  (display (format-gen-series a-series row)))
+                 ((NSeries? a-series)
+                  (display (format-nseries a-series row)))
+                 ((CSeries? a-series)
+                  (display (format-cseries a-series row)))
+                 ((ISeries? a-series)
+                  (display (format-iseries a-series row)))
+                 ((BSeries? a-series)
+                  (display (format-bseries a-series row)))
+                 (else
+                  (error 'data-frame-head "Unknown series types ~s"
+                         (series-type a-series)))))
+          (display " "))
+        (newline)))
 
 (define default-head-rows 10)
 

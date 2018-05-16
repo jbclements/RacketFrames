@@ -31,7 +31,9 @@
     'INTEGER)
    ((andmap number? (canonicalize-to-string-or-num col))
     'NUMERIC)
-   (else 'CATEGORICAL)))
+   ((andmap string? (canonicalize-to-string-or-num col))
+    'CATEGORICAL)
+   (else 'GENERIC)))
 
 (: guess-series-meta ((Listof String) (Listof (Listof String)) -> (Listof ColumnInfo)))
 (define (guess-series-meta headers cols)
@@ -123,3 +125,15 @@
 (Schema-SeriesTypes schema-1)
 
 (transpose-rows-to-cols (list (list "hello" "world") (list "fizz" "buzz")))
+
+(define schema-2 (determine-schema-from-sample (list "5.7" "generic header" "world" "fizz" "buzz" "1" "2.5") ","))
+
+(Schema-headers schema-2)
+
+(Schema-SeriesTypes schema-2)
+
+(define schema-3 (determine-schema-from-sample (list "generic header" "5.7" "world" "fizz" "buzz" "1" "2.5") ","))
+
+(Schema-headers schema-3)
+
+(Schema-SeriesTypes schema-3)

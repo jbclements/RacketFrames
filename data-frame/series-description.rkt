@@ -28,7 +28,7 @@
  [series-type (Series -> SeriesType)]
  [series-length (Series -> Index)]
  [series-data (Series -> (U (Vectorof GenericType) FlVector (Vectorof Symbol) (Vectorof Fixnum) (Vectorof Boolean)))]
- [series-iref (Series Index -> (U Float Symbol Fixnum Boolean))])
+ [series-iref (Series Index -> Any)])
 
 ; ***********************************************************
 
@@ -54,7 +54,7 @@
 
 ; ***********************************************************
 
-(define-type Series (U NSeries CSeries ISeries BSeries))
+(define-type Series (U GenSeries NSeries CSeries ISeries BSeries))
 
 (define-type SeriesType (U 'GenericSeries 'NumericSeries 'CategoricalSeries 'IntegerSeries 'BooleanSeries))
 
@@ -105,7 +105,7 @@
     [(BSeries? series) (bseries-data series)]
     [else (error "Unknown Series type in DataFrame")]))
 
-(: series-iref (Series Index -> (U Float Symbol Fixnum Boolean)))
+(: series-iref (Series Index -> Any))
 (define (series-iref series idx)
   (cond
     [(GenSeries? series) (gen-series-iref series idx)]

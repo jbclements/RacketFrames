@@ -53,13 +53,9 @@
   
   (if (< (GenSeriesBuilder-index builder)         
          (vector-length (GenSeriesBuilder-data builder)))
-      (let ((num (if (string? value)
-		     (let ((num (string->number (string-trim value))))                      
-                       (if num (assert num fixnum?) 0))
-		     value)))
         (vector-set! (GenSeriesBuilder-data builder)
 		     (bump-index)
-		     num))
+		     value)
       (begin
         (extend-data)       
         (append-GenSeriesBuilder builder value))))

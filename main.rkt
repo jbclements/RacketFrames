@@ -35,6 +35,7 @@
  (all-from-out "data-frame/data-frame-join.rkt")
  (all-from-out "stats/tabulate.rkt")
  (all-from-out "stats/statistics.rkt")
+ (all-from-out "data-frame/generic-series.rkt")
  (all-from-out "data-frame/integer-series.rkt")
  (all-from-out "data-frame/numeric-series.rkt")
  (all-from-out "data-frame/categorical-series.rkt")
@@ -52,6 +53,7 @@
  "data-frame/data-frame-join.rkt"
  "data-frame/indexed-series.rkt"
  "data-frame/series-description.rkt"
+ "data-frame/generic-series.rkt"
  "data-frame/integer-series.rkt"
  "data-frame/numeric-series.rkt"
  "data-frame/categorical-series.rkt"

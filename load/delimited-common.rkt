@@ -15,6 +15,9 @@
 	  drain head-n)
  (only-in "../data-frame/series-builder.rkt"
 	  SeriesBuilder)
+ (only-in "../data-frame/generic-series-builder.rkt"
+	  GenSeriesBuilder GenSeriesBuilder?
+	  append-GenSeriesBuilder)
  (only-in "../data-frame/categorical-series-builder.rkt"
 	  CSeriesBuilder CSeriesBuilder?
 	  append-CSeriesBuilder)
@@ -41,20 +44,23 @@
   (: appenders (Listof (Line -> Void)))
   (define appenders (map (λ: ((builder : SeriesBuilder))
 			     (cond
-			      [(CSeriesBuilder? builder)
+                               [(GenSeriesBuilder? builder)
 			       (λ: ((str : String))
-				   (append-CSeriesBuilder builder str))]
-			      [(ISeriesBuilder? builder)
-			       (λ: ((str : String))
-				   (append-ISeriesBuilder builder str))]
-                              [(BSeriesBuilder? builder)
-			       (λ: ((str : String))
-				   (append-BSeriesBuilder builder str))]
-			      [(NSeriesBuilder? builder)
-			       (λ: ((str : String))
-				   (append-NSeriesBuilder builder str))]
-			      [else (λ: ((str : String)) (void))]))
-			 (DataFrameBuilder-builders data-frame-builder)))
+                                 (append-GenSeriesBuilder builder str))]
+                               [(CSeriesBuilder? builder)
+                                (λ: ((str : String))
+                                  (append-CSeriesBuilder builder str))]
+                               [(ISeriesBuilder? builder)
+                                (λ: ((str : String))
+                                  (append-ISeriesBuilder builder str))]
+                               [(BSeriesBuilder? builder)
+                                (λ: ((str : String))
+                                  (append-BSeriesBuilder builder str))]
+                               [(NSeriesBuilder? builder)
+                                (λ: ((str : String))
+                                  (append-NSeriesBuilder builder str))]
+                               [else (λ: ((str : String)) (void))]))
+                         (DataFrameBuilder-builders data-frame-builder)))
 
   #| (define-type (Stream D) (U D 'Nothing 'EOS))
 

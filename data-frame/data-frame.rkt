@@ -65,6 +65,10 @@
           Series 
           SeriesDescription SeriesDescription-name
           SeriesDescription-type SeriesDescription-length)
+ (only-in "generic-series.rkt"
+         GenSeries GenSeries?
+         GenSeries-data
+         new-GenSeries)
  (only-in "categorical-series.rkt"
           CSeries CSeries?
           CSeries-data
@@ -189,6 +193,12 @@
 (define (data-frame-series data-frame col)
   (vector-ref (DataFrame-series data-frame)
               (label-index (assert (LabelIndex-index data-frame)) col)))
+
+; This function uses the above function and the assert function
+; to ensure the series returned is a GenSeries.
+(: data-frame-gen-series (DataFrame Symbol -> GenSeries))
+(define (data-frame-gen-series data-frame name)
+  (assert (data-frame-gen-series data-frame name) GenSeries?))
 
 ; This function uses the above function and the assert function
 ; to ensure the series returned is a CSeries.

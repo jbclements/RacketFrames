@@ -51,6 +51,9 @@
 	  DataFrame new-data-frame data-frame-names
 	  data-frame-cseries data-frame-explode
 	  DataFrameDescription DataFrameDescription-series data-frame-description)
+ (only-in "generic-series.rkt"
+	  GenSeries GenSeries? gen-series-iref new-GenSeries
+	  gen-series-referencer)
  (only-in "numeric-series.rkt"
 	  NSeries NSeries? nseries-iref nseries-label-ref new-NSeries)
  (only-in "integer-series.rkt"
@@ -61,6 +64,10 @@
 	  CSeries CSeries? new-CSeries)
  (only-in "series-builder.rkt"
 	  SeriesBuilder)
+ (only-in "generic-series-builder.rkt"
+	  GenSeriesBuilder GenSeriesBuilder?
+	  append-GenSeriesBuilder complete-GenSeriesBuilder
+	  new-GenSeriesBuilder)
  (only-in "integer-series-builder.rkt"
 	  ISeriesBuilder ISeriesBuilder?
 	  append-ISeriesBuilder complete-ISeriesBuilder
@@ -124,6 +131,7 @@
   (for/list: : (Listof SeriesBuilder)
 	     ([series (DataFrameDescription-series data-frame-description)])
 	     (case (SeriesDescription-type series)
+               ((GenericSeries)     (new-GenSeriesBuilder len))
 	       ((CategoricalSeries) (new-CSeriesBuilder len))
 	       ((NumericSeries)     (new-NSeriesBuilder len))
 	       ((IntegerSeries)     (new-ISeriesBuilder len))
@@ -274,13 +282,21 @@
          ; a NSeries then associated value will be appended onto NSeriesBuilder,
          ; and same goes for ISeries and CSeries.
          (cond
+           ((GenSeries? series)
+            (if (GenSeriesBuilder? builder)
+                (append-GenSeriesBuilder builder 'null)
+                (copy-column-row-error series col)))
 	  ((CSeries? series)
            (if (CSeriesBuilder? builder)
                (append-CSeriesBuilder builder 'null)
                (copy-column-row-error series col)))
 	  ((ISeries? series)
            (if (ISeriesBuilder? builder)
-               (append-ISeriesBuilder builder -100000)
+               (append-ISeriesBuilder builder 0)
+               (copy-column-row-error series col)))
+          ((NSeries? series)
+           (if (NSeriesBuilder? builder)
+               (append-NSeriesBuilder builder +nan.0)
                (copy-column-row-error series col)))))))
 
 ; ***********************************************************

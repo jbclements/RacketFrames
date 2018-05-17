@@ -453,8 +453,8 @@
 					 (set-intersect (list->set cols)
 							(set-intersect cols-a cols-b))))
 
-  ;(when (null? join-cols)
-  ;(error "No common columns between data-frames to join on."))
+  (when (null? join-cols)
+    (error "No common columns between data-frames to join on."))
 
   ; The column of fb that are not in the join set.
   (define: non-key-dfb : (Setof Label) (set-subtract cols-b join-cols))
@@ -473,7 +473,7 @@
 
   (define: dfa-keyfn : (Index -> Key)
     (key-fn (key-cols-series (key-cols-sort-lexical (data-frame-cols dfa join-cols)))))
-
+  
   ; Get series builders of default length 10 for all columns in fa.
   (define: dest-builders-a : (Vectorof SeriesBuilder)
     (list->vector (dest-mapping-series-builders (data-frame-description dfa) 10)))
@@ -481,7 +481,7 @@
   ; Get series builders of default length 10 for only non-key-fb columns in fb.
   (define: dest-builders-b : (Vectorof SeriesBuilder)
     (list->vector
-     (dest-mapping-series-builders (data-frame-description dfb) 10)))
+     (dest-mapping-series-builders (data-frame-description dfb #:project non-key-dfb) 10)))
   
   (do-join-build-left/right (src-series dfa-cols) (src-series dfb-cols) (src-series dfb-cols-match)
 		 dest-builders-a dest-builders-b
@@ -995,17 +995,17 @@
 ; create new data-frame-mixed-6
 (define data-frame-mixed-6 (new-data-frame columns-mixed-6))
 
-;(frame-write-tab data-frame-mixed-5 (current-output-port))
+(frame-write-tab data-frame-mixed-5 (current-output-port))
 
-;(frame-write-tab data-frame-mixed-6 (current-output-port))
+(frame-write-tab data-frame-mixed-6 (current-output-port))
 
-;(frame-write-tab (data-frame-join-left data-frame-mixed-5 data-frame-mixed-6 #:on (list 'col3)) (current-output-port))
+(frame-write-tab (data-frame-join-left data-frame-mixed-5 data-frame-mixed-6 #:on (list 'col3)) (current-output-port))
 
-;(frame-write-tab (data-frame-join-inner data-frame-mixed-5 data-frame-mixed-6 #:on (list 'col2)) (current-output-port))
+(frame-write-tab (data-frame-join-inner data-frame-mixed-5 data-frame-mixed-6 #:on (list 'col2)) (current-output-port))
 
-;(frame-write-tab (data-frame-join-right data-frame-mixed-5 data-frame-mixed-6 #:on (list 'col2)) (current-output-port))
+(frame-write-tab (data-frame-join-right data-frame-mixed-5 data-frame-mixed-6 #:on (list 'col2)) (current-output-port))
 
-;(frame-write-tab (data-frame-join-outer data-frame-mixed-5 data-frame-mixed-6 #:on (list 'col2)) (current-output-port))
+(frame-write-tab (data-frame-join-outer data-frame-mixed-5 data-frame-mixed-6 #:on (list 'col2)) (current-output-port))
 
 (define columns-mixed-7
   (list 
@@ -1032,3 +1032,9 @@
 (frame-write-tab data-frame-mixed-8 (current-output-port))
 
 (frame-write-tab (data-frame-join-left data-frame-mixed-7 data-frame-mixed-8 #:on (list 'col3)) (current-output-port))
+
+(frame-write-tab (data-frame-join-right data-frame-mixed-7 data-frame-mixed-8 #:on (list 'col3)) (current-output-port))
+
+(frame-write-tab (data-frame-join-inner data-frame-mixed-7 data-frame-mixed-8 #:on (list 'col3)) (current-output-port))
+
+(frame-write-tab (data-frame-join-outer data-frame-mixed-7 data-frame-mixed-8 #:on (list 'col3)) (current-output-port))

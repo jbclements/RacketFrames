@@ -216,18 +216,20 @@
 		 (display "\t" outp))
 	 (let ((a-series (vector-ref series col)))
 	   (cond
-	    ((NSeries? a-series)
-	     (let ((n (nseries-iref a-series row)))
-	       (display n outp)))
-	    ((CSeries? a-series)
-	     (display (cseries-iref a-series row) outp))
-	    ((ISeries? a-series)
-	     (display (iseries-iref a-series row) outp))
-            ((BSeries? a-series)
-	     (display (bseries-iref a-series row) outp))
-	    (else
-	     (error 'frame-head "Unknown series types ~s"
-		    (series-type a-series)))))))
+             ((GenSeries? a-series)
+              (display (gen-series-iref a-series row) outp))
+             ((NSeries? a-series)
+              (let ((n (nseries-iref a-series row)))
+                (display n outp)))
+             ((CSeries? a-series)
+              (display (cseries-iref a-series row) outp))
+             ((ISeries? a-series)
+              (display (iseries-iref a-series row) outp))
+             ((BSeries? a-series)
+              (display (bseries-iref a-series row) outp))
+             (else
+              (error 'frame-head "Unknown series types ~s"
+                     (series-type a-series)))))))
 
   (: write-heading (Columns -> Void))
   (define (write-heading cols)

@@ -58,9 +58,12 @@
   
   (if (< (GenSeriesBuilder-index builder)         
          (vector-length (GenSeriesBuilder-data builder)))
-        (vector-set! (GenSeriesBuilder-data builder)
+        (let ((new-value (if (string? value)
+		     (string-to-symbol-or-num value)
+		     value)))
+          (vector-set! (GenSeriesBuilder-data builder)
 		     (bump-index)
-		     (string-to-symbol-or-num (assert value string?)))                    
+                     new-value))
       (begin
         (extend-data)       
         (append-GenSeriesBuilder builder value))))

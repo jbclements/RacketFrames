@@ -7,7 +7,8 @@
 (require typed/rackunit)
 
 ; ***********************************************************
-; data-frame-join rough draft
+; data-frame-join rough draft, currently joins are only possible
+; on integer and categorical series
 ; ***********************************************************
 
 ; **************************
@@ -52,7 +53,7 @@
 	  data-frame-cseries data-frame-explode
 	  DataFrameDescription DataFrameDescription-series data-frame-description)
  (only-in "generic-series.rkt"
-	  GenSeries GenSeries? gen-series-iref new-GenSeries
+	  GenSeries GenSeries? GenericType gen-series-iref new-GenSeries
 	  gen-series-referencer)
  (only-in "numeric-series.rkt"
 	  NSeries NSeries? nseries-iref nseries-label-ref new-NSeries)
@@ -92,7 +93,7 @@
 (define-type Column (Pair Label Series))
 (define-type Key String)
 (define-type JoinHash (HashTable Key (Listof Index)))
-(define-type IndexableSeries (U CSeries ISeries))
+(define-type IndexableSeries (U GenSeries CSeries ISeries))
 
 (define key-delimiter "\t")
 
@@ -158,8 +159,9 @@
 ; in list form.
 (: key-cols-series ((Listof Column) -> (Listof IndexableSeries)))
 (define (key-cols-series cols)
-  (filter (λ: ((s : Series)) (or (CSeries? s)
-				 (ISeries? s)))
+  (filter (λ: ((s : Series)) (or (GenSeries? s)
+                              (CSeries? s)
+                              (ISeries? s)))
 	  (map column-series cols)))
 
 ; This function consumes a Listof IndexableSeries and builds key
@@ -167,21 +169,25 @@
 ; Insert a tab char between each key value, e.g., k1 + \t + k2 + \t + ...
 (: key-fn ((Listof IndexableSeries) -> (Index -> Key)))
 (define (key-fn cols)
-  (let: ((col-refs : (Listof (Index -> (U Label Integer)))
+  (let: ((col-refs : (Listof (Index -> GenericType))
 		   (for/list ([col (in-list cols)])
+                     (if (GenSeries? col)
+                         (gen-series-referencer col)
 			     (if (CSeries? col)
 				 (cseries-referencer col)
-				 (iseries-referencer col)))))
+				 (iseries-referencer col))))))
 	(λ: ((row-id : Index))
 	    (let ((outp (open-output-string)))
 	      (for ([col-ref (in-list col-refs)])
-		   (let*: ((seg : (U Symbol Integer) (col-ref row-id))
-			   (seg-str : String (if (symbol? seg)
-						 (symbol->string seg)
-						 (number->string seg))))
-			  (display seg-str outp)
-			  (display key-delimiter outp)))
-	      (get-output-string outp)))))
+		   (let*: ((seg : GenericType (col-ref row-id))
+			   (seg-str : String (cond
+                                               [(symbol? seg) (symbol->string seg)]
+                                               [(number? seg) (number->string seg)]
+                                               ; pretty-format anything else
+                                               [else (pretty-format seg)])))
+                     (display seg-str outp)
+                     (display key-delimiter outp)))
+              (get-output-string outp)))))
 
 ; ***********************************************************
 
@@ -233,7 +239,7 @@
 ; on a copy column row error.
 (: copy-column-row-error (Series Integer -> Void))
 (define (copy-column-row-error series col)
-  (error 'data-frame-join-left "Invalid target builder for data-frame column series ~s at ~s"
+  (error 'data-frame-join "Invalid target builder for data-frame column series ~s at ~s"
 	 (series-type series) col))
 
 ; This functions consumes a Vectorof Series and Vectorof SeriesBuilder
@@ -251,21 +257,26 @@
          ; a NSeries then associated value will be appended onto NSeriesBuilder,
          ; and same goes for ISeries and CSeries.
          (cond
-	  ((NSeries? series)
-	   (let: ((num : Float (nseries-iref series row-id)))
-		 (if (NSeriesBuilder? builder)
-		     (append-NSeriesBuilder builder num)
-		     (copy-column-row-error series col))))
-	  ((CSeries? series)
-	   (let: ((nom : Label (cseries-iref series row-id)))
-		 (if (CSeriesBuilder? builder)
-		     (append-CSeriesBuilder builder nom)
-		     (copy-column-row-error series col))))
-	  ((ISeries? series)
-	   (let: ((num : Fixnum (iseries-iref series row-id)))
-		 (if (ISeriesBuilder? builder)
-		     (append-ISeriesBuilder builder num)
-		     (copy-column-row-error series col))))))))
+           ((GenSeries? series)
+            (let: ((val : GenericType (gen-series-iref series row-id)))
+              (if (GenSeriesBuilder? builder)
+                  (append-GenSeriesBuilder builder val)
+                  (copy-column-row-error series col))))
+           ((NSeries? series)
+            (let: ((num : Float (nseries-iref series row-id)))
+              (if (NSeriesBuilder? builder)
+                  (append-NSeriesBuilder builder num)
+                  (copy-column-row-error series col))))
+           ((CSeries? series)
+            (let: ((nom : Label (cseries-iref series row-id)))
+              (if (CSeriesBuilder? builder)
+                  (append-CSeriesBuilder builder nom)
+                  (copy-column-row-error series col))))
+           ((ISeries? series)
+            (let: ((num : Fixnum (iseries-iref series row-id)))
+              (if (ISeriesBuilder? builder)
+                  (append-ISeriesBuilder builder num)
+                  (copy-column-row-error series col))))))))
 
 ; This functions consumes a Vectorof Series and Vectorof SeriesBuilder
 ; and an Index and does not return any value. It copies an entire row
@@ -286,18 +297,18 @@
             (if (GenSeriesBuilder? builder)
                 (append-GenSeriesBuilder builder 'null)
                 (copy-column-row-error series col)))
-	  ((CSeries? series)
-           (if (CSeriesBuilder? builder)
-               (append-CSeriesBuilder builder 'null)
-               (copy-column-row-error series col)))
-	  ((ISeries? series)
-           (if (ISeriesBuilder? builder)
-               (append-ISeriesBuilder builder 0)
-               (copy-column-row-error series col)))
-          ((NSeries? series)
-           (if (NSeriesBuilder? builder)
-               (append-NSeriesBuilder builder +nan.0)
-               (copy-column-row-error series col)))))))
+           ((CSeries? series)
+            (if (CSeriesBuilder? builder)
+                (append-CSeriesBuilder builder 'null)
+                (copy-column-row-error series col)))
+           ((ISeries? series)
+            (if (ISeriesBuilder? builder)
+                (append-ISeriesBuilder builder 0)
+                (copy-column-row-error series col)))
+           ((NSeries? series)
+            (if (NSeriesBuilder? builder)
+                (append-NSeriesBuilder builder +nan.0)
+                (copy-column-row-error series col)))))))
 
 ; ***********************************************************
 
@@ -984,8 +995,40 @@
 ; create new data-frame-mixed-6
 (define data-frame-mixed-6 (new-data-frame columns-mixed-6))
 
+;(frame-write-tab data-frame-mixed-5 (current-output-port))
+
+;(frame-write-tab data-frame-mixed-6 (current-output-port))
+
 ;(frame-write-tab (data-frame-join-left data-frame-mixed-5 data-frame-mixed-6 #:on (list 'col3)) (current-output-port))
 
 ;(frame-write-tab (data-frame-join-inner data-frame-mixed-5 data-frame-mixed-6 #:on (list 'col2)) (current-output-port))
 
 ;(frame-write-tab (data-frame-join-right data-frame-mixed-5 data-frame-mixed-6 #:on (list 'col2)) (current-output-port))
+
+;(frame-write-tab (data-frame-join-outer data-frame-mixed-5 data-frame-mixed-6 #:on (list 'col2)) (current-output-port))
+
+(define columns-mixed-7
+  (list 
+   (cons 'col1 (new-ISeries (vector 1 2 3 4) #f))
+   (cons 'col2 (new-CSeries (vector 'a 'b 'c 'd)))
+   (cons 'col3 (new-GenSeries (vector 'a 1.5 20 10) #f))
+   (cons 'col4 (new-ISeries (vector 21 22 23 24) #f))))
+
+(define columns-mixed-8
+  (list 
+   (cons 'col1 (new-ISeries (vector 11 21 31 41) #f))
+   (cons 'col2 (new-CSeries (vector 'a 'b 'g 'd)))
+   (cons 'col3 (new-GenSeries (vector 'a 'b 'c 'd) #f))
+   (cons 'col4 (new-ISeries (vector 22 22 23 24) #f))))
+
+; create new data-frame-mixed-7
+(define data-frame-mixed-7 (new-data-frame columns-mixed-7))
+
+; create new data-frame-mixed-8
+(define data-frame-mixed-8 (new-data-frame columns-mixed-8))
+
+(frame-write-tab data-frame-mixed-7 (current-output-port))
+
+(frame-write-tab data-frame-mixed-8 (current-output-port))
+
+(frame-write-tab (data-frame-join-left data-frame-mixed-7 data-frame-mixed-8 #:on (list 'col3)) (current-output-port))

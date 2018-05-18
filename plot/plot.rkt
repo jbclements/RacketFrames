@@ -226,10 +226,10 @@ Options to pass to matplotlib plotting method |#
   
     (plot
      (points plot-data
-             #:alpha alpha
-             #:x-jitter x-jitter
-             #:y-jitter y-jitter
-             #:sym sym
+             #:alpha 0.4
+             #:x-jitter 1
+             #:y-jitter 1
+             #:sym 'fullcircle1
              #:color "blue")
      #:x-min -10 #:x-max 10 #:y-min -10 #:y-max 10)))
 

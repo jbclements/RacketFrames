@@ -94,7 +94,7 @@
 (struct: DataFrame LabelIndex ([series : (Vectorof Series)]))
 
 (struct: DataFrameDescription ([dimensions : Dim]
-                               [series : (Listof SeriesDescription)]) #:transparent)
+                               [series : (Listof SeriesDescription)]))
 
 ; ***********************************************************
 

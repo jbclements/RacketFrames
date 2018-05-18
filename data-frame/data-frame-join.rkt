@@ -453,8 +453,8 @@
 					 (set-intersect (list->set cols)
 							(set-intersect cols-a cols-b))))
 
-  (when (null? join-cols)
-    (error "No common columns between data-frames to join on."))
+  ;(when (null? join-cols)
+    ;(error "No common columns between data-frames to join on."))
 
   ; The column of fb that are not in the join set.
   (define: non-key-dfb : (Setof Label) (set-subtract cols-b join-cols))
@@ -609,12 +609,23 @@
   (define: cols-b    : (Setof Label) (list->set (data-frame-names dfb)))
   ; Get the common cols between fa and fb
   (define: join-cols : (Setof Label) (if (null? cols)
-					 (set-intersect cols-a cols-b)
+                                         ;(let ((cols-a-b-intersection (set-intersect cols-a cols-b)))
+                                          ; (if (or (= (set-count cols-a-b-intersection) (set-count cols-b)) (= (set-count cols-a-b-intersection) (set-count cols-a)))
+                                           ;    (set)
+                                            ;   cols-a-b-intersection))
+                                         (set-intersect cols-b cols-a)
 					 (set-intersect (list->set cols)
 							(set-intersect cols-a cols-b))))
 
+  (displayln "Join Cols")
+
+  (displayln join-cols)
+
   (when (null? join-cols)
 	(error "No common columns between data-frames to join on."))
+
+  ;(when (or (= (set-count join-cols) (set-count cols-b)) (= (set-count join-cols) (set-count cols-b)))
+   ; (set-clear! join-cols))
 
   ; The column of fb that are not in the join set.
   (define: non-key-dfb : (Setof Label) (set-subtract cols-b join-cols))
@@ -690,8 +701,8 @@
 					 (set-intersect (list->set cols)
 							(set-intersect cols-a cols-b))))
 
-  (when (null? join-cols)
-	(error "No common columns between data-frames to join on."))
+  ;(when (null? join-cols)
+  ;(error "No common columns between data-frames to join on."))
 
   ; The column of fb that are not in the join set.
   (define: non-key-dfb : (Setof Label) (set-subtract cols-b join-cols))
@@ -1038,3 +1049,28 @@
 (frame-write-tab (data-frame-join-inner data-frame-mixed-7 data-frame-mixed-8 #:on (list 'col3)) (current-output-port))
 
 (frame-write-tab (data-frame-join-outer data-frame-mixed-7 data-frame-mixed-8 #:on (list 'col3)) (current-output-port))
+
+(define columns-mixed-9
+  (list 
+   (cons 'col1 (new-ISeries (vector 1 2 3 4) #f))
+   (cons 'col2 (new-CSeries (vector 'a 'b 'c 'd)))
+   (cons 'col3 (new-GenSeries (vector 'a 1.5 20 10) #f))
+   (cons 'col4 (new-ISeries (vector 21 22 23 24) #f))))
+
+(define columns-mixed-10
+  (list 
+   (cons 'col1 (new-ISeries (vector 1 2 3 4) #f))
+   (cons 'col2 (new-CSeries (vector 'a 'b 'c 'd)))
+   (cons 'col3 (new-GenSeries (vector 'a 1.5 20 10) #f))
+   (cons 'col4 (new-ISeries (vector 21 22 23 24) #f))))
+
+; create new data-frame-mixed-9
+(define data-frame-mixed-9 (new-data-frame columns-mixed-9))
+
+; create new data-frame-mixed-10
+(define data-frame-mixed-10 (new-data-frame columns-mixed-10))
+
+(displayln "No provided join column test")
+(frame-write-tab (data-frame-join-left data-frame-mixed-7 data-frame-mixed-8 #:on '()) (current-output-port))
+
+(frame-write-tab (data-frame-join-inner data-frame-mixed-9 data-frame-mixed-10 #:on '()) (current-output-port))

@@ -34,7 +34,7 @@
  [show-data-frame-description (DataFrameDescription -> Void)])
 
 (provide
- DataFrame DataFrame? Column Columns
+ DataFrame DataFrame? Column Column? Columns Columns?
  (struct-out DataFrameDescription)
  data-frame-series
  data-frame-names data-frame-dim 
@@ -89,6 +89,10 @@
 
 (define-type Column  (Pair Label Series))
 (define-type Columns (Listof Column))
+
+(define-predicate Column? Column)
+
+(define-predicate Columns? Columns)
 
 ;; A DataFrame is map of series.
 (struct: DataFrame LabelIndex ([series : (Vectorof Series)]))

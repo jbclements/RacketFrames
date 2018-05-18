@@ -1489,7 +1489,8 @@ Returns a new DataFrame.
 
 (frame-write-tab data-frame-mixed-8 (current-output-port))
 
-(frame-write-tab (data-frame-join-left data-frame-mixed-7 data-frame-mixed-8 #:on (list 'col3)) (current-output-port))
+(frame-write-tab (data-frame-join-left data-frame-mixed-7 data-frame-mixed-8
+  #:on (list 'col3)) (current-output-port))
 
 ;; output ;;
 col1	col2	col3	col4
@@ -1545,7 +1546,8 @@ Returns a new DataFrame.
 
 (frame-write-tab data-frame-mixed-8 (current-output-port))
 
-(frame-write-tab (data-frame-join-right data-frame-mixed-7 data-frame-mixed-8 #:on (list 'col3)) (current-output-port))
+(frame-write-tab (data-frame-join-right data-frame-mixed-7 data-frame-mixed-8
+  #:on (list 'col3)) (current-output-port))
 
 ;; output ;;
 col1	col2	col3	col4
@@ -1600,7 +1602,8 @@ Returns a new DataFrame.
 
 (frame-write-tab data-frame-mixed-8 (current-output-port))
 
-(frame-write-tab (data-frame-join-inner data-frame-mixed-7 data-frame-mixed-8 #:on (list 'col3)) (current-output-port))
+(frame-write-tab (data-frame-join-inner data-frame-mixed-7 data-frame-mixed-8
+  #:on (list 'col3)) (current-output-port))
 
 ;; output ;;
 col1	col2	col3	col4
@@ -1652,7 +1655,8 @@ Returns a new DataFrame.
 
 (frame-write-tab data-frame-mixed-8 (current-output-port))
 
-(frame-write-tab (data-frame-join-outer data-frame-mixed-7 data-frame-mixed-8 #:on (list 'col3)) (current-output-port))
+(frame-write-tab (data-frame-join-outer data-frame-mixed-7 data-frame-mixed-8
+  #:on (list 'col3)) (current-output-port))
 
 ;; output ;;
 col1	col2	col3	col4
@@ -1661,7 +1665,7 @@ col1	col2	col3	col4
 3	c	20	23
 4	d	10	24
 
-  col1	col2	col3	col4
+col1	col2	col3	col4
 11	a	a	22
 21	b	b	22
 31	g	c	23

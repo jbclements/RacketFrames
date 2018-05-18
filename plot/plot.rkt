@@ -155,11 +155,11 @@ Options to pass to matplotlib plotting method |#
  (only-in "../data-frame/series-description.rkt"
 	  SeriesType Series
 	  SeriesDescription-type
-	  series-type series-length
+	  series-iref series-type series-length
           series-data)
  (only-in "../data-frame/data-frame.rkt"
-	  DataFrame DataFrame? Column new-data-frame data-frame-names
-	  data-frame-cseries data-frame-explode
+	  DataFrame DataFrame? Column Column? new-data-frame data-frame-names
+	  data-frame-cseries data-frame-explode column-series
 	  DataFrameDescription DataFrameDescription-series data-frame-description)
  (only-in "../data-frame/generic-series.rkt"
 	  GenSeries GenSeries? GenericType gen-series-iref new-GenSeries
@@ -211,19 +211,33 @@ Options to pass to matplotlib plotting method |#
  	 	#:alpha alpha	 	 	 	 
  	 	#:label label |#
 
+(: get-series-point-sequence (Series -> (Listof (Listof Real))))
+(define (get-series-point-sequence series)
+
+  (when (or (eq? (series-type series) 'CategoricalSeries) (eq? (series-type series) 'BooleanSeries))
+    (error 'get-series-point-sequence "Invalid series to plot."))
+  
+  (for/list: : (Listof (Listof Real))
+    ([idx : Real (range (series-length series))])
+    (list (add1 idx)
+          (assert (series-iref series (assert idx index?)) real?))))
+
+
+(: get-column-point-sequence (Column -> (Listof (Listof Real))))
+(define (get-column-point-sequence column)
+  (get-series-point-sequence (column-series column)))
+
+; (: get-data-frame-point-sequence (DataFrame -> (Sequenceof (Sequenceof Real))))
+; (: get-column-point-sequence (Column -> (Sequenceof (Sequenceof Real))))
+
 (: make-scatter-plot ((U GenSeries ISeries NSeries DataFrame Column) -> Any))
 (define (make-scatter-plot data)
   (let: ((plot-data : (Sequenceof (Sequenceof Real))
          (cond
-           [(GenSeries? data) (list (list 5 5) (list 3 3) (list 2 2) (list 1 1))]
-           [(ISeries? data) (list (list 5 5) (list 3 3) (list 2 2) (list 1 1))]
-           [(NSeries? data) (list (list 5 5) (list 3 3) (list 2 2) (list 1 1))]
+           [(or (GenSeries? data) (ISeries? data) (NSeries? data)) (get-series-point-sequence data)]
+           [(Column? data) (get-column-point-sequence data)]
            [(DataFrame? data) (list (list 5 5) (list 3 3) (list 2 2) (list 1 1))]
-           [else (list (list 5 5) (list 3 3) (list 2 2) (list 1 1))]
-           ;[(Column? data) (list (list 5 5) (list 3 3) (list 2 2) (list 1 1))]
-           )))
-   
-  
+           [else (error 'make-scatter-plot "Invalid data to plot")])))
     (plot
      (points plot-data
              #:alpha 0.4
@@ -234,3 +248,7 @@ Options to pass to matplotlib plotting method |#
      #:x-min -10 #:x-max 10 #:y-min -10 #:y-max 10)))
 
 (make-scatter-plot (new-ISeries (vector 1 2 3 4 5) #f))
+
+(define float-column (cons 'col1 (new-NSeries (flvector 1.5 2.5 3.5 4.5) #f)))
+
+(make-scatter-plot float-column)

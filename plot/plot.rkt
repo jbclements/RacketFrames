@@ -137,14 +137,73 @@ kwds : keywords
 
 Options to pass to matplotlib plotting method |#
 
-(plot
-    (points (for/list ([i (in-range 1000)])
-              (list 0 0))
-            #:alpha 0.4
-            #:x-jitter 1
-            #:y-jitter 1
-            #:sym 'fullcircle1
-            #:color "blue")
-    #:x-min -2 #:x-max 2 #:y-min -2 #:y-max 2)
+(require
+ racket/pretty
+ racket/unsafe/ops
+ racket/flonum
+ racket/set
+ (only-in racket/set
+	  set set-member?
+	  list->set set->list
+	  set-intersect set-subtract)
+ (only-in grip/data/symbol
+	  symbol-prefix)
+ (only-in "../data-frame/indexed-series.rkt"
+	  Label Labeling LabelProjection)
+ (only-in "../data-frame/series.rkt"
+	  series-complete)
+ (only-in "../data-frame/series-description.rkt"
+	  SeriesType Series
+	  SeriesDescription-type
+	  series-type series-length
+          series-data)
+ (only-in "../data-frame/data-frame.rkt"
+	  DataFrame Column new-data-frame data-frame-names
+	  data-frame-cseries data-frame-explode
+	  DataFrameDescription DataFrameDescription-series data-frame-description)
+ (only-in "../data-frame/generic-series.rkt"
+	  GenSeries GenSeries? GenericType gen-series-iref new-GenSeries
+	  gen-series-referencer)
+ (only-in "../data-frame/numeric-series.rkt"
+	  NSeries NSeries? nseries-iref nseries-label-ref new-NSeries)
+ (only-in "../data-frame/integer-series.rkt"
+	  ISeries ISeries? iseries-iref new-ISeries
+	  iseries-referencer)
+ (only-in "../data-frame/categorical-series.rkt"
+	  cseries-referencer cseries-length cseries-iref
+	  CSeries CSeries? new-CSeries)
+ (only-in "../data-frame/series-builder.rkt"
+	  SeriesBuilder)
+ (only-in "../data-frame/generic-series-builder.rkt"
+	  GenSeriesBuilder GenSeriesBuilder?
+	  append-GenSeriesBuilder complete-GenSeriesBuilder
+	  new-GenSeriesBuilder)
+ (only-in "../data-frame/integer-series-builder.rkt"
+	  ISeriesBuilder ISeriesBuilder?
+	  append-ISeriesBuilder complete-ISeriesBuilder
+	  new-ISeriesBuilder)
+ (only-in "../data-frame/categorical-series-builder.rkt"
+	  CSeriesBuilder CSeriesBuilder?
+	  append-CSeriesBuilder complete-CSeriesBuilder
+	  new-CSeriesBuilder)
+ (only-in "../data-frame/categorical-series-ops.rkt"
+	  cseries-append)
+ (only-in "../data-frame/numeric-series-builder.rkt"
+	  NSeriesBuilder NSeriesBuilder?
+	  append-NSeriesBuilder complete-NSeriesBuilder
+	  new-NSeriesBuilder)
+ (only-in "../data-frame/data-frame-print.rkt"
+          frame-write-tab))
 
-(plot (function sqr -2 2))
+(: make-scatter-plot ((U GenSeries ISeries NSeries DataFrame Column) -> Void))
+(define (make-scatter-plot data)
+  (assert  (plot
+            (points (list (list 5 5) (list 3 3) (list 2 2) (list 1 1))
+                    #:alpha 0.4
+                    #:x-jitter 1
+                    #:y-jitter 1
+                    #:sym 'fullcircle1
+                    #:color "blue")
+            #:x-min -2 #:x-max 2 #:y-min -2 #:y-max 2) Void?))
+
+(make-scatter-plot (new-ISeries (vector 1 2 3 4 5) #f))

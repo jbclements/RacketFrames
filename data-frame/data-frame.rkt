@@ -34,7 +34,7 @@
  [show-data-frame-description (DataFrameDescription -> Void)])
 
 (provide
- DataFrame Column Columns
+ DataFrame DataFrame? Column Columns
  (struct-out DataFrameDescription)
  data-frame-series
  data-frame-names data-frame-dim 

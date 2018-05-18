@@ -158,7 +158,7 @@ Options to pass to matplotlib plotting method |#
 	  series-type series-length
           series-data)
  (only-in "../data-frame/data-frame.rkt"
-	  DataFrame Column new-data-frame data-frame-names
+	  DataFrame DataFrame? Column new-data-frame data-frame-names
 	  data-frame-cseries data-frame-explode
 	  DataFrameDescription DataFrameDescription-series data-frame-description)
  (only-in "../data-frame/generic-series.rkt"
@@ -195,15 +195,42 @@ Options to pass to matplotlib plotting method |#
  (only-in "../data-frame/data-frame-print.rkt"
           frame-write-tab))
 
-(: make-scatter-plot ((U GenSeries ISeries NSeries DataFrame Column) -> Void))
+
+#|
+#:x-min [x-min -10]
+ 	 	#:x-max [x-max 10]
+ 	 	#:y-min [y-min 10]
+ 	 	#:y-max y-max	 	 	 	 
+ 	 	#:sym sym	 	 	 	 
+ 	 	#:color color	 	 	 	 
+ 	 	#:fill-color fill-color	 	 	 	 
+ 	 	#:x-jitter x-jitter	 	 	 	 
+ 	 	#:y-jitter y-jitter	 	 	 	 
+ 	 	#:size size	 	 	 	 
+ 	 	#:line-width line-width	 	 	 	 
+ 	 	#:alpha alpha	 	 	 	 
+ 	 	#:label label |#
+
+(: make-scatter-plot ((U GenSeries ISeries NSeries DataFrame Column) -> Any))
 (define (make-scatter-plot data)
-  (assert  (plot
-            (points (list (list 5 5) (list 3 3) (list 2 2) (list 1 1))
-                    #:alpha 0.4
-                    #:x-jitter 1
-                    #:y-jitter 1
-                    #:sym 'fullcircle1
-                    #:color "blue")
-            #:x-min -2 #:x-max 2 #:y-min -2 #:y-max 2) Void?))
+  (let: ((plot-data : (Sequenceof (Sequenceof Real))
+         (cond
+           [(GenSeries? data) (list (list 5 5) (list 3 3) (list 2 2) (list 1 1))]
+           [(ISeries? data) (list (list 5 5) (list 3 3) (list 2 2) (list 1 1))]
+           [(NSeries? data) (list (list 5 5) (list 3 3) (list 2 2) (list 1 1))]
+           [(DataFrame? data) (list (list 5 5) (list 3 3) (list 2 2) (list 1 1))]
+           [else (list (list 5 5) (list 3 3) (list 2 2) (list 1 1))]
+           ;[(Column? data) (list (list 5 5) (list 3 3) (list 2 2) (list 1 1))]
+           )))
+   
+  
+    (plot
+     (points plot-data
+             #:alpha alpha
+             #:x-jitter x-jitter
+             #:y-jitter y-jitter
+             #:sym sym
+             #:color "blue")
+     #:x-min -10 #:x-max 10 #:y-min -10 #:y-max 10)))
 
 (make-scatter-plot (new-ISeries (vector 1 2 3 4 5) #f))

@@ -1465,7 +1465,52 @@ Returns a new DataFrame.
 }
 
 @codeblock|{
-   (data-frame-join-left)
+   (define columns-mixed-7
+  (list 
+   (cons 'col1 (new-ISeries (vector 1 2 3 4) #f))
+   (cons 'col2 (new-CSeries (vector 'a 'b 'c 'd)))
+   (cons 'col3 (new-GenSeries (vector 'a 1.5 20 10) #f))
+   (cons 'col4 (new-ISeries (vector 21 22 23 24) #f))))
+
+(define columns-mixed-8
+  (list 
+   (cons 'col1 (new-ISeries (vector 11 21 31 41) #f))
+   (cons 'col2 (new-CSeries (vector 'a 'b 'g 'd)))
+   (cons 'col3 (new-GenSeries (vector 'a 'b 'c 'd) #f))
+   (cons 'col4 (new-ISeries (vector 22 22 23 24) #f))))
+
+; create new data-frame-mixed-7
+(define data-frame-mixed-7 (new-data-frame columns-mixed-7))
+
+; create new data-frame-mixed-8
+(define data-frame-mixed-8 (new-data-frame columns-mixed-8))
+
+(frame-write-tab data-frame-mixed-7 (current-output-port))
+
+(frame-write-tab data-frame-mixed-8 (current-output-port))
+
+(frame-write-tab (data-frame-join-left data-frame-mixed-7 data-frame-mixed-8 #:on (list 'col3)) (current-output-port))
+
+;; output ;;
+col1	col2	col3	col4
+1	a	a	21
+2	b	1.5	22
+3	c	20	23
+4	d	10	24
+
+col1	col2	col3	col4
+11	a	a	22
+21	b	b	22
+31	g	c	23
+41	d	d	24
+
+dfa-col1	dfa-col2	dfa-col3	dfa-col4	dfb-col1	dfb-col2	dfb-col4
+1		a		a		21		11		a		22
+2		b		1.5		22		0		null		0	
+3		c		20		23		0		null		0
+4		d		10		24		0		null		0
+;; output ;;
+
   }|
 
 @subsubsection[#:tag "data-frame-join-right"]{data-frame-join-right}
@@ -1476,7 +1521,51 @@ Returns a new DataFrame.
 }
 
 @codeblock|{
-   (data-frame-join-right)
+   (define columns-mixed-7
+  (list 
+   (cons 'col1 (new-ISeries (vector 1 2 3 4) #f))
+   (cons 'col2 (new-CSeries (vector 'a 'b 'c 'd)))
+   (cons 'col3 (new-GenSeries (vector 'a 1.5 20 10) #f))
+   (cons 'col4 (new-ISeries (vector 21 22 23 24) #f))))
+
+(define columns-mixed-8
+  (list 
+   (cons 'col1 (new-ISeries (vector 11 21 31 41) #f))
+   (cons 'col2 (new-CSeries (vector 'a 'b 'g 'd)))
+   (cons 'col3 (new-GenSeries (vector 'a 'b 'c 'd) #f))
+   (cons 'col4 (new-ISeries (vector 22 22 23 24) #f))))
+
+; create new data-frame-mixed-7
+(define data-frame-mixed-7 (new-data-frame columns-mixed-7))
+
+; create new data-frame-mixed-8
+(define data-frame-mixed-8 (new-data-frame columns-mixed-8))
+
+(frame-write-tab data-frame-mixed-7 (current-output-port))
+
+(frame-write-tab data-frame-mixed-8 (current-output-port))
+
+(frame-write-tab (data-frame-join-right data-frame-mixed-7 data-frame-mixed-8 #:on (list 'col3)) (current-output-port))
+
+;; output ;;
+col1	col2	col3	col4
+1	a	a	21
+2	b	1.5	22
+3	c	20	23
+4	d	10	24
+
+  col1	col2	col3	col4
+11	a	a	22
+21	b	b	22
+31	g	c	23
+41	d	d	24
+
+dfa-col1	dfa-col2	dfa-col4	dfb-col1	dfb-col2	dfb-col3	dfb-col4
+1		a		21		11		a		a		22
+0		null		0		21		b		b		22
+0		null		0		31		g		c		23
+0		null		0		41		d		d		24
+;; output ;;
   }|
 
 @subsubsection[#:tag "data-frame-join-inner"]{data-frame-join-inner}
@@ -1487,7 +1576,48 @@ Returns a new DataFrame.
 }
 
 @codeblock|{
-   (data-frame-join-inner)
+   (define columns-mixed-7
+  (list 
+   (cons 'col1 (new-ISeries (vector 1 2 3 4) #f))
+   (cons 'col2 (new-CSeries (vector 'a 'b 'c 'd)))
+   (cons 'col3 (new-GenSeries (vector 'a 1.5 20 10) #f))
+   (cons 'col4 (new-ISeries (vector 21 22 23 24) #f))))
+
+(define columns-mixed-8
+  (list 
+   (cons 'col1 (new-ISeries (vector 11 21 31 41) #f))
+   (cons 'col2 (new-CSeries (vector 'a 'b 'g 'd)))
+   (cons 'col3 (new-GenSeries (vector 'a 'b 'c 'd) #f))
+   (cons 'col4 (new-ISeries (vector 22 22 23 24) #f))))
+
+; create new data-frame-mixed-7
+(define data-frame-mixed-7 (new-data-frame columns-mixed-7))
+
+; create new data-frame-mixed-8
+(define data-frame-mixed-8 (new-data-frame columns-mixed-8))
+
+(frame-write-tab data-frame-mixed-7 (current-output-port))
+
+(frame-write-tab data-frame-mixed-8 (current-output-port))
+
+(frame-write-tab (data-frame-join-inner data-frame-mixed-7 data-frame-mixed-8 #:on (list 'col3)) (current-output-port))
+
+;; output ;;
+col1	col2	col3	col4
+1	a	a	21
+2	b	1.5	22
+3	c	20	23
+4	d	10	24
+
+  col1	col2	col3	col4
+11	a	a	22
+21	b	b	22
+31	g	c	23
+41	d	d	24
+
+dfa-col1	dfa-col2	dfa-col3	dfa-col4	dfb-col1	dfb-col2	dfb-col3	dfb-col4
+1		a		a		21		11		a		a		22
+;; output ;;
   }|
 
 @subsubsection[#:tag "data-frame-join-outer"]{data-frame-join-outer}
@@ -1498,7 +1628,54 @@ Returns a new DataFrame.
 }
 
 @codeblock|{
-   (data-frame-join-outer)
+   (define columns-mixed-7
+  (list 
+   (cons 'col1 (new-ISeries (vector 1 2 3 4) #f))
+   (cons 'col2 (new-CSeries (vector 'a 'b 'c 'd)))
+   (cons 'col3 (new-GenSeries (vector 'a 1.5 20 10) #f))
+   (cons 'col4 (new-ISeries (vector 21 22 23 24) #f))))
+
+(define columns-mixed-8
+  (list 
+   (cons 'col1 (new-ISeries (vector 11 21 31 41) #f))
+   (cons 'col2 (new-CSeries (vector 'a 'b 'g 'd)))
+   (cons 'col3 (new-GenSeries (vector 'a 'b 'c 'd) #f))
+   (cons 'col4 (new-ISeries (vector 22 22 23 24) #f))))
+
+; create new data-frame-mixed-7
+(define data-frame-mixed-7 (new-data-frame columns-mixed-7))
+
+; create new data-frame-mixed-8
+(define data-frame-mixed-8 (new-data-frame columns-mixed-8))
+
+(frame-write-tab data-frame-mixed-7 (current-output-port))
+
+(frame-write-tab data-frame-mixed-8 (current-output-port))
+
+(frame-write-tab (data-frame-join-outer data-frame-mixed-7 data-frame-mixed-8 #:on (list 'col3)) (current-output-port))
+
+;; output ;;
+col1	col2	col3	col4
+1	a	a	21
+2	b	1.5	22
+3	c	20	23
+4	d	10	24
+
+  col1	col2	col3	col4
+11	a	a	22
+21	b	b	22
+31	g	c	23
+41	d	d	24
+
+dfa-col1	dfa-col2	dfa-col3	dfa-col4	dfb-col1	dfb-col2	dfb-col3	dfb-col4
+1		a		a		21		11		a		a		22
+2		b		1.5		22		0		null		null		0
+3		c		20		23		0		null		null		0
+4		d		10		24		0		null		null		0
+0		null		null		0		21		b		b		22
+0		null		null		0		31		g		c		23
+0		null		null		0		41		d		d		24
+;; output ;;
   }|
 
 @index-section[]

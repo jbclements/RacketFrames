@@ -153,12 +153,12 @@ Options to pass to matplotlib plotting method |#
  (only-in "../data-frame/series.rkt"
 	  series-complete)
  (only-in "../data-frame/series-description.rkt"
-	  SeriesType Series
+	  SeriesType Series Series? SeriesList SeriesList?
 	  SeriesDescription-type
 	  series-iref series-type series-length
           series-data)
  (only-in "../data-frame/data-frame.rkt"
-	  DataFrame DataFrame? Column Column? new-data-frame data-frame-names
+	  DataFrame DataFrame? Column Columns Columns? Column? new-data-frame data-frame-names
 	  data-frame-cseries data-frame-explode column-series
 	  DataFrameDescription DataFrameDescription-series data-frame-description)
  (only-in "../data-frame/generic-series.rkt"
@@ -211,6 +211,10 @@ Options to pass to matplotlib plotting method |#
  	 	#:alpha alpha	 	 	 	 
  	 	#:label label |#
 
+(: is-plottable-series (Series -> Boolean))
+(define (is-plottable-series series)
+  (or (GenSeries? series) (ISeries? series) (NSeries? series)))
+
 (: get-series-point-sequence (Series -> (Listof (Listof Real))))
 (define (get-series-point-sequence series)
 
@@ -246,16 +250,30 @@ Options to pass to matplotlib plotting method |#
          (y-series (map column-series (cdr data-frame-exploded))))
     (map (lambda ([y : Series]) (get-series-to-series-point-sequence x-series y)) y-series)))
 
+(: get-series-list-point-sequence (SeriesList -> (Listof (Listof (Listof Real)))))
+(define (get-series-list-point-sequence series-list)
+  (let ((x-series (car series-list))
+        (y-series (cdr series-list)))
+    (map (lambda ([y : Series]) (get-series-to-series-point-sequence x-series y)) y-series)))
+
+(: get-columns-point-sequence (Columns -> (Listof (Listof (Listof Real)))))
+(define (get-columns-point-sequence columns)
+  (let ((x-series (column-series (car columns)))
+        (y-series (map column-series (cdr columns))))
+    (map (lambda ([y : Series]) (get-series-to-series-point-sequence x-series y)) y-series)))
+
 (: make-points ((Listof (Listof Real)) -> renderer2d))
 (define (make-points list-of-points)
   (points list-of-points))
 
-(: make-scatter-plot ((U GenSeries ISeries NSeries DataFrame Column) -> Any))
+(: make-scatter-plot ((U Series (Listof Series) DataFrame Column Columns) -> Any))
 (define (make-scatter-plot data)
   (let: ((plot-points : (Treeof renderer2d)
          (cond
-           [(or (GenSeries? data) (ISeries? data) (NSeries? data)) (list (points (get-series-point-sequence data)))]
+           [(and (Series? data) (is-plottable-series data)) (list (points (get-series-point-sequence data)))]
+           [(and (SeriesList? data) (andmap is-plottable-series data)) (map make-points (get-series-list-point-sequence data))]
            [(Column? data) (list (points (get-column-point-sequence data)))]
+           [(Columns? data) (map make-points (get-columns-point-sequence data))]
            [(DataFrame? data) (map make-points (get-data-frame-point-sequence data))]
            [else (error 'make-scatter-plot "Invalid data to plot")])))
     (plot
@@ -288,6 +306,10 @@ Options to pass to matplotlib plotting method |#
 
 (make-scatter-plot data-frame-integer)
 
+(displayln "plotting integer columns")
+
+(make-scatter-plot columns-integer)
+
 ;******************
 ;data-frame-float
 ;******************
@@ -303,3 +325,7 @@ Options to pass to matplotlib plotting method |#
 (displayln "plotting float data-frame")
 
 (make-scatter-plot data-frame-float)
+
+(displayln "plotting float columns")
+
+(make-scatter-plot columns-float)

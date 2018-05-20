@@ -21,7 +21,7 @@
 
 (provide
  (struct-out SeriesDescription)
- Series SeriesType)
+ Series Series? SeriesList SeriesList? SeriesType)
 
 (provide:
  [series-description (Label Series -> SeriesDescription)]
@@ -55,6 +55,12 @@
 ; ***********************************************************
 
 (define-type Series (U GenSeries NSeries CSeries ISeries BSeries))
+
+(define-predicate Series? Series)
+
+(define-type SeriesList (Listof Series))
+
+(define-predicate SeriesList? SeriesList)
 
 (define-type SeriesType (U 'GenericSeries 'NumericSeries 'CategoricalSeries 'IntegerSeries 'BooleanSeries))
 

@@ -47,9 +47,9 @@
 	  SeriesType Series
 	  SeriesDescription-type
 	  series-type series-length
-          series-data)
+          series-data series-iref)
  (only-in "data-frame.rkt"
-	  DataFrame new-data-frame data-frame-names
+	  DataFrame Column new-data-frame data-frame-names
 	  data-frame-cseries data-frame-explode
 	  DataFrameDescription DataFrameDescription-series data-frame-description)
  (only-in "generic-series.rkt"
@@ -90,9 +90,9 @@
 
 ; ***********************************************************
 
-(define-type Column (Pair Label Series))
 (define-type Key String)
 (define-type JoinHash (HashTable Key (Listof Index)))
+(define-type GroupHash (HashTable Key (Listof GenericType)))
 (define-type IndexableSeries (U GenSeries CSeries ISeries))
 
 (define key-delimiter "\t")
@@ -194,19 +194,19 @@
 ; ***********************************************************
 
 ; This function is self-explanatory, it consumes no arguments
-; and creates a hash map which will representa JoinHash.
+; and creates a hash map which will represent a JoinHash.
 (: make-index (-> JoinHash))
 (define (make-index)
   (make-hash))
 
-; This function consumes a Listof IndexableSeries and creates
-; a JoinHash
+; This hash consumes a Listof IndexableSeries and creates
+; a JoinHash.
 (: index ((Listof IndexableSeries) -> JoinHash))
 (define (index cols)
 
   (define: index : JoinHash (make-index))
 
-  ; Get length of one of the IndexablSeries
+  ; Get length of one of the IndexableSeries
   (define len (series-length (car cols)))
   (define: series-key : (Index -> String) (key-fn cols))
 
@@ -757,6 +757,57 @@
 
 ; ***********************************************************
 
+; ***********************************************************
+
+; This function is self-explanatory, it consumes no arguments
+; and creates a hash map which will represent a JoinHash.
+(: make-group-hash (-> GroupHash))
+(define (make-group-hash)
+  (make-hash))
+
+;Used to determine the groups for the groupby. If by is a function, it’s called on each value of the object’s index. If a dict or Series is passed, the Series or dict VALUES will be used to determine the groups (the Series’ values are first aligned; see .align() method). If an ndarray is passed, the values are used as-is determine the groups. A label or list of labels may be passed to group by the columns in self. Notice that a tuple is interpreted a (single) key.
+(: data-frame-groupby (DataFrame (Listof Label) -> GroupHash))
+(define (data-frame-groupby data-frame by)
+  (define: group-index : GroupHash (make-group-hash))
+  (define: col-groups : (Listof IndexableSeries) (key-cols-series (data-frame-explode data-frame #:project by)))
+  (define: col-data : (Listof IndexableSeries) (key-cols-series (data-frame-explode data-frame #:project (set-subtract (list->set (data-frame-names data-frame)) (list->set by)))))
+
+  ; Get length of one of the IndexableSeries
+  (define len (series-length (car col-groups)))
+  (define: group-key : (Index -> String) (key-fn col-groups))
+
+  (let loop ([i 0])
+    (if (unsafe-fx>= i len)
+	group-index
+	(let: ((i : Index (assert i index?)))
+	      (let ((key (group-key i)))
+		(hash-update! group-index key
+			      (λ: ((idx : (Listof GenericType)))
+				  (append (map (lambda ([series : IndexableSeries]) (series-iref series i)) col-data) idx))
+			      (λ () (list))))
+	      (loop (add1 i))))))
+
+; ***********************************************************
+
+; ***********************************************************
+;; DataFrame agg ops
+
+; Applies the aggregate function specificed by function-name to the values in
+; the column-name column. Currently supports 3: sum, avg, count.
+#| (: apply-agg-data-frame (Symbol DataFrame -> GenericType))
+(define (apply-agg-data-frame function-name data-frame)
+  (cond 
+    [(eq? function-name 'sum) (apply + (vector->list (ISeries-data series)))]
+    [(eq? function-name 'mean) (mean (vector->list (ISeries-data series)))]
+    ;[(eq? function-name 'median) (median (vector->list (ISeries-data series)))]
+    ;[(eq? function-name 'mode) (mode (vector->list (ISeries-data series)))]
+    [(eq? function-name 'count) (iseries-length series)]
+    [(eq? function-name 'min) (vector-argmin (lambda ([x : Fixnum]) x) (ISeries-data series))]
+    [(eq? function-name 'max) (vector-argmax (lambda ([x : Fixnum]) x) (ISeries-data series))]
+    [else (error 'apply-agg-is "Unknown aggregate function.")])) |#
+
+; ***********************************************************
+
 ; ***********
 ; Test Cases
 ; ***********
@@ -795,6 +846,13 @@
 
 ; create new data-frame-categorical
 (define data-frame-categorical (new-data-frame columns-categorical))
+
+(display "data-frame-groupby")
+(data-frame-groupby data-frame-integer (list 'col1))
+
+(data-frame-groupby data-frame-integer (list 'col2))
+
+(data-frame-groupby data-frame-integer (list 'col1 'col2))
 
 ; unable to protect opaque value
 ;(check-equal?

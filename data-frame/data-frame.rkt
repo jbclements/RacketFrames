@@ -442,7 +442,6 @@
 ;******************
 ;data-frame-integer
 ;******************
-; will define parse to automatically build this columns structure
 (define columns-integer
   (list 
    (cons 'col1 (new-ISeries (vector 1 2 3 4)
@@ -458,7 +457,6 @@
 ;******************
 ;data-frame-float
 ;******************
-; will define parse to automatically build this columns structure
 (define columns-float
   (list 
    (cons 'col1 (new-NSeries (flvector 1.5 2.5 3.5 4.5)

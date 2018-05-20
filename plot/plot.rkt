@@ -222,33 +222,84 @@ Options to pass to matplotlib plotting method |#
     (list (add1 idx)
           (assert (series-iref series (assert idx index?)) real?))))
 
-
 (: get-column-point-sequence (Column -> (Listof (Listof Real))))
 (define (get-column-point-sequence column)
   (get-series-point-sequence (column-series column)))
 
-; (: get-data-frame-point-sequence (DataFrame -> (Sequenceof (Sequenceof Real))))
-; (: get-column-point-sequence (Column -> (Sequenceof (Sequenceof Real))))
+(: get-series-to-series-point-sequence (Series Series -> (Listof (Listof Real))))
+(define (get-series-to-series-point-sequence series-1 series-2)
+
+  (when (or
+         (or (eq? (series-type series-1) 'CategoricalSeries) (eq? (series-type series-1) 'BooleanSeries))
+         (or (eq? (series-type series-2) 'CategoricalSeries) (eq? (series-type series-2) 'BooleanSeries)))
+    (error 'get-series-point-sequence "Invalid series to plot."))
+  
+  (for/list: : (Listof (Listof Real))
+    ([idx : Real (range (series-length series-1))])
+    (list (assert (series-iref series-1 (assert idx index?)) real?)
+          (assert (series-iref series-2 (assert idx index?)) real?))))
+
+(: get-data-frame-point-sequence (DataFrame -> (Listof (Listof (Listof Real)))))
+(define (get-data-frame-point-sequence data-frame)
+  (let* ((data-frame-exploded (data-frame-explode data-frame))
+         (x-series (cdr (car data-frame-exploded)))
+         (y-series (map column-series (cdr data-frame-exploded))))
+    (map (lambda ([y : Series]) (get-series-to-series-point-sequence x-series y)) y-series)))
+
+(: make-points ((Listof (Listof Real)) -> renderer2d))
+(define (make-points list-of-points)
+  (points list-of-points))
 
 (: make-scatter-plot ((U GenSeries ISeries NSeries DataFrame Column) -> Any))
 (define (make-scatter-plot data)
-  (let: ((plot-data : (Sequenceof (Sequenceof Real))
+  (let: ((plot-points : (Treeof renderer2d)
          (cond
-           [(or (GenSeries? data) (ISeries? data) (NSeries? data)) (get-series-point-sequence data)]
-           [(Column? data) (get-column-point-sequence data)]
-           [(DataFrame? data) (list (list 5 5) (list 3 3) (list 2 2) (list 1 1))]
+           [(or (GenSeries? data) (ISeries? data) (NSeries? data)) (list (points (get-series-point-sequence data)))]
+           [(Column? data) (list (points (get-column-point-sequence data)))]
+           [(DataFrame? data) (map make-points (get-data-frame-point-sequence data))]
            [else (error 'make-scatter-plot "Invalid data to plot")])))
     (plot
-     (points plot-data
-             #:alpha 0.4
-             #:x-jitter 1
-             #:y-jitter 1
-             #:sym 'fullcircle1
-             #:color "blue")
-     #:x-min -10 #:x-max 10 #:y-min -10 #:y-max 10)))
+     plot-points         
+     #:x-min -20 #:x-max 20 #:y-min -20 #:y-max 20)))
+
+(displayln "plotting integer series")
 
 (make-scatter-plot (new-ISeries (vector 1 2 3 4 5) #f))
 
 (define float-column (cons 'col1 (new-NSeries (flvector 1.5 2.5 3.5 4.5) #f)))
 
+(displayln "plotting float columns")
+
 (make-scatter-plot float-column)
+
+;******************
+;data-frame-integer
+;******************
+(define columns-integer
+  (list 
+   (cons 'col1 (new-ISeries (vector 1 2 3 4) #f))
+   (cons 'col2 (new-ISeries (vector 5 6 7 8) #f))
+   (cons 'col3 (new-ISeries (vector 9 10 11 12) #f))))
+
+; create new data-frame-integer
+(define data-frame-integer (new-data-frame columns-integer))
+
+(displayln "plotting integer data-frame")
+
+(make-scatter-plot data-frame-integer)
+
+;******************
+;data-frame-float
+;******************
+(define columns-float
+  (list 
+   (cons 'col1 (new-NSeries (flvector 1.5 2.5 3.5 4.5) #f))
+   (cons 'col2 (new-NSeries (flvector 5.5 6.5 7.5 8.5) #f))
+   (cons 'col3 (new-NSeries (flvector 9.5 10.5 11.5 12.5) #f))))
+
+; create new data-frame-float
+(define data-frame-float (new-data-frame columns-float))
+
+(displayln "plotting float data-frame")
+
+(make-scatter-plot data-frame-float)

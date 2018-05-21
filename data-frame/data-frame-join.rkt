@@ -5,6 +5,7 @@
 
 #lang typed/racket
 (require typed/rackunit)
+(require math/statistics)
 
 ; ***********************************************************
 ; data-frame-join rough draft, currently joins are only possible
@@ -94,6 +95,8 @@
 (define-type JoinHash (HashTable Key (Listof Index)))
 (define-type GroupHash (HashTable Key (Listof GenericType)))
 (define-type IndexableSeries (U GenSeries CSeries ISeries))
+
+(define-predicate ListofReal? (Listof Real))
 
 (define key-delimiter "\t")
 
@@ -794,17 +797,30 @@
 
 ; Applies the aggregate function specificed by function-name to the values in
 ; the column-name column. Currently supports 3: sum, avg, count.
-#| (: apply-agg-data-frame (Symbol DataFrame -> GenericType))
-(define (apply-agg-data-frame function-name data-frame)
-  (cond 
-    [(eq? function-name 'sum) (apply + (vector->list (ISeries-data series)))]
-    [(eq? function-name 'mean) (mean (vector->list (ISeries-data series)))]
-    ;[(eq? function-name 'median) (median (vector->list (ISeries-data series)))]
-    ;[(eq? function-name 'mode) (mode (vector->list (ISeries-data series)))]
-    [(eq? function-name 'count) (iseries-length series)]
-    [(eq? function-name 'min) (vector-argmin (lambda ([x : Fixnum]) x) (ISeries-data series))]
-    [(eq? function-name 'max) (vector-argmax (lambda ([x : Fixnum]) x) (ISeries-data series))]
-    [else (error 'apply-agg-is "Unknown aggregate function.")])) |#
+(: apply-agg-data-frame (Symbol GroupHash -> (HashTable String GenericType)))
+(define (apply-agg-data-frame function-name group-hash)
+  (define len (hash-count group-hash))
+
+  (: agg-value-hash (HashTable String GenericType))
+  (define agg-value-hash (make-hash))
+
+  (hash-for-each group-hash
+                 (lambda ([key : String] [val : (Listof GenericType)])
+                   
+                   (let ((key (assert key string?))
+                         (val (assert val ListofReal?)))
+                     (hash-set! agg-value-hash key
+                                (cond 
+                                  [(eq? function-name 'sum) (apply + val)]
+                                  [(eq? function-name 'mean) (mean val)]
+                                  ;[(eq? function-name 'median) (median (vector->list (ISeries-data series)))]
+                                  ;[(eq? function-name 'mode) (mode (vector->list (ISeries-data series)))]
+                                  [(eq? function-name 'count) (length val)]
+                                  [(eq? function-name 'min) (argmin (lambda ([x : Real]) x) val)]
+                                  [(eq? function-name 'max) (argmax (lambda ([x : Real]) x) val)]
+                                  [else (error 'apply-agg-data-frame "Unknown aggregate function.")])))))
+
+  agg-value-hash)
 
 ; ***********************************************************
 
@@ -833,7 +849,8 @@
   (list 
    (cons 'col1 (new-ISeries (vector 1 2 3 4) #f))
    (cons 'col2 (new-ISeries (vector 5 6 7 8) #f))
-   (cons 'col3 (new-ISeries (vector 9 10 11 12) #f))))
+   (cons 'col3 (new-ISeries (vector 9 10 11 12) #f))
+   (cons 'col4 (new-ISeries (vector 13 14 15 16) #f))))
 
 (define columns-categorical
   (list 
@@ -847,12 +864,15 @@
 ; create new data-frame-categorical
 (define data-frame-categorical (new-data-frame columns-categorical))
 
-(display "data-frame-groupby")
+(displayln "data-frame-groupby")
 (data-frame-groupby data-frame-integer (list 'col1))
 
 (data-frame-groupby data-frame-integer (list 'col2))
 
 (data-frame-groupby data-frame-integer (list 'col1 'col2))
+
+(displayln "data-frame-groupby aggregate mean")
+(apply-agg-data-frame 'mean (data-frame-groupby data-frame-integer (list 'col1 'col2)))
 
 ; unable to protect opaque value
 ;(check-equal?

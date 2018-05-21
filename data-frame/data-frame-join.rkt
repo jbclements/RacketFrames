@@ -847,10 +847,10 @@
 
 (define columns-integer
   (list 
-   (cons 'col1 (new-ISeries (vector 1 2 3 4) #f))
-   (cons 'col2 (new-ISeries (vector 5 6 7 8) #f))
-   (cons 'col3 (new-ISeries (vector 9 10 11 12) #f))
-   (cons 'col4 (new-ISeries (vector 13 14 15 16) #f))))
+   (cons 'col1 (new-ISeries (vector 1 2 3 4 2 ) #f))
+   (cons 'col2 (new-ISeries (vector 5 6 7 8 6) #f))
+   (cons 'col3 (new-ISeries (vector 9 10 11 12 17) #f))
+   (cons 'col4 (new-ISeries (vector 13 14 15 16 18) #f))))
 
 (define columns-categorical
   (list 
@@ -873,6 +873,9 @@
 
 (displayln "data-frame-groupby aggregate mean")
 (apply-agg-data-frame 'mean (data-frame-groupby data-frame-integer (list 'col1 'col2)))
+
+(displayln "data-frame-groupby aggregate count")
+(apply-agg-data-frame 'count (data-frame-groupby data-frame-integer (list 'col1 'col2)))
 
 ; unable to protect opaque value
 ;(check-equal?

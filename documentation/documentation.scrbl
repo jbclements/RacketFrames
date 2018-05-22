@@ -5,7 +5,7 @@
 
 @title[#:tag "top" #:version "1.0" #:style 'toc-hidden]{RacketFrames}
 
-@author["Shubham" "Kahal"]
+@author["Shubham Kahal"]
 
 @"\U2192" A DataFrame implementation in the spirit of Pandas or R data frames.
 

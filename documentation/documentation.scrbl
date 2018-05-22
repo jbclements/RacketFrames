@@ -1896,6 +1896,8 @@ data-frame-groupby aggregate count
 ;; output ;;
   }|
 
+@subsection[#:style 'toc]{Loading}
+
 @subsection[#:style 'toc]{Plotting}
 
 @local-table-of-contents[]

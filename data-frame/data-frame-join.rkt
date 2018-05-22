@@ -94,6 +94,7 @@
 (define-type Key String)
 (define-type JoinHash (HashTable Key (Listof Index)))
 (define-type GroupHash (HashTable Key (Listof GenericType)))
+(define-type AggValueHash (HashTable String GenericType))
 (define-type IndexableSeries (U GenSeries CSeries ISeries))
 
 (define-predicate ListofReal? (Listof Real))
@@ -790,6 +791,10 @@
 			      (λ () (list))))
 	      (loop (add1 i))))))
 
+#| (: group-hash-to-data-frame (GroupHash -> DataFrame))
+(deifne (group-hash-to-data-frame group-hash)
+        (new-data-frame)) |#
+
 ; ***********************************************************
 
 ; ***********************************************************
@@ -797,11 +802,11 @@
 
 ; Applies the aggregate function specificed by function-name to the values in
 ; the column-name column. Currently supports 3: sum, avg, count.
-(: apply-agg-data-frame (Symbol GroupHash -> (HashTable String GenericType)))
+(: apply-agg-data-frame (Symbol GroupHash -> AggValueHash))
 (define (apply-agg-data-frame function-name group-hash)
   (define len (hash-count group-hash))
 
-  (: agg-value-hash (HashTable String GenericType))
+  (: agg-value-hash AggValueHash)
   (define agg-value-hash (make-hash))
 
   (hash-for-each group-hash
@@ -821,6 +826,10 @@
                                   [else (error 'apply-agg-data-frame "Unknown aggregate function.")])))))
 
   agg-value-hash)
+
+#| (: agg-value-hash-to-data-frame (AggValueHash -> DataFrame))
+(deifne (group-hash-to-data-frame agg-value-hash)
+        (new-data-frame)) |#
 
 ; ***********************************************************
 

@@ -873,6 +873,8 @@
 ; create new data-frame-categorical
 (define data-frame-categorical (new-data-frame columns-categorical))
 
+(frame-write-tab data-frame-integer (current-output-port))
+
 (displayln "data-frame-groupby")
 (data-frame-groupby data-frame-integer (list 'col1))
 

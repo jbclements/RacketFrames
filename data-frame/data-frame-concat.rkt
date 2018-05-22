@@ -50,6 +50,9 @@
           dest-mapping-series-builders copy-column-row-error copy-column-row join-column-name)
  (only-in "numeric-series.rkt"
 	  NSeries NSeries? nseries-iref nseries-label-ref new-NSeries)
+ (only-in "generic-series.rkt"
+          GenSeries GenSeries? gen-series-iref new-GenSeries
+          gen-series-referencer)
  (only-in "integer-series.rkt"
 	  ISeries ISeries? iseries-iref new-ISeries
 	  iseries-referencer)
@@ -61,6 +64,10 @@
 	  CSeries CSeries? new-CSeries)
  (only-in "series-builder.rkt"
 	  SeriesBuilder)
+ (only-in "generic-series-builder.rkt"
+	  GenSeriesBuilder GenSeriesBuilder?
+	  append-GenSeriesBuilder complete-GenSeriesBuilder
+	  new-GenSeriesBuilder)
  (only-in "integer-series-builder.rkt"
 	  ISeriesBuilder ISeriesBuilder?
 	  append-ISeriesBuilder complete-ISeriesBuilder
@@ -101,22 +108,26 @@
          ; a NSeries then associated value will be appended onto NSeriesBuilder,
          ; and same goes for ISeries and CSeries.
          (cond
-	  ((CSeries? series)
-           (if (CSeriesBuilder? builder)
-               (append-CSeriesBuilder builder 'null)
+           ((GenSeries? series)
+            (if (GenSeriesBuilder? builder)
+                (append-GenSeriesBuilder builder 'null)
+                (copy-column-row-error series col)))
+           ((CSeries? series)
+            (if (CSeriesBuilder? builder)
+                (append-CSeriesBuilder builder 'null)
+                (copy-column-row-error series col)))
+           ((ISeries? series)
+            (if (ISeriesBuilder? builder)
+                (append-ISeriesBuilder builder 0)
+                (copy-column-row-error series col)))
+           ((NSeries? series)
+            (if (NSeriesBuilder? builder)
+               (append-NSeriesBuilder builder +nan.0)
                (copy-column-row-error series col)))
-	  ((ISeries? series)
-           (if (ISeriesBuilder? builder)
-               (append-ISeriesBuilder builder -100000)
-               (copy-column-row-error series col)))
-          ((NSeries? series)
-           (if (NSeriesBuilder? builder)
-               (append-NSeriesBuilder builder -100000.0)
-               (copy-column-row-error series col)))
-          ((BSeries? series)
-           (if (BSeriesBuilder? builder)
-               (append-BSeriesBuilder builder #f)
-               (copy-column-row-error series col)))))))
+           ((BSeries? series)
+            (if (BSeriesBuilder? builder)
+                (append-BSeriesBuilder builder #f)
+                (copy-column-row-error series col)))))))
 
 
 ; This function consumes two DataFrames and produces a
@@ -277,15 +288,19 @@
 ; create new data-frame-mixed-2
 (define data-frame-mixed-2 (new-data-frame columns-mixed-2))
 
-;(displayln "Concat Test 2")
+(displayln "Concat Test")
 
-;(frame-write-tab data-frame-mixed-1 (current-output-port))
+(frame-write-tab data-frame-mixed-1 (current-output-port))
 
-;(frame-write-tab data-frame-mixed-2 (current-output-port))
+(frame-write-tab data-frame-mixed-2 (current-output-port))
 
-;(frame-write-tab (data-frame-concat-vertical data-frame-mixed-1 data-frame-mixed-2) (current-output-port))
+(displayln "Vertical Concat")
 
-;(frame-write-tab (data-frame-concat-horizontal data-frame-mixed-1 data-frame-mixed-2) (current-output-port))
+(frame-write-tab (data-frame-concat-vertical data-frame-mixed-1 data-frame-mixed-2) (current-output-port))
+
+(displayln "Horizontal Concat")
+
+(frame-write-tab (data-frame-concat-horizontal data-frame-mixed-1 data-frame-mixed-2) (current-output-port))
 
 (define columns-mixed-3
   (list 
@@ -296,5 +311,7 @@
 
 ; create new data-frame-mixed-3
 (define data-frame-mixed-3 (new-data-frame columns-mixed-3))
+
+(frame-write-tab data-frame-mixed-3 (current-output-port))
 
 (frame-write-tab (data-frame-concat-horizontal data-frame-mixed-2 data-frame-mixed-3) (current-output-port))

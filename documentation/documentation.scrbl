@@ -1631,7 +1631,7 @@ Returns a new DataFrame.
 }
 
 @codeblock|{
-   (define columns-mixed-7
+(define columns-mixed-7
   (list 
    (cons 'col1 (new-ISeries (vector 1 2 3 4) #f))
    (cons 'col2 (new-CSeries (vector 'a 'b 'c 'd)))
@@ -1681,5 +1681,223 @@ dfa-col1	dfa-col2	dfa-col3	dfa-col4	dfb-col1	dfb-col2	dfb-col3	dfb-col4
 0		null		null		0		41		d		d		24
 ;; output ;;
   }|
+
+@subsubsection[#:tag "data-frame-concat-vertical"]{data-frame-concat-vertical}
+@defproc[#:link-target? #f
+ (data-frame-concat-vertical [dfa DataFrame] [dfb DataFrame] [col (Listof Symbol)])
+DataFrame?]{
+Returns a new DataFrame.
+}
+
+@codeblock|{
+(define columns-mixed-1
+  (list 
+   (cons 'col1 (new-ISeries (vector 1 2 3 4) #f))
+   (cons 'col2 (new-NSeries (flvector 5.2 6.2 7.2 8.2) #f))
+   (cons 'col3 (new-CSeries (vector 'a 'b 'c 'd)))
+   (cons 'col4 (new-ISeries (vector 21 22 23 24) #f))))
+
+(define columns-mixed-2
+  (list 
+   (cons 'col1 (new-ISeries (vector 1 2 3 4) #f))
+   (cons 'col2 (new-NSeries (flvector 25.3 26.3 27.3 28.3) #f))
+   (cons 'col3 (new-CSeries (vector 'e 'f 'g 'h)))
+   (cons 'col4 (new-ISeries (vector 1 2 3 4) #f))))
+
+; create new data-frame-mixed-1
+(define data-frame-mixed-1 (new-data-frame columns-mixed-1))
+
+; create new data-frame-mixed-2
+(define data-frame-mixed-2 (new-data-frame columns-mixed-2))
+
+; display created data frames
+(frame-write-tab data-frame-mixed-1 (current-output-port))
+
+(frame-write-tab data-frame-mixed-2 (current-output-port))
+
+; vertical concat
+(frame-write-tab (data-frame-concat-vertical data-frame-mixed-1 data-frame-mixed-2) (current-output-port))
+
+;; output ;;
+col1	col2	col3	col4
+1	5.2	a	21
+2	6.2	b	22
+3	7.2	c	23
+4	8.2	d	24
+
+  col1	col2	col3	col4
+1	25.3	e	1
+2	26.3	f	2
+3	27.3	g	3
+4	28.3	h	4
+
+col1	col2	col3	col4
+1	5.2	a	21
+2	6.2	b	22
+3	7.2	c	23
+4	8.2	d	24
+1	25.3	e	1
+2	26.3	f	2
+3	27.3	g	3
+4	28.3	h	4
+;; output ;;
+  }|
+
+@subsubsection[#:tag "data-frame-concat-horizontal"]{data-frame-concat-horizontal}
+@defproc[#:link-target? #f
+ (data-frame-concat-horizontal [dfa DataFrame] [dfb DataFrame] [col (Listof Symbol)])
+DataFrame?]{
+Returns a new DataFrame.
+}
+
+@codeblock|{
+(define columns-mixed-1
+  (list 
+   (cons 'col1 (new-ISeries (vector 1 2 3 4) #f))
+   (cons 'col2 (new-NSeries (flvector 5.2 6.2 7.2 8.2) #f))
+   (cons 'col3 (new-CSeries (vector 'a 'b 'c 'd)))
+   (cons 'col4 (new-ISeries (vector 21 22 23 24) #f))))
+
+(define columns-mixed-2
+  (list 
+   (cons 'col1 (new-ISeries (vector 1 2 3 4) #f))
+   (cons 'col2 (new-NSeries (flvector 25.3 26.3 27.3 28.3) #f))
+   (cons 'col3 (new-CSeries (vector 'e 'f 'g 'h)))
+   (cons 'col4 (new-ISeries (vector 1 2 3 4) #f))))
+
+; create new data-frame-mixed-1
+(define data-frame-mixed-1 (new-data-frame columns-mixed-1))
+
+; create new data-frame-mixed-2
+(define data-frame-mixed-2 (new-data-frame columns-mixed-2))
+
+; display created data frames
+(frame-write-tab data-frame-mixed-1 (current-output-port))
+
+(frame-write-tab data-frame-mixed-2 (current-output-port))
+
+; horizontal concat
+(frame-write-tab (data-frame-concat-horizontal data-frame-mixed-1 data-frame-mixed-2) (current-output-port))
+
+;; output ;;
+col1	col2	col3	col4
+1	5.2	a	21
+2	6.2	b	22
+3	7.2	c	23
+4	8.2	d	24
+
+col1	col2	col3	col4
+1	25.3	e	1
+2	26.3	f	2
+3	27.3	g	3
+4	28.3	h	4
+
+dfa-col1	dfa-col2	dfa-col3	dfa-col4	dfb-col1	dfb-col2	dfb-col3	dfb-col4
+1	        5.2		a		21		1		25.3	        e		1
+2	        6.2		b		22		2		26.3	        f		2
+3	        7.2		c		23		3		27.3	        g		3
+4  		8.2		d		24		4		28.3	        h		4   
+;; output ;;
+  }|
+
+@subsubsection[#:tag "data-frame-groupby"]{data-frame-groupby}
+@defproc[#:link-target? #f
+ (data-frame-groupby [dfa DataFrame] [by (Listof Symbol)])
+GroupHash?]{
+Returns a new DataFrame.
+}
+
+@codeblock|{
+(define columns-integer
+  (list 
+   (cons 'col1 (new-ISeries (vector 1 2 3 4 2 ) #f))
+   (cons 'col2 (new-ISeries (vector 5 6 7 8 6) #f))
+   (cons 'col3 (new-ISeries (vector 9 10 11 12 17) #f))
+   (cons 'col4 (new-ISeries (vector 13 14 15 16 18) #f))))
+
+; create new data-frame-integer
+(define data-frame-integer (new-data-frame columns-integer))
+
+(frame-write-tab data-frame-integer (current-output-port))
+
+(data-frame-groupby data-frame-integer (list 'col1))
+
+(data-frame-groupby data-frame-integer (list 'col2))
+
+(data-frame-groupby data-frame-integer (list 'col1 'col2))
+            
+;; output ;;
+
+col1	col2	col3	col4
+1	5	9	13
+2	6	10	14
+3	7	11	15
+4	8	12	16
+2	6	17	18
+
+'#hash(("2\t" . (6 17 18 6 10 14))
+       ("1\t" . (5 9 13))
+       ("4\t" . (8 12 16))
+       ("3\t" . (7 11 15)))
+       
+'#hash(("8\t" . (4 12 16))
+       ("7\t" . (3 11 15))
+       ("6\t" . (2 17 18 2 10 14))
+       ("5\t" . (1 9 13)))
+       
+'#hash(("4\t8\t" . (12 16))
+       ("2\t6\t" . (17 18 10 14))
+       ("3\t7\t" . (11 15))
+       ("1\t5\t" . (9 13)))
+       
+;; output ;;
+  }|
+
+@subsubsection[#:tag "apply-agg-data-frame"]{apply-agg-data-frame}
+@defproc[#:link-target? #f
+ (apply-agg-data-frame [function-name Symbol] [group-hash GroupHash])
+AggValueHash?]{
+Returns a new DataFrame.
+}
+
+@codeblock|{
+(define columns-integer
+  (list 
+   (cons 'col1 (new-ISeries (vector 1 2 3 4 2 ) #f))
+   (cons 'col2 (new-ISeries (vector 5 6 7 8 6) #f))
+   (cons 'col3 (new-ISeries (vector 9 10 11 12 17) #f))
+   (cons 'col4 (new-ISeries (vector 13 14 15 16 18) #f))))
+
+; create new data-frame-integer
+(define data-frame-integer (new-data-frame columns-integer))
+
+(frame-write-tab data-frame-integer (current-output-port))
+
+(displayln "data-frame-groupby aggregate mean")
+(apply-agg-data-frame 'mean (data-frame-groupby data-frame-integer (list 'col1 'col2)))
+
+(displayln "data-frame-groupby aggregate count")
+(apply-agg-data-frame 'count (data-frame-groupby data-frame-integer (list 'col1 'col2)))
+            
+;; output ;;
+
+col1	col2	col3	col4
+1	5	9	13
+2	6	10	14
+3	7	11	15
+4	8	12	16
+2	6	17	18
+
+data-frame-groupby aggregate mean
+'#hash(("4\t8\t" . 14) ("1\t5\t" . 11) ("3\t7\t" . 13) ("2\t6\t" . 14.75))
+data-frame-groupby aggregate count
+'#hash(("4\t8\t" . 2) ("1\t5\t" . 2) ("3\t7\t" . 2) ("2\t6\t" . 4))
+
+;; output ;;
+  }|
+
+@subsection[#:style 'toc]{Plotting}
+
+@local-table-of-contents[]
 
 @index-section[]

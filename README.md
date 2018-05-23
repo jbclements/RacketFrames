@@ -1,6 +1,6 @@
 # RacketFrames
 
-This is RacketFrames. DataFrames from the popular Pandas library implemented in Racket.
+This is RacketFrames implemented as a masters thesis at California Polytechnic State University, San Luis Obispo. DataFrames from the popular Pandas library implemented in Racket.
 
 ## Getting Started
 

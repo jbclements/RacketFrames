@@ -400,6 +400,16 @@
 ; ***********************************************************
 
 ; ***********************************************************
+(: iseries-filter (ISeries (Fixnum -> Boolean) -> ISeries))
+(define (iseries-filter iseries filter-function)
+  (ISeries #f (vector-filter filter-function (ISeries-data iseries))))
+
+(: iseries-filter-not (ISeries (Fixnum -> Boolean) -> ISeries))
+(define (iseries-filter-not iseries filter-function)
+  (ISeries #f (vector-filter-not filter-function (ISeries-data iseries))))
+; ***********************************************************
+
+; ***********************************************************
 ;; ISeries agg ops
 
 ; Applies the aggregate function specificed by function-name to the values in
@@ -502,6 +512,15 @@
 ; map tests
 (check-equal? (ISeries-data (map/is series-integer (λ: ((x : Fixnum)) (unsafe-fx+ x 1))))
               (vector 2 3 4 5))
+
+; iseries filter
+(check-equal? (ISeries-data (iseries-filter series-integer even?)) (vector 2 4))
+
+(check-equal? (ISeries-data (iseries-filter series-integer odd?)) (vector 1 3))
+
+(check-equal? (ISeries-data (iseries-filter-not series-integer even?)) (vector 1 3))
+
+(check-equal? (ISeries-data (iseries-filter-not series-integer odd?)) (vector 2 4))
 
 ; agg tests
 (check-equal? (apply-agg-is 'sum series-integer) 10)

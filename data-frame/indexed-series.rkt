@@ -28,7 +28,7 @@
 ; Provide functions in this file to other files.
 (provide:
  [is-labeled? (LabelIndex -> Boolean)]
- [label-sort-positional (LabelIndex [#:project LabelProjection] -> Labeling)]
+ ;[label-sort-positional (LabelIndex [#:project LabelProjection] -> Labeling)]
  [label-sort-lexical (LabelIndex -> Labeling)]
  [gseries-length (GSeries -> Index)]
  [gseries-data (All (A) (GSeries A) -> (Vectorof A))])
@@ -41,7 +41,7 @@
  new-GSeries 
  series-ref gseries-iref
  map/GSeries 
- build-index-from-labels label-index label->idx)
+ build-index-from-labels label-index label->lst-idx)
 ; ***********************************************************
 
 ; ***********************************************************
@@ -60,9 +60,9 @@
 
 (define-predicate Label? Label)
 
-(define-type Labeling (Listof (Pair Label Index)))
+(define-type Labeling (Listof (Pair Label (Listof Index))))
 
-(define-type SIndex (HashTable Label Index))
+(define-type SIndex (HashTable Label (Listof Index)))
 
 (define-type LabelProjection (U (Listof Label) (Setof Label)))
 
@@ -81,10 +81,17 @@
       (if (null? labels)
           index
           (begin
-            (hash-set! index (car labels) idx)
+            ;(hash-set! index (car labels) idx)
+
+            (hash-update! index (car labels)
+			      (λ: ((lst-index : (Listof Index)))
+				  (append lst-index (list idx)))
+			      (λ () (list)))
+
+            
             (loop (assert (+ idx 1) index?) (cdr labels)))))))
 
-(: label-index (SIndex Label -> Integer))
+(: label-index (SIndex Label -> (Listof Index)))
 (define (label-index index label)      
   (hash-ref index label))
 ; ***********************************************************
@@ -98,6 +105,15 @@
 (define (gseries-data gseries)
   (GSeries-data gseries))
 
+(: get-total-index-value-count (SIndex -> Integer))
+(define (get-total-index-value-count index)
+  (define value-count 0)
+
+  (for ([hash-val (hash-values index)])
+    (set! value-count (+ value-count (length hash-val))))
+
+  value-count)
+  
 ; Consumes a Vector of generic type and a list of Labels which
 ; can come in list form or SIndex form and produces a GSeries
 ; struct object.
@@ -106,7 +122,7 @@
   
   (: check-mismatch (SIndex -> Void))
   (define (check-mismatch index)
-    (unless (eq? (vector-length data) (hash-count index))
+    (unless (eq? (vector-length data) (get-total-index-value-count index))
       (let ((k (current-continuation-marks)))
         (raise (make-exn:fail:contract "Cardinality of a Series' data and labels must be equal" k))))
     (void))
@@ -132,8 +148,8 @@
 ; This function consumes LabelIndex and Label and returns the
 ; numerical Index of the Label in the LabelIndex. The index
 ; must be a SIndex else an exception is raised.
-(: label->idx (LabelIndex Label -> Index))
-(define (label->idx series label)
+(: label->lst-idx (LabelIndex Label -> (Listof Index)))
+(define (label->lst-idx series label)
   (let ((index (LabelIndex-index series)))
     (if index
         (hash-ref index label)
@@ -142,17 +158,18 @@
 ; ***********************************************************
 
 ; ***********************************************************
-; This function consumes a series and an index and returns
+; This function consumes a series and an Listof Index and returns
 ; the value at that index in the series.
-(: gseries-iref (All (A) (GSeries A) Index -> (U Float A)))
-(define (gseries-iref series idx)
-  (vector-ref (GSeries-data series) idx))
+(: gseries-iref (All (A) (GSeries A) (Listof Index) -> (U (Listof Float) (Listof A))))
+(define (gseries-iref series lst-idx)
+  (map (lambda ((idx : Index)) (vector-ref (GSeries-data series) idx))
+       lst-idx))
 
 ; This function consumes a series and a Label and returns
 ; the value at that Label in the series.
-(: series-ref (All (A) (GSeries A) Label -> (U A Float)))
+(: series-ref (All (A) (GSeries A) Label -> (U (Listof A) (Listof Float))))
 (define (series-ref series label)
-  (gseries-iref series (label->idx series label)))
+  (gseries-iref series (label->lst-idx series label)))
 
 ; This function consumes a series and returns the length
 ; of that series.
@@ -178,7 +195,7 @@
 ; This function consumes a LabelIndex which as long as it is
 ; a valid SIndex which is a HashTable, it converts it to a
 ; list of Label Index pairs.
-(: labeling (LabelIndex -> (Listof (Pair Label Index))))
+(: labeling (LabelIndex -> (Listof (Pair Label (Listof Index)))))
 (define (labeling lindex)
   (hash->list (assert (LabelIndex-index lindex))))
 ; ***********************************************************
@@ -189,10 +206,10 @@
 ; The Labeling is sorted on the Label.
 (: label-sort-lexical (LabelIndex -> Labeling))
 (define (label-sort-lexical lindex)
-  ((inst sort (Pair Label Index) (Pair Label Index))
+  ((inst sort (Pair Label (Listof Index)) (Pair Label (Listof Index)))
    (labeling lindex)
-   (λ: ((kv1 : (Pair Symbol Index)) 
-	(kv2 : (Pair Symbol Index)))
+   (λ: ((kv1 : (Pair Label (Listof Index)))
+	(kv2 : (Pair Label (Listof Index))))
        (string<=? (symbol->string (car kv1))
 		  (symbol->string (car kv2))))))
 ; ***********************************************************
@@ -201,22 +218,22 @@
 ; This function consumes a LabelIndex and LabelProjection produces
 ; a sorted Labeling which is a list consisting of Label Index pairs.
 ; The Labeling is sorted on the index of the labels.
-(: label-sort-positional (LabelIndex [#:project LabelProjection] -> Labeling))
+#|(: label-sort-positional (LabelIndex [#:project LabelProjection] -> Labeling))
 (define (label-sort-positional lindex #:project [project '()])
 
   (define: projection : (Setof Label) (if (list? project) (list->set project) project))
   
-  (let ((labels ((inst sort (Pair Symbol Index) (Pair Symbol Index))
+  (let ((labels ((inst sort (Pair Symbol (Listof Index)) (Pair Symbol (Listof Index)))
                  (labeling lindex)
-                 (λ: ((kv1 : (Pair Symbol Index)) 
-                      (kv2 : (Pair Symbol Index)))
+                 (λ: ((kv1 : (Pair Symbol (Listof Index)))
+                      (kv2 : (Pair Symbol (Listof Index))))
                    (< (cdr kv1) (cdr kv2))))))
 
     (if (set-empty? projection)
         labels
-        (filter (λ: ((label : (Pair Label Index)))
+        (filter (λ: ((label : (Pair Symbol (Listof Index))))
 		    (set-member? projection (car label)))
-		labels))))
+		labels))))|#
 ; ***********************************************************
 
 ; ***********************************************************
@@ -228,12 +245,12 @@
 ;              (hash 'b 1 'c' 2 'd 3 'a 0))
 
 ; checks numerical index of label
-(check-equal? (label-index (build-index-from-labels (list 'a 'b 'c 'd)) 'a) 0)
-(check-equal? (label-index (build-index-from-labels (list 'a 'b 'c 'd)) 'c) 2)
+(check-equal? (label-index (build-index-from-labels (list 'a 'b 'c 'd)) 'a) (list 0))
+(check-equal? (label-index (build-index-from-labels (list 'a 'b 'c 'd)) 'c) (list 2))
 
 ; checks numerical idx of LabelIndex
-(check-equal? (label->idx (LabelIndex (build-index-from-labels (list 'a 'b 'c 'd))) 'd) 3)
-(check-equal? (label->idx (LabelIndex (build-index-from-labels (list 'a 'b 'c 'd))) 'c) 2)
+(check-equal? (label->lst-idx (LabelIndex (build-index-from-labels (list 'a 'b 'c 'd))) 'd) (list 3))
+(check-equal? (label->lst-idx (LabelIndex (build-index-from-labels (list 'a 'b 'c 'd))) 'c) (list 2))
 
 ; checks to see if we have a labelled index
 (check-equal? (is-labeled? (LabelIndex (build-index-from-labels (list 'a 'b 'c 'd)))) #t)
@@ -243,6 +260,8 @@
 
 ; create integer series
 (define g-series-integer (new-GSeries (vector 1 2 3 4) (build-index-from-labels (list 'a 'b 'c 'd))))
+
+(define g-series-integer-2 (new-GSeries (vector 1 2 3 4 5) (build-index-from-labels (list 'a 'b 'c 'd 'a))))
 
 ; create float series
 (define g-series-float (new-GSeries (vector 1.5 2.5 3.5 4.5 5.5) (build-index-from-labels (list 'a 'b 'c 'd 'e))))
@@ -259,7 +278,7 @@
 ;(gseries-data g-series-point)
 
 ; point series ref by index
-;(gseries-iref g-series-point 2)
+;(gseries-iref g-series-point (list 2))
 
 ; point series ref by label
 ;(series-ref g-series-point 'd)
@@ -268,16 +287,18 @@
 ;                                (point-x p))))
 
 ; integer series ref by index
-(check-equal? (gseries-iref g-series-integer 2) 3)
+(check-equal? (gseries-iref g-series-integer (list 2)) (list 3))
 
 ; integer series ref by label
-(check-equal? (series-ref g-series-integer 'd) 4)
+(check-equal? (series-ref g-series-integer 'd) (list 4))
+
+(check-equal? (series-ref g-series-integer-2 'a) (list 1 5))
 
 ; symbol series ref by index
-(check-equal? (gseries-iref g-series-symbol 2) 'g)
+;(check-equal? (gseries-iref g-series-symbol 2) (list 'g))
 
 ; symbol series ref by label
-(check-equal? (series-ref g-series-symbol 'd) 'h)
+(check-equal? (series-ref g-series-symbol 'd) (list 'h))
 
 ; series length
 (check-equal? (gseries-length g-series-symbol) 4)
@@ -289,17 +310,17 @@
 (define g-series-struct (new-GSeries (vector (LabelIndex #f) (LabelIndex #f)) (build-index-from-labels (list 'a 'b))))
 
 ; struct series ref by index
-(check-equal? (LabelIndex-index (assert (gseries-iref g-series-struct 1) LabelIndex?)) (LabelIndex-index (LabelIndex #f)))
+;(check-equal? (LabelIndex-index (assert (gseries-iref g-series-struct 1) LabelIndex?)) (LabelIndex-index (LabelIndex #f)))
 
 ; integer series ref by label
 ; checks labeling function which converts labels hash to list
 (check-equal? (labeling (LabelIndex (build-index-from-labels (list 'a 'b 'c 'd))))
-              '((b . 1) (c . 2) (d . 3) (a . 0)))
+              '((b 1) (c 2) (d 3) (a 0)))
 
 ; checks label sorting
 (check-equal? (label-sort-lexical (LabelIndex (build-index-from-labels (list 'b 'd 'a 'c))))
-              '((a . 2) (b . 0) (c . 3) (d . 1)))
+              '((a 2) (b 0) (c 3) (d 1)))
 
 ; check label sorting by position
-(check-equal? (label-sort-positional (LabelIndex (build-index-from-labels (list 'b 'd 'a 'c))))
-              '((b . 0) (d . 1) (a . 2) (c . 3)))
+; (check-equal? (label-sort-positional (LabelIndex (build-index-from-labels (list 'b 'd 'a 'c))))
+;              '((b . 0) (d . 1) (a . 2) (c . 3)))

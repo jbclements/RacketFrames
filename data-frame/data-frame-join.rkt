@@ -203,7 +203,7 @@
 (define (make-index)
   (make-hash))
 
-; This hash consumes a Listof IndexableSeries and creates
+; This function consumes a Listof IndexableSeries and creates
 ; a JoinHash.
 (: index ((Listof IndexableSeries) -> JoinHash))
 (define (index cols)

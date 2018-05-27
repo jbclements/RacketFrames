@@ -114,11 +114,11 @@
 (: series-iref (Series Index -> Any))
 (define (series-iref series idx)
   (cond
-    [(GenSeries? series) (gen-series-iref series idx)]
-    [(NSeries? series) (nseries-iref series idx)]    
-    [(CSeries? series) (cseries-iref series idx)]    
-    [(ISeries? series) (iseries-iref series idx)]
-    [(BSeries? series) (bseries-iref series idx)]
+    [(GenSeries? series) (gen-series-iref series (list idx))]
+    [(NSeries? series) (nseries-iref series (list idx))]    
+    [(CSeries? series) (cseries-iref series (list idx))]    
+    [(ISeries? series) (iseries-iref series (list idx))]
+    [(BSeries? series) (bseries-iref series (list idx))]
     [else (error "Unknown Series type in DataFrame")]))
 
 ; ***********************************************************

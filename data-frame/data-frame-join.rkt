@@ -29,6 +29,9 @@
  [dest-mapping-series-builders (DataFrameDescription Index -> (Listof SeriesBuilder))]
  [join-column-name (Column (Setof Label) String -> Symbol)])
 
+(provide
+ IndexableSeries)
+
 (require
  racket/pretty
  racket/unsafe/ops

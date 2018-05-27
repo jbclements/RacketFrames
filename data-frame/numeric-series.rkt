@@ -25,8 +25,8 @@
 ; Provide functions in this file to other files.
 
 (provide:
- [nseries-iref (NSeries Index -> Float)]
- [nseries-label-ref (NSeries Label -> Float)]
+ [nseries-iref (NSeries (Listof Index) -> (Listof Float))]
+ [nseries-label-ref (NSeries Label -> (Listof Float))]
  [nseries-range (NSeries Index -> FlVector)]
  [nseries-referencer (NSeries -> (Index -> Float))]
  [nseries-length (NSeries -> Index)]
@@ -89,10 +89,9 @@
 	  Settings-max-output
 	  settings)
  (only-in "indexed-series.rkt"
-	  label-index label->idx
+	  label-index label->lst-idx
 	  build-index-from-labels
 	  Label SIndex
-	  GSeries GSeries-data
 	  LabelIndex LabelIndex-index)
  (only-in "boolean-series.rkt"
           BSeries BSeries-data)
@@ -183,9 +182,10 @@
 
 ; This function consumes an integer series and an index and
 ; returns the value at that index in the series.
-(: nseries-iref (NSeries Index -> Float))
-(define (nseries-iref series idx)
-  (flvector-ref (NSeries-data series) idx))
+(: nseries-iref (NSeries (Listof Index) -> (Listof Float)))
+(define (nseries-iref series lst-idx)
+  (map (lambda ((idx : Index)) (flvector-ref (NSeries-data series) idx))
+       lst-idx))
 
 ; This function consumes an integer series and an index and
 ; returns a vector of values in the range [0:index] in the series.
@@ -199,9 +199,9 @@
   
   flvector-ranged)
 
-(: nseries-label-ref (NSeries Label -> Float))
+(: nseries-label-ref (NSeries Label -> (Listof Float)))
 (define (nseries-label-ref series label)
-  (nseries-iref series (label->idx series label)))
+  (nseries-iref series (label->lst-idx series label)))
 
 ; This function consumes a numeric series and returns its
 ; data vector.
@@ -683,13 +683,13 @@
 
 (check-equal? ((nseries-referencer series-float) 1) 2.4)
 
-(check-equal? (nseries-iref series-float 0) 1.5)
+(check-equal? (nseries-iref series-float (list 0)) (list 1.5))
 
-(check-equal? (nseries-iref series-float 1) 2.4)
+(check-equal? (nseries-iref series-float (list 1)) (list 2.4))
 
-(check-equal? (nseries-label-ref series-float 'd) 4.1)
+(check-equal? (nseries-label-ref series-float 'd) (list 4.1))
 
-(check-equal? (nseries-label-ref series-float 'c) 3.6)
+(check-equal? (nseries-label-ref series-float 'c) (list 3.6))
 
 ; series length
 (check-equal? (nseries-length series-float) 4)

@@ -26,8 +26,8 @@
 
 (provide:
  [new-BSeries ((Vectorof Boolean) (Option (U (Listof Label) SIndex)) -> BSeries)]
- [bseries-iref (BSeries Index -> Boolean)]
- [bseries-label-ref (BSeries Label -> Boolean)]
+ [bseries-iref (BSeries (Listof Index) -> (Listof Boolean))]
+ [bseries-label-ref (BSeries Label -> (Listof Boolean))]
  [bseries-range (BSeries Index -> (Vectorof Boolean))]
  [bseries-length (BSeries -> Index)]
  [bseries-referencer (BSeries -> (Index -> Boolean))]
@@ -43,7 +43,7 @@
  (only-in "indexed-series.rkt"
 	  build-index-from-labels
 	  Label SIndex LabelIndex
-          label-index label->idx))
+          label-index label->lst-idx))
 ; ***********************************************************
 
 ; ***********************************************************
@@ -96,9 +96,10 @@
 
 ; This function consumes an integer series and an index and
 ; returns the value at that index in the series.
-(: bseries-iref (BSeries Index -> Boolean))
-(define (bseries-iref series idx)
-  (vector-ref (BSeries-data series) idx))
+(: bseries-iref (BSeries (Listof Index) -> (Listof Boolean)))
+(define (bseries-iref series lst-idx)
+  (map (lambda ((idx : Index)) (vector-ref (BSeries-data series) idx))
+       lst-idx))
 
 ; This function consumes an integer series and an index and
 ; returns a vector of values in the range [0:index] in the series.
@@ -114,9 +115,9 @@
 
 ; This function consumes a series and a Label and returns
 ; the value at that Label in the series.
-(: bseries-label-ref (BSeries Label -> Boolean))
+(: bseries-label-ref (BSeries Label -> (Listof Boolean)))
 (define (bseries-label-ref series label)
-  (bseries-iref series (label->idx series label)))
+  (bseries-iref series (label->lst-idx series label)))
 
 ; This function consumes an integer series and returns the
 ; length of that series.
@@ -152,13 +153,13 @@
 
 (check-equal? ((bseries-referencer series-boolean) 1) #t)
 
-(check-equal? (bseries-iref series-boolean 0) #f)
+(check-equal? (bseries-iref series-boolean (list 0)) (list #f))
 
-(check-equal? (bseries-iref series-boolean 1) #t)
+(check-equal? (bseries-iref series-boolean (list 1)) (list #t))
 
-(check-equal? (bseries-label-ref series-boolean 'd) #t)
+(check-equal? (bseries-label-ref series-boolean 'd) (list #t))
 
-(check-equal? (bseries-label-ref series-boolean 'c) #t)
+(check-equal? (bseries-label-ref series-boolean 'c) (list #t))
 
 ; series length
 (check-equal? (bseries-length series-boolean) 4)

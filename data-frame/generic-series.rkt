@@ -6,7 +6,7 @@
  (only-in "indexed-series.rkt"
 	  build-index-from-labels
 	  Label SIndex LabelIndex
-          label-index label->idx))
+          label-index label->lst-idx))
 
 ; **************************
 ; Test cases are at bottom
@@ -23,7 +23,7 @@
 
 (provide:
  [new-GenSeries ((Vectorof GenericType) (Option (U (Listof Label) SIndex)) -> GenSeries)]
- [gen-series-iref (GenSeries Index -> GenericType)]
+ [gen-series-iref (GenSeries (Listof Index) -> GenericType)]
  [gen-series-label-ref (GenSeries Label -> GenericType)]
  [gen-series-range (GenSeries Index -> (Vectorof GenericType))]
  [gen-series-length (GenSeries -> Index)]
@@ -70,9 +70,10 @@
 
 ; This function consumes a generic series and an index and
 ; returns the value at that index in the series.
-(: gen-series-iref (GenSeries Index -> GenericType))
-(define (gen-series-iref series idx)
-  (vector-ref (GenSeries-data series) idx))
+(: gen-series-iref (GenSeries (Listof Index) -> (Listof GenericType)))
+(define (gen-series-iref series lst-idx)
+  (map (lambda ((idx : Index)) (vector-ref (GenSeries-data series) idx))
+       lst-idx))
 
 ; This function consumes a generic series and an index and
 ; returns a vector of values in the range [0:index] in the series.
@@ -88,9 +89,9 @@
 
 ; This function consumes a generic series and a Label and returns
 ; the value at that Label in the series.
-(: gen-series-label-ref (GenSeries Label -> GenericType))
+(: gen-series-label-ref (GenSeries Label -> (Listof GenericType)))
 (define (gen-series-label-ref series label)
-  (gen-series-iref series (label->idx series label)))
+  (gen-series-iref series (label->lst-idx series label)))
 
 ; This function consumes a generic series and returns the
 ; length of that series.
@@ -120,13 +121,13 @@
 
 (check-equal? ((gen-series-referencer series-generic) 1) 2.5)
 
-(check-equal? (gen-series-iref series-generic 0) 1)
+(check-equal? (gen-series-iref series-generic (list 0)) (list 1))
 
-(check-equal? (gen-series-iref series-generic 1) 2.5)
+(check-equal? (gen-series-iref series-generic (list 1)) (list 2.5))
 
-(check-equal? (gen-series-label-ref series-generic 'd) #t)
+(check-equal? (gen-series-label-ref series-generic 'd) (list #t))
 
-(check-equal? (gen-series-label-ref series-generic 'c) 'categorical)
+(check-equal? (gen-series-label-ref series-generic 'c) (list 'categorical))
 
 ; gen-series length
 (check-equal? (gen-series-length series-generic) 4)
@@ -140,7 +141,7 @@
 (gen-series-data gen-series-point)
 
 ; point series ref by index
-(gen-series-iref gen-series-point 2)
+(gen-series-iref gen-series-point (list 2))
 
 ; point series ref by label
 (gen-series-label-ref gen-series-point 'd)

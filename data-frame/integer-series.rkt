@@ -28,8 +28,8 @@
 
 (provide:
  [new-ISeries ((Vectorof Fixnum) (Option (U (Listof Label) SIndex)) -> ISeries)]
- [iseries-iref (ISeries Index -> Fixnum)]
- [iseries-label-ref (ISeries Label -> Integer)]
+ [iseries-iref (ISeries (Listof Index) -> (Listof Fixnum))]
+ [iseries-label-ref (ISeries Label -> (Listof Integer))]
  [iseries-range (ISeries Index -> (Vectorof Fixnum))]
  [iseries-length (ISeries -> Index)]
  [iseries-referencer (ISeries -> (Index -> Fixnum))]
@@ -67,7 +67,7 @@
  (only-in "indexed-series.rkt"
 	  build-index-from-labels
 	  Label SIndex LabelIndex
-          label-index label->idx)
+          label-index label->lst-idx)
  (only-in "boolean-series.rkt"
           BSeries))
 ; ***********************************************************
@@ -122,9 +122,10 @@
 
 ; This function consumes an integer series and an index and
 ; returns the value at that index in the series.
-(: iseries-iref (ISeries Index -> Fixnum))
-(define (iseries-iref series idx)
-  (vector-ref (ISeries-data series) idx))
+(: iseries-iref (ISeries (Listof Index) -> (Listof Fixnum)))
+(define (iseries-iref series lst-idx)
+  (map (lambda ((idx : Index)) (vector-ref (ISeries-data series) idx))
+       lst-idx))
 
 ; This function consumes an integer series and an index and
 ; returns a vector of values in the range [0:index] in the series.
@@ -139,10 +140,10 @@
   (ISeries-data series))
 
 ; This function consumes a series and a Label and returns
-; the value at that Label in the series.
-(: iseries-label-ref (ISeries Label -> Integer))
+; the list of values at that Label in the series.
+(: iseries-label-ref (ISeries Label -> (Listof Integer)))
 (define (iseries-label-ref series label)
-  (iseries-iref series (label->idx series label)))
+  (iseries-iref series (label->lst-idx series label)))
 
 ; This function consumes an integer series and returns the
 ; length of that series.
@@ -459,13 +460,13 @@
 
 (check-equal? ((iseries-referencer series-integer) 1) 2)
 
-(check-equal? (iseries-iref series-integer 0) 1)
+(check-equal? (iseries-iref series-integer (list 0)) (list 1))
 
-(check-equal? (iseries-iref series-integer 1) 2)
+(check-equal? (iseries-iref series-integer (list 1)) (list 2))
 
-(check-equal? (iseries-label-ref series-integer 'd) 4)
+(check-equal? (iseries-label-ref series-integer 'd) (list 4))
 
-(check-equal? (iseries-label-ref series-integer 'c) 3)
+(check-equal? (iseries-label-ref series-integer 'c) (list 3))
 
 ; series length
 (check-equal? (iseries-length series-integer) 4)

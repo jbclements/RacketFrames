@@ -28,7 +28,7 @@
 ; Provide functions in this file to other files.
 (provide:
  [is-labeled? (LabelIndex -> Boolean)]
- ;[label-sort-positional (LabelIndex [#:project LabelProjection] -> Labeling)]
+ [label-sort-positional (LabelIndex [#:project LabelProjection] -> Labeling)]
  [label-sort-lexical (LabelIndex -> Labeling)]
  [gseries-length (GSeries -> Index)]
  [gseries-data (All (A) (GSeries A) -> (Vectorof A))])
@@ -218,7 +218,7 @@
 ; This function consumes a LabelIndex and LabelProjection produces
 ; a sorted Labeling which is a list consisting of Label Index pairs.
 ; The Labeling is sorted on the index of the labels.
-#|(: label-sort-positional (LabelIndex [#:project LabelProjection] -> Labeling))
+(: label-sort-positional (LabelIndex [#:project LabelProjection] -> Labeling))
 (define (label-sort-positional lindex #:project [project '()])
 
   (define: projection : (Setof Label) (if (list? project) (list->set project) project))
@@ -227,13 +227,14 @@
                  (labeling lindex)
                  (λ: ((kv1 : (Pair Symbol (Listof Index)))
                       (kv2 : (Pair Symbol (Listof Index))))
-                   (< (cdr kv1) (cdr kv2))))))
+                   ; just comapres first of the list of index
+                   (< (car (cdr kv1)) (car (cdr kv2)))))))
 
     (if (set-empty? projection)
         labels
         (filter (λ: ((label : (Pair Symbol (Listof Index))))
 		    (set-member? projection (car label)))
-		labels))))|#
+		labels))))
 ; ***********************************************************
 
 ; ***********************************************************

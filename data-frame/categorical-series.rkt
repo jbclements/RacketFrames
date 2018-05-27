@@ -8,7 +8,7 @@
 (provide:
  [CSeries->SIndex    (CSeries -> SIndex)]
  [cseries-length      (CSeries -> Index)]
- [cseries-iref        (CSeries Fixnum -> Label)]
+ [cseries-iref        (CSeries (Listof Index) -> (Listof Label))]
  [cseries-range (CSeries Index -> (Vectorof Label))]
  [cseries-data        (CSeries -> (Vectorof Symbol))]
  [cseries-referencer (CSeries -> (Fixnum -> Label))])
@@ -81,7 +81,7 @@
     (do ([i 0 (add1 i)])
 	([>= i len] sindex)
       (when (index? i)
-	    (hash-set! sindex (vector-ref noms i) i)))))
+	    (hash-set! sindex (vector-ref noms i) (list i))))))
 
 (: cseries-referencer (CSeries -> (Fixnum -> Label)))
 (define (cseries-referencer cseries)
@@ -91,10 +91,12 @@
 	(let ((code (vector-ref data idx)))
 	  (vector-ref noms code)))))
 
-(: cseries-iref (CSeries Fixnum -> Label))
-(define (cseries-iref cseries idx)
-  (vector-ref (CSeries-nominals cseries)
-	      (vector-ref (CSeries-data cseries) idx)))
+(: cseries-iref (CSeries (Listof Index) -> (Listof Label)))
+(define (cseries-iref cseries lst-idx)
+  (map (lambda ((idx : Index))
+         (vector-ref (CSeries-nominals cseries)
+                     (vector-ref (CSeries-data cseries) idx)))
+       lst-idx))
 
 ; This function consumes an integer series and an index and
 ; returns a vector of values in the range [0:index] in the series.

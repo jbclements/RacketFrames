@@ -165,7 +165,7 @@
 (define (data-frame-rename data-frame from to)
   (let ((index (LabelIndex-index data-frame)))
     (if index
-	(let: ((col-idx : (Option Index) (hash-ref index from (λ () #f))))
+	(let: ((col-idx : (Option (Listof Index)) (hash-ref index from (λ () #f))))
 	      (if col-idx
 		  (let ((new-index (hash-copy index)))
 		    (hash-remove! new-index from)
@@ -196,7 +196,7 @@
 (: data-frame-series (DataFrame Symbol -> Series))
 (define (data-frame-series data-frame col)
   (vector-ref (DataFrame-series data-frame)
-              (label-index (assert (LabelIndex-index data-frame)) col)))
+              (car (label-index (assert (LabelIndex-index data-frame)) col))))
 
 ; This function uses the above function and the assert function
 ; to ensure the series returned is a GenSeries.
@@ -225,7 +225,7 @@
 ; This function consumes a DataFrame and returns a Listof pairs
 ; consisting of the column name and its associated index in the
 ; DataFrame.
-(: data-frame-labels (DataFrame -> (Listof (Pair Symbol Index))))
+(: data-frame-labels (DataFrame -> (Listof (Pair Symbol (Listof Index)))))
 (define (data-frame-labels data-frame)
   (hash->list (assert (LabelIndex-index data-frame))))
 
@@ -242,13 +242,13 @@
 ; Symbol representing all the column names.
 (: data-frame-names (DataFrame -> (Listof Symbol)))
 (define (data-frame-names data-frame)  
-  (map (λ: ((kv : (Pair Symbol Integer)))
+  (map (λ: ((kv : (Pair Symbol (Listof Integer))))
 	   (car kv))
-       ((inst sort (Pair Symbol Index) (Pair Symbol Index))
+       ((inst sort (Pair Symbol (Listof Index)) (Pair Symbol (Listof Index)))
         (data-frame-labels data-frame)
-        (λ: ((kv1 : (Pair Symbol Index)) 
-             (kv2 : (Pair Symbol Index)))
-	    (< (cdr kv1) (cdr kv2))))))
+        (λ: ((kv1 : (Pair Symbol (Listof Index)))
+             (kv2 : (Pair Symbol (Listof Index))))
+	    (< (car (cdr kv1)) (car (cdr kv2)))))))
 
 ; ***********************************************************
 
@@ -363,7 +363,7 @@
     (projection-filter (for/list: : Columns
 				  ([label labeling])
 				  (cons (car label)
-					(vector-ref series (cdr label))))
+					(vector-ref series (car (cdr label)))))
 		       (λ: ((l-s : Column))
 			   (car l-s))
 		       project)))
@@ -515,7 +515,7 @@
               (vector 1 2 3 4))
 
 (check-equal? (data-frame-labels data-frame-integer)
-              (list (cons 'col2 1) (cons 'col3 2) (cons 'col-one 0)))
+              (list '(col2 1) '(col3 2) '(col-one 0)))
 
 (check-equal? (projection-set (list 'col-one 'col2 'col3))
               (set 'col-one 'col2 'col3))

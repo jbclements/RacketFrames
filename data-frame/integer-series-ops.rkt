@@ -56,8 +56,8 @@
 (: iseries-head (ISeries [#:rows Index] -> ISeries))
 (define (iseries-head iseries #:rows [rows 10])
   (if (< (vector-length (iseries-data iseries)) rows)
-      (new-ISeries (for/vector: : (Vectorof Fixnum) ([i (vector-length (iseries-data iseries))]) (iseries-iref iseries i)) #f)
-      (new-ISeries (for/vector: : (Vectorof Fixnum) ([i rows]) (iseries-iref iseries i)) #f)))
+      (new-ISeries (for/vector: : (Vectorof Fixnum) ([i (vector-length (iseries-data iseries))]) (car (iseries-iref iseries (list i)))) #f)
+      (new-ISeries (for/vector: : (Vectorof Fixnum) ([i rows]) (car (iseries-iref iseries (list i)))) #f)))
 
 (define default-iseries-rows 10)
 

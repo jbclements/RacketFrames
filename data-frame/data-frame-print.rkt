@@ -105,7 +105,7 @@
 
 (: format-gen-series (GenSeries Index -> String))
 (define (format-gen-series gen-series row)
-  (let ((data (gen-series-iref gen-series row)))
+  (let ((data (gen-series-iref gen-series (list row))))
     (cond
       [(symbol? data)
           (~a (symbol->string data)
@@ -130,13 +130,13 @@
 
 (: format-cseries (CSeries Index -> String))
 (define (format-cseries cseries row)
-  (~a (symbol->string (cseries-iref cseries row))
+  (~a (symbol->string (car (cseries-iref cseries (list row))))
       #:width WIDTH
       #:align 'left))
 
 (: format-nseries (NSeries Index -> String))
 (define (format-nseries nseries row)
-  (let ((n (nseries-iref nseries row)))
+  (let ((n (nseries-iref nseries (list row))))
     (if (rational? n)
 	(~r n
 	    #:precision '(= 4)
@@ -145,13 +145,13 @@
 
 (: format-iseries (ISeries Index -> String))
 (define (format-iseries iseries row)
-  (~r (iseries-iref iseries row)
+  (~r (car (iseries-iref iseries (list row)))
       #:precision 0
       #:min-width WIDTH))
 
 (: format-bseries (BSeries Index -> String))
 (define (format-bseries bseries row)
-  (~a (if (bseries-iref bseries row)
+  (~a (if (bseries-iref bseries (list row))
           "#t"
           "#f")
       #:width WIDTH
@@ -217,16 +217,16 @@
 	 (let ((a-series (vector-ref series col)))
 	   (cond
              ((GenSeries? a-series)
-              (display (gen-series-iref a-series row) outp))
+              (display (gen-series-iref a-series (list row)) outp))
              ((NSeries? a-series)
-              (let ((n (nseries-iref a-series row)))
+              (let ((n (nseries-iref a-series (list row))))
                 (display n outp)))
              ((CSeries? a-series)
-              (display (cseries-iref a-series row) outp))
+              (display (cseries-iref a-series (list row)) outp))
              ((ISeries? a-series)
-              (display (iseries-iref a-series row) outp))
+              (display (iseries-iref a-series (list row)) outp))
              ((BSeries? a-series)
-              (display (bseries-iref a-series row) outp))
+              (display (bseries-iref a-series (list row)) outp))
              (else
               (error 'frame-head "Unknown series types ~s"
                      (series-type a-series)))))))

@@ -265,22 +265,22 @@
          ; and same goes for ISeries and CSeries.
          (cond
            ((GenSeries? series)
-            (let: ((val : GenericType (gen-series-iref series row-id)))
+            (let: ((val : GenericType (gen-series-iref series (list row-id))))
               (if (GenSeriesBuilder? builder)
-                  (append-GenSeriesBuilder builder val)
+                  (append-GenSeriesBuilder builder (car (assert val list?)))
                   (copy-column-row-error series col))))
            ((NSeries? series)
-            (let: ((num : Float (nseries-iref series row-id)))
+            (let: ((num : Float (car (nseries-iref series (list row-id)))))
               (if (NSeriesBuilder? builder)
                   (append-NSeriesBuilder builder num)
                   (copy-column-row-error series col))))
            ((CSeries? series)
-            (let: ((nom : Label (cseries-iref series row-id)))
+            (let: ((nom : Label (car (cseries-iref series (list row-id)))))
               (if (CSeriesBuilder? builder)
                   (append-CSeriesBuilder builder nom)
                   (copy-column-row-error series col))))
            ((ISeries? series)
-            (let: ((num : Fixnum (iseries-iref series row-id)))
+            (let: ((num : Fixnum (car (iseries-iref series (list row-id)))))
               (if (ISeriesBuilder? builder)
                   (append-ISeriesBuilder builder num)
                   (copy-column-row-error series col))))))))
@@ -940,7 +940,7 @@
 
 (define cseries-builder-1-complete (complete-CSeriesBuilder cseries-builder-1))
 
-(check-equal? (cseries-iref cseries-builder-1-complete 0) 'b)
+(check-equal? (cseries-iref cseries-builder-1-complete (list 0)) (list 'b))
 
 ;(copy-column-row-error cseries-1 3)
 
@@ -956,11 +956,11 @@
                  (vector cseries-builder-2 iseries-builder-1 nseries-builder-1)
                  2)
 
-(check-equal? (cseries-iref (complete-CSeriesBuilder cseries-builder-2) 0) 'c)
+(check-equal? (cseries-iref (complete-CSeriesBuilder cseries-builder-2) (list 0)) (list 'c))
 
-(check-equal? (iseries-iref (complete-ISeriesBuilder iseries-builder-1) 0) 3)
+(check-equal? (iseries-iref (complete-ISeriesBuilder iseries-builder-1) (list 0)) (list 3))
 
-(check-equal? (nseries-iref (complete-NSeriesBuilder nseries-builder-1) 0) 3.5)
+(check-equal? (nseries-iref (complete-NSeriesBuilder nseries-builder-1) (list 0)) (list 3.5))
 
 ; (: do-join-build-left/right ((Vectorof Series) (Vectorof Series)
 ;		  (Vectorof SeriesBuilder) (Vectorof SeriesBuilder)

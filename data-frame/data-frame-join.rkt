@@ -27,7 +27,8 @@
  [copy-column-row-error (Series Integer -> Void)]
  [copy-column-row ((Vectorof Series) (Vectorof SeriesBuilder) Index -> Void)]
  [dest-mapping-series-builders (DataFrameDescription Index -> (Listof SeriesBuilder))]
- [join-column-name (Column (Setof Label) String -> Symbol)])
+ [join-column-name (Column (Setof Label) String -> Symbol)]
+ [key-fn ((Listof IndexableSeries) -> (Index -> Key))])
 
 (provide
  IndexableSeries)
@@ -816,7 +817,7 @@
                  (lambda ([key : String] [val : (Listof GenericType)])
                    
                    (let ((key (assert key string?))
-                         (val (assert val ListofReal?)))
+                         (val (assert (flatten val) ListofReal?)))
                      (hash-set! agg-value-hash key
                                 (cond 
                                   [(eq? function-name 'sum) (apply + val)]

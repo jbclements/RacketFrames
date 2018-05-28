@@ -68,6 +68,8 @@
 	  build-index-from-labels
 	  Label SIndex LabelIndex
           label-index label->lst-idx)
+ (only-in "multi-indexed-series.rkt"
+          MIndex build-multi-index-from-list)
  (only-in "boolean-series.rkt"
           BSeries))
 ; ***********************************************************

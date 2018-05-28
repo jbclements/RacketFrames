@@ -91,7 +91,7 @@
 	  append-BSeriesBuilder complete-BSeriesBuilder
 	  new-BSeriesBuilder)
  (only-in "data-frame-print.rkt"
-          frame-write-tab))
+          data-frame-write-tab))
 
 ; This functions consumes a Vectorof Series and Vectorof SeriesBuilder
 ; and an Index and does not return any value. It copies an entire row
@@ -262,11 +262,11 @@
 
 ;(displayln "Concat Test 1")
 
-;(frame-write-tab data-frame-integer-1 (current-output-port))
+;(data-frame-write-tab data-frame-integer-1 (current-output-port))
 
-;(frame-write-tab data-frame-integer-2 (current-output-port))
+;(data-frame-write-tab data-frame-integer-2 (current-output-port))
 
-;(frame-write-tab (data-frame-concat-vertical data-frame-integer-1 data-frame-integer-2) (current-output-port))
+;(data-frame-write-tab (data-frame-concat-vertical data-frame-integer-1 data-frame-integer-2) (current-output-port))
 
 (define columns-mixed-1
   (list 
@@ -290,17 +290,17 @@
 
 (displayln "Concat Test")
 
-(frame-write-tab data-frame-mixed-1 (current-output-port))
+(data-frame-write-tab data-frame-mixed-1 (current-output-port))
 
-(frame-write-tab data-frame-mixed-2 (current-output-port))
+(data-frame-write-tab data-frame-mixed-2 (current-output-port))
 
 (displayln "Vertical Concat")
 
-(frame-write-tab (data-frame-concat-vertical data-frame-mixed-1 data-frame-mixed-2) (current-output-port))
+(data-frame-write-tab (data-frame-concat-vertical data-frame-mixed-1 data-frame-mixed-2) (current-output-port))
 
 (displayln "Horizontal Concat")
 
-(frame-write-tab (data-frame-concat-horizontal data-frame-mixed-1 data-frame-mixed-2) (current-output-port))
+(data-frame-write-tab (data-frame-concat-horizontal data-frame-mixed-1 data-frame-mixed-2) (current-output-port))
 
 (define columns-mixed-3
   (list 
@@ -312,6 +312,6 @@
 ; create new data-frame-mixed-3
 (define data-frame-mixed-3 (new-data-frame columns-mixed-3))
 
-(frame-write-tab data-frame-mixed-3 (current-output-port))
+(data-frame-write-tab data-frame-mixed-3 (current-output-port))
 
-(frame-write-tab (data-frame-concat-horizontal data-frame-mixed-2 data-frame-mixed-3) (current-output-port))
+(data-frame-write-tab (data-frame-concat-horizontal data-frame-mixed-2 data-frame-mixed-3) (current-output-port))

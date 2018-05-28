@@ -31,6 +31,7 @@
  (all-from-out "data-frame/series-iter.rkt")
  (all-from-out "data-frame/data-frame.rkt")
  (all-from-out "data-frame/data-frame-ops.rkt")
+ (all-from-out "data-frame/data-frame-concat.rkt")
  (all-from-out "data-frame/data-frame-print.rkt")
  (all-from-out "data-frame/data-frame-join.rkt")
  (all-from-out "stats/tabulate.rkt")
@@ -49,6 +50,7 @@
  "data-frame/types.rkt"
  "data-frame/data-frame.rkt"
  "data-frame/data-frame-ops.rkt"
+ "data-frame/data-frame-concat.rkt"
  "data-frame/data-frame-print.rkt"
  "data-frame/data-frame-join.rkt"
  "data-frame/indexed-series.rkt"

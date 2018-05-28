@@ -28,7 +28,7 @@
  [copy-column-row ((Vectorof Series) (Vectorof SeriesBuilder) Index -> Void)]
  [dest-mapping-series-builders (DataFrameDescription Index -> (Listof SeriesBuilder))]
  [join-column-name (Column (Setof Label) String -> Symbol)]
- [build-multi-index-from-cols ((U (Listof IndexableSeries) Columns) -> MIndex)])
+ [build-multi-index-from-cols ((U (Listof IndexableSeries) Columns) -> SIndex)])
 
 (provide
  IndexableSeries)
@@ -45,9 +45,7 @@
  (only-in grip/data/symbol
 	  symbol-prefix)
  (only-in "indexed-series.rkt"
-	  Label Labeling LabelProjection)
- (only-in "multi-indexed-series.rkt"
-	  MIndex)
+	  SIndex Label Labeling LabelProjection)
  (only-in "series.rkt"
 	  series-complete)
  (only-in "series-description.rkt"
@@ -841,7 +839,7 @@
 
 ; ***********************************************************
 
-(: build-multi-index-from-cols ((U (Listof IndexableSeries) Columns) -> MIndex))
+(: build-multi-index-from-cols ((U (Listof IndexableSeries) Columns) -> SIndex))
 (define (build-multi-index-from-cols cols)
 
   (let ((cols : (Listof IndexableSeries)
@@ -853,13 +851,13 @@
     (define len (series-length (car cols)))
     (define: series-key : (Index -> String) (key-fn cols))
 
-    (let ((index : MIndex (make-hash '())))
+    (let ((index : SIndex (make-hash '())))
       (let loop ([i 0])
         (if (>= i len)
             index
             (let: ((i : Index (assert i index?)))
               (let ((key (series-key i)))
-                (hash-update! index key
+                (hash-update! index (string->symbol key)
                               (λ: ((idx : (Listof Index)))
                                 (append idx (list i)))
                               (λ () (list))))

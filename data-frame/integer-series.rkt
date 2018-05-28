@@ -28,6 +28,7 @@
 
 (provide:
  [new-ISeries ((Vectorof Fixnum) (Option (U (Listof Label) SIndex)) -> ISeries)]
+ [set-ISeries-index (ISeries (U (Listof Label) SIndex) -> ISeries)]
  [iseries-iref (ISeries (Listof Index) -> (Listof Fixnum))]
  [iseries-label-ref (ISeries Label -> (Listof Integer))]
  [iseries-range (ISeries Index -> (Vectorof Fixnum))]
@@ -107,6 +108,28 @@
 	    (check-mismatch index)
 	    (ISeries index data))
 	  (ISeries #f data))))
+; ***********************************************************
+
+; ***********************************************************
+(: set-ISeries-index (ISeries (U (Listof Label) SIndex) -> ISeries))
+(define (set-ISeries-index iseries labels)
+
+  (define data (ISeries-data iseries))
+  
+  (: check-mismatch (SIndex -> Void))
+  (define (check-mismatch index)
+    (unless (eq? (vector-length data) (hash-count index))
+      (let ((k (current-continuation-marks)))
+	(raise (make-exn:fail:contract "Cardinality of a Series' data and labels must be equal" k))))
+    (void))
+
+  (if (hash? labels)
+      (begin
+	(check-mismatch labels)
+	(ISeries labels data))
+      (let ((index (build-index-from-labels labels)))
+        (check-mismatch index)
+        (ISeries index data))))
 ; ***********************************************************
 
 ; ***********************************************************

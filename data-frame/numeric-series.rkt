@@ -25,6 +25,7 @@
 ; Provide functions in this file to other files.
 
 (provide:
+ [set-NSeries-index (NSeries (U (Listof Label) SIndex) -> NSeries)]
  [nseries-iref (NSeries (Listof Index) -> (Listof Float))]
  [nseries-label-ref (NSeries Label -> (Listof Float))]
  [nseries-range (NSeries Index -> FlVector)]
@@ -166,6 +167,28 @@
 	    (NSeries index data))
 	  (NSeries #f data))))
 
+; ***********************************************************
+
+; ***********************************************************
+(: set-NSeries-index (NSeries (U (Listof Label) SIndex) -> NSeries))
+(define (set-NSeries-index nseries labels)
+
+  (define data (NSeries-data nseries))
+  
+  (: check-mismatch (SIndex -> Void))
+  (define (check-mismatch index)
+    (unless (eq? (flvector-length data) (hash-count index))
+      (let ((k (current-continuation-marks)))
+	(raise (make-exn:fail:contract "Cardinality of a Series' data and labels must be equal" k))))
+    (void))
+
+  (if (hash? labels)
+      (begin
+	(check-mismatch labels)
+	(NSeries labels data))
+      (let ((index (build-index-from-labels labels)))
+        (check-mismatch index)
+        (NSeries index data))))
 ; ***********************************************************
 
 ; ***********************************************************

@@ -26,6 +26,7 @@
 
 (provide:
  [new-BSeries ((Vectorof Boolean) (Option (U (Listof Label) SIndex)) -> BSeries)]
+ [set-BSeries-index (BSeries (U (Listof Label) SIndex) -> BSeries)]
  [bseries-iref (BSeries (Listof Index) -> (Listof Boolean))]
  [bseries-label-ref (BSeries Label -> (Listof Boolean))]
  [bseries-range (BSeries Index -> (Vectorof Boolean))]
@@ -81,6 +82,28 @@
 	    (check-mismatch index)
 	    (BSeries index data))
 	  (BSeries #f data))))
+; ***********************************************************
+
+; ***********************************************************
+(: set-BSeries-index (BSeries (U (Listof Label) SIndex) -> BSeries))
+(define (set-BSeries-index bseries labels)
+
+  (define data (BSeries-data bseries))
+  
+  (: check-mismatch (SIndex -> Void))
+  (define (check-mismatch index)
+    (unless (eq? (vector-length data) (hash-count index))
+      (let ((k (current-continuation-marks)))
+	(raise (make-exn:fail:contract "Cardinality of a Series' data and labels must be equal" k))))
+    (void))
+
+  (if (hash? labels)
+      (begin
+	(check-mismatch labels)
+	(BSeries labels data))
+      (let ((index (build-index-from-labels labels)))
+        (check-mismatch index)
+        (BSeries index data))))
 ; ***********************************************************
 
 ; ***********************************************************

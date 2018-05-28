@@ -147,15 +147,15 @@
 (define data-frame-mixed-6 (new-data-frame columns-mixed-6))'
 
 (displayln "DataFrame Mixed")
-(frame-write-tab data-frame-mixed-5 (current-output-port))
+(data-frame-write-tab data-frame-mixed-5 (current-output-port))
 
 (displayln "DataFrame Mixed")
-(frame-write-tab data-frame-mixed-6 (current-output-port))
+(data-frame-write-tab data-frame-mixed-6 (current-output-port))
 
 (displayln "DataFrame Inner Join")
-(frame-write-tab (data-frame-join-inner data-frame-mixed-5  data-frame-mixed-6 #:on (list 'col2)) (current-output-port))
+(data-frame-write-tab (data-frame-join-inner data-frame-mixed-5  data-frame-mixed-6 #:on (list 'col2)) (current-output-port))
 
 (display "\n")
 
 (displayln "DataFrame Outer Join")
-(frame-write-tab (data-frame-join-outer data-frame-mixed-5  data-frame-mixed-6 #:on (list 'col2)) (current-output-port))
+(data-frame-write-tab (data-frame-join-outer data-frame-mixed-5  data-frame-mixed-6 #:on (list 'col2)) (current-output-port))

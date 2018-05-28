@@ -23,6 +23,7 @@
 
 (provide:
  [new-GenSeries ((Vectorof GenericType) (Option (U (Listof Label) SIndex)) -> GenSeries)]
+ [set-GenSeries-index (GenSeries (U (Listof Label) SIndex) -> GenSeries)]
  [gen-series-iref (GenSeries (Listof Index) -> GenericType)]
  [gen-series-label-ref (GenSeries Label -> GenericType)]
  [gen-series-range (GenSeries Index -> (Vectorof GenericType))]
@@ -30,6 +31,8 @@
  [gen-series-referencer (GenSeries -> (Index -> GenericType))]
  [gen-series-data (GenSeries -> (Vectorof GenericType))]
  [map/gen-s (GenSeries (GenericType -> GenericType) -> GenSeries)])
+
+; ***********************************************************
 
 ;; Integer series optimized with use of Fixnum.
 (struct GenSeries LabelIndex ([data : (Vectorof GenericType)]))
@@ -56,6 +59,30 @@
 	    (check-mismatch index)
 	    (GenSeries index data))
 	  (GenSeries #f data))))
+
+; ***********************************************************
+
+; ***********************************************************
+(: set-GenSeries-index (GenSeries (U (Listof Label) SIndex) -> GenSeries))
+(define (set-GenSeries-index iseries labels)
+
+  (define data (GenSeries-data iseries))
+  
+  (: check-mismatch (SIndex -> Void))
+  (define (check-mismatch index)
+    (unless (eq? (vector-length data) (hash-count index))
+      (let ((k (current-continuation-marks)))
+	(raise (make-exn:fail:contract "Cardinality of a Series' data and labels must be equal" k))))
+    (void))
+
+  (if (hash? labels)
+      (begin
+	(check-mismatch labels)
+	(GenSeries labels data))
+      (let ((index (build-index-from-labels labels)))
+        (check-mismatch index)
+        (GenSeries index data))))
+; ***********************************************************
 
 ; ***********************************************************
 ; This function consumes a generic series and returns a

@@ -31,7 +31,8 @@
  [label-sort-positional (LabelIndex [#:project LabelProjection] -> Labeling)]
  [label-sort-lexical (LabelIndex -> Labeling)]
  [gseries-length (GSeries -> Index)]
- [gseries-data (All (A) (GSeries A) -> (Vectorof A))])
+ [gseries-data (All (A) (GSeries A) -> (Vectorof A))]
+ [build-multi-index-from-list ((Listof (Listof GenericType)) -> SIndex)])
 
 (provide
  SIndex Labeling
@@ -68,7 +69,7 @@
 
 ; like in Pandas, it could be dictionary of labels to values or not
 ; that's what the LabelIndex is for
-(struct LabelIndex ([index : (Option SIndex)]))
+(struct LabelIndex ([index : (Option SIndex)]) #:mutable)
 ; ***********************************************************
 
 ; ***********************************************************

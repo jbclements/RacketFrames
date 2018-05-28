@@ -28,7 +28,8 @@
  [series-type (Series -> SeriesType)]
  [series-length (Series -> Index)]
  [series-data (Series -> (U (Vectorof GenericType) FlVector (Vectorof Symbol) (Vectorof Fixnum) (Vectorof Boolean)))]
- [series-iref (Series Index -> Any)])
+ [series-iref (Series Index -> Any)]
+ [set-series-index! (Series (U (Listof Label) SIndex) -> Void)])
 
 ; ***********************************************************
 
@@ -38,17 +39,21 @@
  (only-in racket/flonum
           flvector-length)
  (only-in "indexed-series.rkt"
-          Label)
+          Label SIndex)
  (only-in "generic-series.rkt"
-          GenericType GenSeries GenSeries? GenSeries-data gen-series-length gen-series-data gen-series-iref)
+          GenericType GenSeries GenSeries? GenSeries-data gen-series-length gen-series-data gen-series-iref
+          set-GenSeries-index)
  (only-in "categorical-series.rkt"
           CSeries CSeries? CSeries-data cseries-length cseries-data cseries-iref)
  (only-in "numeric-series.rkt"
-          NSeries NSeries? NSeries-data nseries-length nseries-data nseries-iref)
+          NSeries NSeries? NSeries-data nseries-length nseries-data nseries-iref
+          set-NSeries-index)
  (only-in "integer-series.rkt"
-	  ISeries ISeries? ISeries-data iseries-length iseries-data iseries-iref)
+	  ISeries ISeries? ISeries-data iseries-length iseries-data iseries-iref
+          set-ISeries-index)
  (only-in "boolean-series.rkt"
-	  BSeries BSeries? BSeries-data bseries-length bseries-data bseries-iref))
+	  BSeries BSeries? BSeries-data bseries-length bseries-data bseries-iref
+          set-BSeries-index))
 
 ; ***********************************************************
 
@@ -120,6 +125,20 @@
     [(ISeries? series) (iseries-iref series (list idx))]
     [(BSeries? series) (bseries-iref series (list idx))]
     [else (error "Unknown Series type in DataFrame")]))
+
+; ***********************************************************
+
+; ***********************************************************
+
+(: set-series-index! (Series (U (Listof Label) SIndex) -> Void))
+(define (set-series-index! series index)
+  (cond
+    [(GenSeries? series) (set! series (set-GenSeries-index (assert series GenSeries?) index))]
+    [(NSeries? series) (set! series (set-NSeries-index (assert series NSeries?) index))]    
+    ;[(CSeries? series) (cseries-data series)]    
+    [(ISeries? series) (set! series (set-ISeries-index (assert series ISeries?) index))]
+    [(BSeries? series) (set! series (set-BSeries-index (assert series BSeries?) index))]
+    [else (error "Unknown or not supported series type in DataFrame")]))
 
 ; ***********************************************************
 

@@ -21,7 +21,7 @@
 ; Provide functions in this file to other files.
 
 (provide:
- [frame-write-tab (DataFrame Output-Port [#:heading Boolean] -> Void)]
+ [data-frame-write-tab (DataFrame Output-Port [#:heading Boolean] -> Void)]
  [data-frame-head (case-> (DataFrame -> Void)
 		     (DataFrame (Option Index) -> Void))])
 
@@ -200,8 +200,8 @@
                     (if (not count) default-head-rows count))))
     (display-data-frame-row series (in-range count))))
 
-(: frame-write-tab (DataFrame Output-Port [#:heading Boolean] -> Void))
-(define (frame-write-tab data-frame outp #:heading [heading #t])
+(: data-frame-write-tab (DataFrame Output-Port [#:heading Boolean] -> Void))
+(define (data-frame-write-tab data-frame outp #:heading [heading #t])
 
   (define: cols     : Columns (data-frame-explode data-frame))
   (define: headings : (Listof Label) (map column-heading cols))
@@ -267,4 +267,4 @@
 ; create new data-frame-integer
 (define data-frame-integer (new-data-frame columns-integer))
 
-(frame-write-tab data-frame-integer (current-output-port))
+(data-frame-write-tab data-frame-integer (current-output-port))

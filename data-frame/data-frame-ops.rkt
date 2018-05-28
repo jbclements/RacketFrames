@@ -84,7 +84,7 @@
 	  append-BSeriesBuilder complete-BSeriesBuilder
 	  new-BSeriesBuilder)
  (only-in "data-frame-print.rkt"
-          frame-write-tab))
+          data-frame-write-tab))
 
 
 ;(: data-frame+ (DataFrame DataFrame -> DataFrame))
@@ -138,11 +138,11 @@
 
 (displayln "data-frame+ Test 1")
 
-(frame-write-tab data-frame-integer-1 (current-output-port))
+(data-frame-write-tab data-frame-integer-1 (current-output-port))
 
-(frame-write-tab data-frame-integer-2 (current-output-port))
+(data-frame-write-tab data-frame-integer-2 (current-output-port))
 
-(frame-write-tab (data-frame+ data-frame-integer-1 data-frame-integer-2) (current-output-port))
+(data-frame-write-tab (data-frame+ data-frame-integer-1 data-frame-integer-2) (current-output-port))
 
 ;(: data-frame- (DataFrame DataFrame [#:on (Listof Symbol)] -> DataFrame))
 (: data-frame- (DataFrame DataFrame -> DataFrame))
@@ -173,11 +173,11 @@
 
 (displayln "data-frame- Test 1")
 
-(frame-write-tab data-frame-integer-1 (current-output-port))
+(data-frame-write-tab data-frame-integer-1 (current-output-port))
 
-(frame-write-tab data-frame-integer-2 (current-output-port))
+(data-frame-write-tab data-frame-integer-2 (current-output-port))
 
-(frame-write-tab (data-frame- data-frame-integer-1 data-frame-integer-2) (current-output-port))
+(data-frame-write-tab (data-frame- data-frame-integer-1 data-frame-integer-2) (current-output-port))
 
 ;(: data-frame* (DataFrame DataFrame [#:on (Listof Symbol)] -> DataFrame))
 (: data-frame* (DataFrame DataFrame -> DataFrame))
@@ -208,11 +208,11 @@
 
 (displayln "data-frame* Test 1")
 
-(frame-write-tab data-frame-integer-1 (current-output-port))
+(data-frame-write-tab data-frame-integer-1 (current-output-port))
 
-(frame-write-tab data-frame-integer-2 (current-output-port))
+(data-frame-write-tab data-frame-integer-2 (current-output-port))
 
-(frame-write-tab (data-frame* data-frame-integer-1 data-frame-integer-2) (current-output-port))
+(data-frame-write-tab (data-frame* data-frame-integer-1 data-frame-integer-2) (current-output-port))
 
 ;(: data-frame/ (DataFrame DataFrame [#:on (Listof Symbol)] -> DataFrame))
 (: data-frame/ (DataFrame DataFrame -> DataFrame))
@@ -243,11 +243,11 @@
 
 (displayln "data-frame/ Test 1")
 
-(frame-write-tab data-frame-integer-1 (current-output-port))
+(data-frame-write-tab data-frame-integer-1 (current-output-port))
 
-(frame-write-tab data-frame-integer-2 (current-output-port))
+(data-frame-write-tab data-frame-integer-2 (current-output-port))
 
-(frame-write-tab (data-frame/ data-frame-integer-1 data-frame-integer-2) (current-output-port))
+(data-frame-write-tab (data-frame/ data-frame-integer-1 data-frame-integer-2) (current-output-port))
 
 ;(: data-frame% (DataFrame DataFrame [#:on (Listof Symbol)] -> DataFrame))
 (: data-frame% (DataFrame DataFrame -> DataFrame))
@@ -272,11 +272,11 @@
 
 (displayln "data-frame% Test 1")
 
-(frame-write-tab data-frame-integer-1 (current-output-port))
+(data-frame-write-tab data-frame-integer-1 (current-output-port))
 
-(frame-write-tab data-frame-integer-2 (current-output-port))
+(data-frame-write-tab data-frame-integer-2 (current-output-port))
 
-(frame-write-tab (data-frame% data-frame-integer-1 data-frame-integer-2) (current-output-port))
+(data-frame-write-tab (data-frame% data-frame-integer-1 data-frame-integer-2) (current-output-port))
 
 (: data-frame-r (DataFrame DataFrame -> DataFrame))
 (define (data-frame-r dfa dfb)
@@ -300,11 +300,11 @@
 
 (displayln "data-frame-r Test 1")
 
-(frame-write-tab data-frame-integer-1 (current-output-port))
+(data-frame-write-tab data-frame-integer-1 (current-output-port))
 
-(frame-write-tab data-frame-integer-2 (current-output-port))
+(data-frame-write-tab data-frame-integer-2 (current-output-port))
 
-(frame-write-tab (data-frame-r data-frame-integer-1 data-frame-integer-2) (current-output-port))
+(data-frame-write-tab (data-frame-r data-frame-integer-1 data-frame-integer-2) (current-output-port))
 
 
 ;(: data-frame= (DataFrame DataFrame [#:on (Listof Symbol)] -> DataFrame))
@@ -336,11 +336,11 @@
 
 (displayln "data-frame= Test 1")
 
-(frame-write-tab data-frame-integer-1 (current-output-port))
+(data-frame-write-tab data-frame-integer-1 (current-output-port))
 
-(frame-write-tab data-frame-integer-2 (current-output-port))
+(data-frame-write-tab data-frame-integer-2 (current-output-port))
 
-(frame-write-tab (data-frame= data-frame-integer-1 data-frame-integer-2) (current-output-port))
+(data-frame-write-tab (data-frame= data-frame-integer-1 data-frame-integer-2) (current-output-port))
 
 ;(: data-frame!= (DataFrame DataFrame [#:on (Listof Symbol)] -> DataFrame))
 (: data-frame!= (DataFrame DataFrame -> DataFrame))
@@ -371,11 +371,11 @@
 
 (displayln "data-frame!= Test 1")
 
-(frame-write-tab data-frame-integer-1 (current-output-port))
+(data-frame-write-tab data-frame-integer-1 (current-output-port))
 
-(frame-write-tab data-frame-integer-2 (current-output-port))
+(data-frame-write-tab data-frame-integer-2 (current-output-port))
 
-(frame-write-tab (data-frame!= data-frame-integer-1 data-frame-integer-2) (current-output-port))
+(data-frame-write-tab (data-frame!= data-frame-integer-1 data-frame-integer-2) (current-output-port))
 
 ;(: data-frame< (DataFrame DataFrame [#:on (Listof Symbol)] -> DataFrame))
 (: data-frame< (DataFrame DataFrame -> DataFrame))
@@ -406,11 +406,11 @@
 
 (displayln "data-frame< Test 1")
 
-(frame-write-tab data-frame-integer-1 (current-output-port))
+(data-frame-write-tab data-frame-integer-1 (current-output-port))
 
-(frame-write-tab data-frame-integer-2 (current-output-port))
+(data-frame-write-tab data-frame-integer-2 (current-output-port))
 
-(frame-write-tab (data-frame< data-frame-integer-1 data-frame-integer-2) (current-output-port))
+(data-frame-write-tab (data-frame< data-frame-integer-1 data-frame-integer-2) (current-output-port))
 
 ;(: data-frame> (DataFrame DataFrame [#:on (Listof Symbol)] -> DataFrame))
 (: data-frame> (DataFrame DataFrame -> DataFrame))
@@ -441,11 +441,11 @@
 
 (displayln "data-frame> Test 1")
 
-(frame-write-tab data-frame-integer-1 (current-output-port))
+(data-frame-write-tab data-frame-integer-1 (current-output-port))
 
-(frame-write-tab data-frame-integer-2 (current-output-port))
+(data-frame-write-tab data-frame-integer-2 (current-output-port))
 
-(frame-write-tab (data-frame> data-frame-integer-1 data-frame-integer-2) (current-output-port))
+(data-frame-write-tab (data-frame> data-frame-integer-1 data-frame-integer-2) (current-output-port))
 
 ;(: data-frame<= (DataFrame DataFrame [#:on (Listof Symbol)] -> DataFrame))
 (: data-frame<= (DataFrame DataFrame -> DataFrame))
@@ -476,11 +476,11 @@
 
 (displayln "data-frame<= Test 1")
 
-(frame-write-tab data-frame-integer-1 (current-output-port))
+(data-frame-write-tab data-frame-integer-1 (current-output-port))
 
-(frame-write-tab data-frame-integer-2 (current-output-port))
+(data-frame-write-tab data-frame-integer-2 (current-output-port))
 
-(frame-write-tab (data-frame<= data-frame-integer-1 data-frame-integer-2) (current-output-port))
+(data-frame-write-tab (data-frame<= data-frame-integer-1 data-frame-integer-2) (current-output-port))
 
 ;(: data-frame>= (DataFrame DataFrame [#:on (Listof Symbol)] -> DataFrame))
 (: data-frame>= (DataFrame DataFrame -> DataFrame))
@@ -511,11 +511,11 @@
 
 (displayln "data-frame>= Test 1")
 
-(frame-write-tab data-frame-integer-1 (current-output-port))
+(data-frame-write-tab data-frame-integer-1 (current-output-port))
 
-(frame-write-tab data-frame-integer-2 (current-output-port))
+(data-frame-write-tab data-frame-integer-2 (current-output-port))
 
-(frame-write-tab (data-frame>= data-frame-integer-1 data-frame-integer-2) (current-output-port))
+(data-frame-write-tab (data-frame>= data-frame-integer-1 data-frame-integer-2) (current-output-port))
 
 ;(: data-frame-abs (DataFrame [#:on (Listof Symbol)] -> DataFrame))
 (: data-frame-abs (DataFrame -> DataFrame))
@@ -533,7 +533,7 @@
 
 (displayln "data-frame-abs Test 1")
 
-(frame-write-tab data-frame-integer-1 (current-output-port))
+(data-frame-write-tab data-frame-integer-1 (current-output-port))
 
 (define columns-integer-3
   (list 
@@ -545,11 +545,11 @@
 ; create new data-frame-integer-3
 (define data-frame-integer-3 (new-data-frame columns-integer-3))
 
-(frame-write-tab data-frame-integer-3 (current-output-port))
+(data-frame-write-tab data-frame-integer-3 (current-output-port))
 
-(frame-write-tab (data-frame-abs data-frame-integer-1) (current-output-port))
+(data-frame-write-tab (data-frame-abs data-frame-integer-1) (current-output-port))
 
-(frame-write-tab (data-frame-abs data-frame-integer-3) (current-output-port))
+(data-frame-write-tab (data-frame-abs data-frame-integer-3) (current-output-port))
 
 ; DataFrame.apply(func[, axis, broadcast, ...])	Applies function along input axis of DataFrame.
 ; (: data-frame-apply func)

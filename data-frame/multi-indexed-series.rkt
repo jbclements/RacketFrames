@@ -57,25 +57,6 @@
                             (λ () (list))))
             (loop (add1 i)))))))
 
-#|(: build-multi-index-from-cols ((Listof IndexableSeries) -> MIndex))
-(define (build-multi-index-from-cols cols)
-
-  ; Get length of one of the IndexableSeries
-  (define len (series-length (car cols)))
-  (define: series-key : (Index -> String) (key-fn cols))
-
-  (let ((index : MIndex (make-hash '())))
-    (let loop ([i 0])
-      (if (>= i len)
-          index
-          (let: ((i : Index (assert i index?)))
-            (let ((key (series-key i)))
-              (hash-update! index key
-                            (λ: ((idx : (Listof Index)))
-                              (append idx (list i)))
-                            (λ () (list))))
-            (loop (add1 i))))))) |#
-
 (build-multi-index-from-list (list (list 'a 'b 'c) (list 1 2 3)))
 
 (build-multi-index-from-list (list (list 'a 'b 'c 'a 'c) (list 1 2 3 4 3)))

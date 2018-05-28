@@ -50,7 +50,7 @@
 	  new-data-frame
           data-frame-explode)
  (only-in "../data-frame/data-frame-print.rkt"
-          frame-write-tab
+          data-frame-write-tab
           data-frame-head)
  "data-frame-builder.rkt"
  (only-in "delimited-common.rkt"
@@ -150,12 +150,12 @@
 ; read csv
 ;(define fruits-data-frame-csv (load-csv-file (FilePath "../data-frame/fruits.csv") #:schema fruits-schema))
 
-;(frame-write-tab fruits-data-frame-csv (current-output-port))
+;(data-frame-write-tab fruits-data-frame-csv (current-output-port))
 
 ; no schema
 ;(define fruits-data-frame-csv-no-schema (load-csv-file (FilePath "../data-frame/fruits.csv") #:schema #f))
 
-;(frame-write-tab fruits-data-frame-csv-no-schema (current-output-port))
+;(data-frame-write-tab fruits-data-frame-csv-no-schema (current-output-port))
 
 ; read delimited
 (define random-demographic-data-frame-delimited (load-delimited-file "../sample-csv/random_demographic.csv" "|" #:schema random-demographic-schema))
@@ -167,4 +167,4 @@
 ; no schema
 ;(define fruits-data-frame-delimited-no-schema (load-delimited-file (FilePath "../data-frame/fruits.csv") "," #:schema #f))
 
-;(frame-write-tab fruits-data-frame-delimited-no-schema (current-output-port))
+;(data-frame-write-tab fruits-data-frame-delimited-no-schema (current-output-port))

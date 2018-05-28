@@ -28,7 +28,7 @@
  [copy-column-row ((Vectorof Series) (Vectorof SeriesBuilder) Index -> Void)]
  [dest-mapping-series-builders (DataFrameDescription Index -> (Listof SeriesBuilder))]
  [join-column-name (Column (Setof Label) String -> Symbol)]
- [key-fn ((Listof IndexableSeries) -> (Index -> Key))])
+ [build-multi-index-from-cols ((U (Listof IndexableSeries) Columns) -> MIndex)])
 
 (provide
  IndexableSeries)
@@ -46,6 +46,8 @@
 	  symbol-prefix)
  (only-in "indexed-series.rkt"
 	  Label Labeling LabelProjection)
+ (only-in "multi-indexed-series.rkt"
+	  MIndex)
  (only-in "series.rkt"
 	  series-complete)
  (only-in "series-description.rkt"
@@ -54,7 +56,7 @@
 	  series-type series-length
           series-data series-iref)
  (only-in "data-frame.rkt"
-	  DataFrame Column new-data-frame data-frame-names
+	  DataFrame Column Columns Columns? new-data-frame data-frame-names
 	  data-frame-cseries data-frame-explode
 	  DataFrameDescription DataFrameDescription-series data-frame-description)
  (only-in "generic-series.rkt"
@@ -89,7 +91,7 @@
 	  append-NSeriesBuilder complete-NSeriesBuilder
 	  new-NSeriesBuilder)
  (only-in "data-frame-print.rkt"
-          frame-write-tab))
+          data-frame-write-tab))
 
 ; ***********************************************************
 
@@ -154,7 +156,7 @@
 
 ; This function consumes a Listof Columns and alphabetically
 ; sorts it on the column name and returns new sorted list.
-(: key-cols-sort-lexical ((Listof Column) -> (Listof Column)))
+(: key-cols-sort-lexical (Columns -> Columns))
 (define (key-cols-sort-lexical cols)
   ((inst sort Column Column)
    cols
@@ -165,7 +167,7 @@
 ; This function consumes a Listof Column and filteres it for
 ; only columns of CSeries or ISeries and returns those series
 ; in list form.
-(: key-cols-series ((Listof Column) -> (Listof IndexableSeries)))
+(: key-cols-series (Columns -> (Listof IndexableSeries)))
 (define (key-cols-series cols)
   (filter (λ: ((s : Series)) (or (GenSeries? s)
                               (CSeries? s)
@@ -443,13 +445,13 @@
 
   ; This function consumes a DataFrame and LabelProjection and
   ; projects those columns.
-  (: data-frame-cols (DataFrame LabelProjection -> (Listof Column)))
+  (: data-frame-cols (DataFrame LabelProjection -> Columns))
   (define (data-frame-cols data-frame project)
     (data-frame-explode data-frame #:project project))
 
   ; This function consumes a Listof Column and returns a Vectorof
   ; Series contained in those columns.
-  (: src-series ((Listof Column) -> (Vectorof Series)))
+  (: src-series (Columns -> (Vectorof Series)))
   (define (src-series cols)
     (list->vector (map column-series cols)))
 
@@ -468,11 +470,11 @@
   (define: non-key-dfb : (Setof Label) (set-subtract cols-b join-cols))
 
   ; get all dfa-cols regardless of join intersection
-  (define: dfa-cols : (Listof Column) (data-frame-cols dfa '()))
+  (define: dfa-cols : Columns (data-frame-cols dfa '()))
   ; only get dfb-cols not in join intersection
-  (define: dfb-cols : (Listof Column) (data-frame-cols dfb non-key-dfb))
+  (define: dfb-cols : Columns (data-frame-cols dfb non-key-dfb))
   ; only get dfb-cols which match for display purposes
-  (define: dfb-cols-match : (Listof Column) (data-frame-cols dfb (set-intersect cols-a cols-b)))
+  (define: dfb-cols-match : Columns (data-frame-cols dfb (set-intersect cols-a cols-b)))
 
   ; Create index on fb dataframe on join-cols.
   (define: dfb-index : JoinHash
@@ -495,13 +497,13 @@
 		 dest-builders-a dest-builders-b
 		 dfa-keyfn dfb-index)
 
-  (define: new-a-series : (Listof Column)
+  (define: new-a-series : Columns
     (for/list ([builder (in-vector dest-builders-a)]
 	       [col     (in-list dfa-cols)])
 	      (cons (join-column-name col cols-a "dfa-")
 		    (series-complete builder))))
 
-  (define: new-b-series : (Listof Column)
+  (define: new-b-series : Columns
     (for/list ([builder (in-vector dest-builders-b)]
 	       [col     (in-list dfb-cols)])
 	      (cons (join-column-name col cols-b "dfb-")
@@ -523,13 +525,13 @@
 
   ; This function consumes a DataFrame and LabelProjection and
   ; projects those columns.
-  (: data-frame-cols (DataFrame LabelProjection -> (Listof Column)))
+  (: data-frame-cols (DataFrame LabelProjection -> Columns))
   (define (data-frame-cols data-frame project)
     (data-frame-explode data-frame #:project project))
 
   ; This function consumes a Listof Column and returns a Vectorof
   ; Series contained in those columns.
-  (: src-series ((Listof Column) -> (Vectorof Series)))
+  (: src-series (Columns -> (Vectorof Series)))
   (define (src-series cols)
     (list->vector (map column-series cols)))
 
@@ -548,12 +550,12 @@
   (define: non-key-dfa : (Setof Label) (set-subtract cols-a join-cols))
 
   ; get all fb-cols regardless of join intersection
-  (define: dfb-cols : (Listof Column) (data-frame-cols dfb '()))
+  (define: dfb-cols : Columns (data-frame-cols dfb '()))
   ; only get fa-cols not in join intersection
-  (define: dfa-cols : (Listof Column) (data-frame-cols dfa non-key-dfa))
+  (define: dfa-cols : Columns (data-frame-cols dfa non-key-dfa))
 
   ; only get dfb-cols which match for display purposes
-  (define: dfa-cols-match : (Listof Column) (data-frame-cols dfa (set-intersect cols-a cols-b)))
+  (define: dfa-cols-match : Columns (data-frame-cols dfa (set-intersect cols-a cols-b)))
 
   ; Create index on dfa dataframe on join-cols.
   (define: dfa-index : JoinHash
@@ -576,13 +578,13 @@
 		 dest-builders-b dest-builders-a
 		 dfb-keyfn dfa-index)
 
-  (define: new-a-series : (Listof Column)
+  (define: new-a-series : Columns
     (for/list ([builder (in-vector dest-builders-a)]
 	       [col     (in-list dfa-cols)])
 	      (cons (join-column-name col cols-a "dfa-")
 		    (series-complete builder))))
 
-  (define: new-b-series : (Listof Column)
+  (define: new-b-series : Columns
     (for/list ([builder (in-vector dest-builders-b)]
 	       [col     (in-list dfb-cols)])
 	      (cons (join-column-name col cols-b "dfb-")
@@ -603,13 +605,13 @@
 
   ; This function consumes a DataFrame and LabelProjection and
   ; projects those columns.
-  (: data-frame-cols (DataFrame LabelProjection -> (Listof Column)))
+  (: data-frame-cols (DataFrame LabelProjection -> Columns))
   (define (data-frame-cols data-frame project)
     (data-frame-explode data-frame #:project project))
 
   ; This function consumes a Listof Column and returns a Vectorof
   ; Series contained in those columns.
-  (: src-series ((Listof Column) -> (Vectorof Series)))
+  (: src-series (Columns -> (Vectorof Series)))
   (define (src-series cols)
     (list->vector (map column-series cols)))
 
@@ -639,9 +641,9 @@
   (define: non-key-dfb : (Setof Label) (set-subtract cols-b join-cols))
 
   ; get all dfa-cols regardless of join intersection
-  (define: dfa-cols : (Listof Column) (data-frame-cols dfa '()))
+  (define: dfa-cols : Columns (data-frame-cols dfa '()))
   ; only get dfb-cols not in join intersection
-  (define: dfb-cols : (Listof Column) (data-frame-cols dfb '()))
+  (define: dfb-cols : Columns (data-frame-cols dfb '()))
 
   ; Create index on fb dataframe on join-cols.
   (define: dfb-index : JoinHash
@@ -664,13 +666,13 @@
 		 dest-builders-a dest-builders-b
 		 dfa-keyfn dfb-index)
 
-  (define: new-a-series : (Listof Column)
+  (define: new-a-series : Columns
     (for/list ([builder (in-vector dest-builders-a)]
 	       [col     (in-list dfa-cols)])
 	      (cons (join-column-name col cols-a "dfa-")
 		    (series-complete builder))))
 
-  (define: new-b-series : (Listof Column)
+  (define: new-b-series : Columns
     (for/list ([builder (in-vector dest-builders-b)]
 	       [col     (in-list dfb-cols)])
 	      (cons (join-column-name col cols-b "dfb-")
@@ -691,13 +693,13 @@
 
   ; This function consumes a DataFrame and LabelProjection and
   ; projects those columns.
-  (: data-frame-cols (DataFrame LabelProjection -> (Listof Column)))
+  (: data-frame-cols (DataFrame LabelProjection -> Columns))
   (define (data-frame-cols data-frame project)
     (data-frame-explode data-frame #:project project))
 
   ; This function consumes a Listof Column and returns a Vectorof
   ; Series contained in those columns.
-  (: src-series ((Listof Column) -> (Vectorof Series)))
+  (: src-series (Columns -> (Vectorof Series)))
   (define (src-series cols)
     (list->vector (map column-series cols)))
 
@@ -716,9 +718,9 @@
   (define: non-key-dfb : (Setof Label) (set-subtract cols-b join-cols))
 
   ; get all dfa-cols regardless of join intersection
-  (define: dfa-cols : (Listof Column) (data-frame-cols dfa '()))
+  (define: dfa-cols : Columns (data-frame-cols dfa '()))
   ; only get dfb-cols not in join intersection
-  (define: dfb-cols : (Listof Column) (data-frame-cols dfb '()))
+  (define: dfb-cols : Columns (data-frame-cols dfb '()))
 
   ; Create index on fb dataframe on join-cols.
   (define: dfa-index : JoinHash
@@ -749,13 +751,13 @@
 		 dest-builders-a dest-builders-b
 		 dfa-keyfn dfb-keyfn dfa-index dfb-index)
 
-  (define: new-a-series : (Listof Column)
+  (define: new-a-series : Columns
     (for/list ([builder (in-vector dest-builders-a)]
 	       [col     (in-list dfa-cols)])
 	      (cons (join-column-name col cols-a "dfa-")
 		    (series-complete builder))))
 
-  (define: new-b-series : (Listof Column)
+  (define: new-b-series : Columns
     (for/list ([builder (in-vector dest-builders-b)]
 	       [col     (in-list dfb-cols)])
 	      (cons (join-column-name col cols-b "dfb-")
@@ -835,7 +837,35 @@
 (deifne (group-hash-to-data-frame agg-value-hash)
         (new-data-frame)) |#
 
+; **********************************************************
+
 ; ***********************************************************
+
+(: build-multi-index-from-cols ((U (Listof IndexableSeries) Columns) -> MIndex))
+(define (build-multi-index-from-cols cols)
+
+  (let ((cols : (Listof IndexableSeries)
+              (if (Columns? cols)
+                  (key-cols-series cols)
+                  cols)))
+
+    ; Get length of one of the IndexableSeries
+    (define len (series-length (car cols)))
+    (define: series-key : (Index -> String) (key-fn cols))
+
+    (let ((index : MIndex (make-hash '())))
+      (let loop ([i 0])
+        (if (>= i len)
+            index
+            (let: ((i : Index (assert i index?)))
+              (let ((key (series-key i)))
+                (hash-update! index key
+                              (λ: ((idx : (Listof Index)))
+                                (append idx (list i)))
+                              (λ () (list))))
+              (loop (add1 i))))))))
+
+; **********************************************************
 
 ; ***********
 ; Test Cases
@@ -877,7 +907,7 @@
 ; create new data-frame-categorical
 (define data-frame-categorical (new-data-frame columns-categorical))
 
-(frame-write-tab data-frame-integer (current-output-port))
+(data-frame-write-tab data-frame-integer (current-output-port))
 
 (displayln "data-frame-groupby")
 (data-frame-groupby data-frame-integer (list 'col1))
@@ -982,7 +1012,7 @@
 
 ;(series-data (complete-CSeriesBuilder cseries-builder-b))
 
-;(frame-write-tab (data-frame-join-left data-frame-integer data-frame-categorical) (current-output-port))
+;(data-frame-write-tab (data-frame-join-left data-frame-integer data-frame-categorical) (current-output-port))
 
 (define columns-integer-2
   (list 
@@ -1004,13 +1034,13 @@
 ; create new data-frame-integer-3
 (define data-frame-integer-3 (new-data-frame columns-integer-3))
 
-;(frame-write-tab (data-frame-join-left data-frame-integer-2 data-frame-integer-3 #:on (list 'col1)) (current-output-port))
+;(data-frame-write-tab (data-frame-join-left data-frame-integer-2 data-frame-integer-3 #:on (list 'col1)) (current-output-port))
 
-;(frame-write-tab (data-frame-join-left data-frame-integer-2 data-frame-integer-3 #:on (list 'col2)) (current-output-port))
+;(data-frame-write-tab (data-frame-join-left data-frame-integer-2 data-frame-integer-3 #:on (list 'col2)) (current-output-port))
 
-;(frame-write-tab (data-frame-join-right data-frame-integer-2 data-frame-integer-3 #:on (list 'col1)) (current-output-port))
+;(data-frame-write-tab (data-frame-join-right data-frame-integer-2 data-frame-integer-3 #:on (list 'col1)) (current-output-port))
 
-;(frame-write-tab (data-frame-join-right data-frame-integer-2 data-frame-integer-3 #:on (list 'col2)) (current-output-port))
+;(data-frame-write-tab (data-frame-join-right data-frame-integer-2 data-frame-integer-3 #:on (list 'col2)) (current-output-port))
 
 (define columns-integer-4
   (list 
@@ -1032,15 +1062,15 @@
 ; create new data-frame-integer-5
 (define data-frame-integer-5 (new-data-frame columns-integer-5))
 
-;(frame-write-tab (data-frame-join-left data-frame-integer-4 data-frame-integer-5 #:on (list 'co3)) (current-output-port))
+;(data-frame-write-tab (data-frame-join-left data-frame-integer-4 data-frame-integer-5 #:on (list 'co3)) (current-output-port))
 
-;(frame-write-tab (data-frame-join-inner data-frame-integer-2 data-frame-integer-3 #:on (list 'col1)) (current-output-port))
+;(data-frame-write-tab (data-frame-join-inner data-frame-integer-2 data-frame-integer-3 #:on (list 'col1)) (current-output-port))
 
-;(frame-write-tab (data-frame-join-inner data-frame-integer-4 data-frame-integer-5 #:on (list 'col2)) (current-output-port))
+;(data-frame-write-tab (data-frame-join-inner data-frame-integer-4 data-frame-integer-5 #:on (list 'col2)) (current-output-port))
 
-;(frame-write-tab (data-frame-join-outer data-frame-integer-4 data-frame-integer-5 #:on (list 'col2)) (current-output-port))
+;(data-frame-write-tab (data-frame-join-outer data-frame-integer-4 data-frame-integer-5 #:on (list 'col2)) (current-output-port))
 
-;(frame-write-tab (data-frame-join-outer data-frame-integer-4 data-frame-integer-5 #:on (list 'col3)) (current-output-port))
+;(data-frame-write-tab (data-frame-join-outer data-frame-integer-4 data-frame-integer-5 #:on (list 'col3)) (current-output-port))
 
 (define columns-mixed-1
   (list 
@@ -1060,9 +1090,9 @@
 ; create new data-frame-mixed-2
 (define data-frame-mixed-2 (new-data-frame columns-mixed-2))
 
-;(frame-write-tab (data-frame-join-outer data-frame-mixed-1 data-frame-mixed-2 #:on (list 'col2)) (current-output-port))
+;(data-frame-write-tab (data-frame-join-outer data-frame-mixed-1 data-frame-mixed-2 #:on (list 'col2)) (current-output-port))
 
-;(frame-write-tab (data-frame-join-outer data-frame-mixed-1 data-frame-mixed-2 #:on (list 'col3)) (current-output-port))
+;(data-frame-write-tab (data-frame-join-outer data-frame-mixed-1 data-frame-mixed-2 #:on (list 'col3)) (current-output-port))
 
 (define columns-mixed-3
   (list 
@@ -1082,7 +1112,7 @@
 ; create new data-frame-mixed-4
 (define data-frame-mixed-4 (new-data-frame columns-mixed-4))
 
-;(frame-write-tab (data-frame-join-outer data-frame-mixed-3 data-frame-mixed-4 #:on (list 'col2)) (current-output-port))
+;(data-frame-write-tab (data-frame-join-outer data-frame-mixed-3 data-frame-mixed-4 #:on (list 'col2)) (current-output-port))
 
 (define columns-mixed-5
   (list 
@@ -1102,17 +1132,17 @@
 ; create new data-frame-mixed-6
 (define data-frame-mixed-6 (new-data-frame columns-mixed-6))
 
-(frame-write-tab data-frame-mixed-5 (current-output-port))
+(data-frame-write-tab data-frame-mixed-5 (current-output-port))
 
-(frame-write-tab data-frame-mixed-6 (current-output-port))
+(data-frame-write-tab data-frame-mixed-6 (current-output-port))
 
-(frame-write-tab (data-frame-join-left data-frame-mixed-5 data-frame-mixed-6 #:on (list 'col3)) (current-output-port))
+(data-frame-write-tab (data-frame-join-left data-frame-mixed-5 data-frame-mixed-6 #:on (list 'col3)) (current-output-port))
 
-(frame-write-tab (data-frame-join-inner data-frame-mixed-5 data-frame-mixed-6 #:on (list 'col2)) (current-output-port))
+(data-frame-write-tab (data-frame-join-inner data-frame-mixed-5 data-frame-mixed-6 #:on (list 'col2)) (current-output-port))
 
-(frame-write-tab (data-frame-join-right data-frame-mixed-5 data-frame-mixed-6 #:on (list 'col2)) (current-output-port))
+(data-frame-write-tab (data-frame-join-right data-frame-mixed-5 data-frame-mixed-6 #:on (list 'col2)) (current-output-port))
 
-(frame-write-tab (data-frame-join-outer data-frame-mixed-5 data-frame-mixed-6 #:on (list 'col2)) (current-output-port))
+(data-frame-write-tab (data-frame-join-outer data-frame-mixed-5 data-frame-mixed-6 #:on (list 'col2)) (current-output-port))
 
 (define columns-mixed-7
   (list 
@@ -1134,17 +1164,17 @@
 ; create new data-frame-mixed-8
 (define data-frame-mixed-8 (new-data-frame columns-mixed-8))
 
-(frame-write-tab data-frame-mixed-7 (current-output-port))
+(data-frame-write-tab data-frame-mixed-7 (current-output-port))
 
-(frame-write-tab data-frame-mixed-8 (current-output-port))
+(data-frame-write-tab data-frame-mixed-8 (current-output-port))
 
-(frame-write-tab (data-frame-join-left data-frame-mixed-7 data-frame-mixed-8 #:on (list 'col3)) (current-output-port))
+(data-frame-write-tab (data-frame-join-left data-frame-mixed-7 data-frame-mixed-8 #:on (list 'col3)) (current-output-port))
 
-(frame-write-tab (data-frame-join-right data-frame-mixed-7 data-frame-mixed-8 #:on (list 'col3)) (current-output-port))
+(data-frame-write-tab (data-frame-join-right data-frame-mixed-7 data-frame-mixed-8 #:on (list 'col3)) (current-output-port))
 
-(frame-write-tab (data-frame-join-inner data-frame-mixed-7 data-frame-mixed-8 #:on (list 'col3)) (current-output-port))
+(data-frame-write-tab (data-frame-join-inner data-frame-mixed-7 data-frame-mixed-8 #:on (list 'col3)) (current-output-port))
 
-(frame-write-tab (data-frame-join-outer data-frame-mixed-7 data-frame-mixed-8 #:on (list 'col3)) (current-output-port))
+(data-frame-write-tab (data-frame-join-outer data-frame-mixed-7 data-frame-mixed-8 #:on (list 'col3)) (current-output-port))
 
 (define columns-mixed-9
   (list 
@@ -1167,6 +1197,14 @@
 (define data-frame-mixed-10 (new-data-frame columns-mixed-10))
 
 (displayln "No provided join column test")
-(frame-write-tab (data-frame-join-left data-frame-mixed-7 data-frame-mixed-8 #:on '()) (current-output-port))
+(data-frame-write-tab (data-frame-join-left data-frame-mixed-7 data-frame-mixed-8 #:on '()) (current-output-port))
 
-(frame-write-tab (data-frame-join-inner data-frame-mixed-9 data-frame-mixed-10 #:on '()) (current-output-port))
+(data-frame-write-tab (data-frame-join-inner data-frame-mixed-9 data-frame-mixed-10 #:on '()) (current-output-port))
+
+(displayln "multi-index-from-cols test")
+(build-multi-index-from-cols (list (new-ISeries (vector 1 2 3 4) #f)
+                                   (new-CSeries (vector 'a 'b 'c 'd))
+                                   (new-GenSeries (vector 'a 1.5 20 10) #f)
+                                   (new-ISeries (vector 21 22 23 24) #f)))
+
+(build-multi-index-from-cols columns-mixed-10)

@@ -193,7 +193,7 @@ Options to pass to matplotlib plotting method |#
 	  append-NSeriesBuilder complete-NSeriesBuilder
 	  new-NSeriesBuilder)
  (only-in "../data-frame/data-frame-print.rkt"
-          frame-write-tab))
+          data-frame-write-tab))
 
 
 #|
@@ -211,6 +211,8 @@ Options to pass to matplotlib plotting method |#
  	 	#:alpha alpha	 	 	 	 
  	 	#:label label |#
 
+; ***********************************************************
+
 (: is-plottable-series (Series -> Boolean))
 (define (is-plottable-series series)
   (or (GenSeries? series) (ISeries? series) (NSeries? series)))
@@ -224,7 +226,7 @@ Options to pass to matplotlib plotting method |#
   (for/list: : (Listof (Listof Real))
     ([idx : Real (range (series-length series))])
     (list (add1 idx)
-          (assert (series-iref series (assert idx index?)) real?))))
+          (assert (car (assert (series-iref series (assert idx index?)) list?)) real?))))
 
 (: get-column-point-sequence (Column -> (Listof (Listof Real))))
 (define (get-column-point-sequence column)
@@ -240,8 +242,8 @@ Options to pass to matplotlib plotting method |#
   
   (for/list: : (Listof (Listof Real))
     ([idx : Real (range (series-length series-1))])
-    (list (assert (series-iref series-1 (assert idx index?)) real?)
-          (assert (series-iref series-2 (assert idx index?)) real?))))
+    (list (assert (car (assert (series-iref series-1 (assert idx index?)) list?)) real?)
+          (assert (car (assert (series-iref series-2 (assert idx index?)) list?)) real?))))
 
 (: get-data-frame-point-sequence (DataFrame -> (Listof (Listof (Listof Real)))))
 (define (get-data-frame-point-sequence data-frame)
@@ -266,6 +268,10 @@ Options to pass to matplotlib plotting method |#
 (define (make-points list-of-points)
   (points list-of-points))
 
+(: make-lines ((Listof (Listof Real)) -> renderer2d))
+(define (make-lines list-of-points)
+  (lines list-of-points))
+
 (: make-scatter-plot ((U Series (Listof Series) DataFrame Column Columns) -> Any))
 (define (make-scatter-plot data)
   (let: ((plot-points : (Treeof renderer2d)
@@ -280,15 +286,89 @@ Options to pass to matplotlib plotting method |#
      plot-points         
      #:x-min -20 #:x-max 20 #:y-min -20 #:y-max 20)))
 
+(: make-line-plot ((U Series (Listof Series) DataFrame Column Columns) -> Any))
+(define (make-line-plot data)
+  (let: ((plot-points : (Treeof renderer2d)
+         (cond
+           [(and (Series? data) (is-plottable-series data)) (list (lines (get-series-point-sequence data)))]
+           [(and (SeriesList? data) (andmap is-plottable-series data)) (map make-lines (get-series-list-point-sequence data))]
+           [(Column? data) (list (lines (get-column-point-sequence data)))]
+           [(Columns? data) (map make-lines (get-columns-point-sequence data))]
+           [(DataFrame? data) (map make-lines (get-data-frame-point-sequence data))]
+           [else (error 'make-line-plot "Invalid data to plot")])))
+    (plot
+     plot-points         
+     #:x-min -20 #:x-max 20 #:y-min -20 #:y-max 20)))
+
+; ***********************************************************
+
+; ***********************************************************
+
+(define-type HistBin (HashTable GenericType Real))
+
+; This function is self-explanatory, it consumes no arguments
+; and creates a hash map which will represent a JoinHash.
+(: make-hist-bins (-> HistBin))
+(define (make-hist-bins)
+  (make-hash))
+
+;Used to determine the groups for the groupby. If by is a function, it’s called on each value of the object’s index. If a dict or Series is passed, the Series or dict VALUES will be used to determine the groups (the Series’ values are first aligned; see .align() method). If an ndarray is passed, the values are used as-is determine the groups. A label or list of labels may be passed to group by the columns in self. Notice that a tuple is interpreted a (single) key.
+(: get-discrete-hist-data ((Vectorof Real) -> HistBin))
+(define (get-discrete-hist-data data-vec)
+  (define: hist-bin-index : HistBin (make-hist-bins))
+  (define len (vector-length data-vec))
+
+  (let loop ([i 0])
+    (if (>= i len)
+	hist-bin-index
+	(let: ((i : Index (assert i index?)))
+	      (let ((key (vector-ref data-vec i)))
+		(hash-update! hist-bin-index key
+			      (λ: ((incr : Real))
+				  (add1 incr))
+			      (λ () 0)))
+	      (loop (add1 i))))))
+
+(: list-of-vec-from-hist-bin (HistBin -> (Listof (Vectorof GenericType))))
+(define (list-of-vec-from-hist-bin hist-bin)
+  (hash-map hist-bin (lambda ([key : GenericType] [value : Real]) : (Vectorof GenericType) #(key value))))
+
+;(define-predicate vectorof-real? (Vectorof Real))
+
+#|
+(: make-discrete-histogram ((U Series (Listof Series) DataFrame Column Columns) -> Any))
+(define (make-discrete-histogram data)
+  (let: ((plot-points : renderer2d
+         (cond
+           [(and (Series? data) (is-plottable-series data))
+            (discrete-histogram (list-of-vec-from-hist-bin (get-discrete-hist-data (assert (series-data data) vectorof-real?))))]
+           ;[(and (SeriesList? data) (andmap is-plottable-series data)) (map make-points (get-series-list-point-sequence data))]
+           ;[(Column? data) (list (points (get-column-point-sequence data)))]
+           ;[(Columns? data) (map make-points (get-columns-point-sequence data))]
+           ;[(DataFrame? data) (map make-points (get-data-frame-point-sequence data))]
+           [else (error 'make-scatter-plot "Invalid data to plot")])))
+    (plot
+     plot-points))) |#
+
+; ***********************************************************
+
+;******************
+; test cases
+;******************
+
 (displayln "plotting integer series")
 
 (make-scatter-plot (new-ISeries (vector 1 2 3 4 5) #f))
+
+(make-line-plot (new-ISeries (vector 1 2 3 4 5) #f))
 
 (define float-column (cons 'col1 (new-NSeries (flvector 1.5 2.5 3.5 4.5) #f)))
 
 (displayln "plotting float columns")
 
 (make-scatter-plot float-column)
+
+(make-line-plot float-column)
 
 ;******************
 ;data-frame-integer
@@ -329,3 +409,7 @@ Options to pass to matplotlib plotting method |#
 (displayln "plotting float columns")
 
 (make-scatter-plot columns-float)
+
+(displayln "discrete histogram")
+
+;(make-discrete-histogram (new-ISeries (vector 1 2 3 4 5) #f))

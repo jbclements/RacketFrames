@@ -64,7 +64,8 @@
 	  series-description series-length series-type series-data
           Series 
           SeriesDescription SeriesDescription-name
-          SeriesDescription-type SeriesDescription-length)
+          SeriesDescription-type SeriesDescription-length
+          set-series-index!)
  (only-in "generic-series.rkt"
          GenSeries GenSeries?
          GenSeries-data
@@ -432,6 +433,16 @@
    (else
     (new-data-frame (append (data-frame-explode data-frame) (list cols))))))
 
+; ***********************************************************
+
+; ***********************************************************
+; Sets data-frame index in place
+(: data-frame-set-index! (DataFrame (U (Listof Label) SIndex) -> Void))
+(define (data-frame-set-index! data-frame new-index)
+  (define src-series (DataFrame-series data-frame))
+  
+  (for ([pos (in-range (vector-length src-series))])
+    (set-series-index! (vector-ref src-series pos) new-index)))
 ; ***********************************************************
 
 ; ***********************************************************

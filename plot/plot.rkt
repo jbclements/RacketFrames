@@ -304,7 +304,7 @@ Options to pass to matplotlib plotting method |#
 
 ; ***********************************************************
 
-(define-type HistBin (HashTable GenericType Real))
+(define-type HistBin (HashTable Any Real))
 
 ; This function is self-explanatory, it consumes no arguments
 ; and creates a hash map which will represent a JoinHash.
@@ -329,26 +329,26 @@ Options to pass to matplotlib plotting method |#
 			      (λ () 0)))
 	      (loop (add1 i))))))
 
-(: list-of-vec-from-hist-bin (HistBin -> (Listof (Vectorof GenericType))))
+(: list-of-vec-from-hist-bin (HistBin -> (Listof (Vector Any Real))))
 (define (list-of-vec-from-hist-bin hist-bin)
-  (hash-map hist-bin (lambda ([key : GenericType] [value : Real]) : (Vectorof GenericType) #(key value))))
+  (hash-map hist-bin (lambda ([key : Any] [value : Real]) : (Vector Any Real) (vector key value))))
 
-;(define-predicate vectorof-real? (Vectorof Real))
-
-#|
+(define-predicate vectorof-real? (Vectorof Real))
+;ann
 (: make-discrete-histogram ((U Series (Listof Series) DataFrame Column Columns) -> Any))
 (define (make-discrete-histogram data)
   (let: ((plot-points : renderer2d
          (cond
            [(and (Series? data) (is-plottable-series data))
-            (discrete-histogram (list-of-vec-from-hist-bin (get-discrete-hist-data (assert (series-data data) vectorof-real?))))]
+            (discrete-histogram (ann (list-of-vec-from-hist-bin (get-discrete-hist-data (assert (series-data data) vectorof-real?))) (Sequenceof
+             (U (List Any (U False Real ivl)) (Vector Any (U False Real ivl))))))]
            ;[(and (SeriesList? data) (andmap is-plottable-series data)) (map make-points (get-series-list-point-sequence data))]
            ;[(Column? data) (list (points (get-column-point-sequence data)))]
            ;[(Columns? data) (map make-points (get-columns-point-sequence data))]
            ;[(DataFrame? data) (map make-points (get-data-frame-point-sequence data))]
            [else (error 'make-scatter-plot "Invalid data to plot")])))
     (plot
-     plot-points))) |#
+     plot-points)))
 
 ; ***********************************************************
 
@@ -413,3 +413,7 @@ Options to pass to matplotlib plotting method |#
 (displayln "discrete histogram")
 
 ;(make-discrete-histogram (new-ISeries (vector 1 2 3 4 5) #f))
+
+(get-discrete-hist-data (vector 1 2 3 4 5))
+
+(list-of-vec-from-hist-bin (get-discrete-hist-data (vector 1 2 3 4 5)))

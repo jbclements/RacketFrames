@@ -39,9 +39,11 @@
 	  series-type series-length
           series-data)
  (only-in "data-frame.rkt"
-	  DataFrame Columns new-data-frame data-frame-names
+	  DataFrame Columns new-data-frame data-frame-names column-heading
 	  data-frame-series data-frame-cseries data-frame-nseries data-frame-iseries data-frame-explode
 	  DataFrameDescription DataFrameDescription-series data-frame-description column-series)
+ (only-in "data-frame-join.rkt"
+          dest-mapping-series-builders copy-column-row)
  (only-in "numeric-series.rkt"
 	  NSeries NSeries? nseries-iref nseries-label-ref new-NSeries
           +/ns -/ns */ns //ns >/ns </ns
@@ -61,7 +63,7 @@
           iseries-abs)
  (only-in "boolean-series.rkt"
 	  BSeries BSeries? bseries-iref new-BSeries
-	  bseries-referencer)
+	  bseries-referencer bseries-data)
  (only-in "categorical-series.rkt"
 	  cseries-referencer cseries-length cseries-iref
 	  CSeries CSeries? new-CSeries)
@@ -565,3 +567,60 @@
 
 ; DataFrame.groupby([by, axis, level, ...])	Group series using mapper (dict or key function, apply given function to group, return result as series) or by a series of columns.
 ; (: data-frame-groupby [#:by (Listof Symbol)])
+
+; This function consumes two Vectorof Series and two Vectorof
+; SeriesBuilder. The types of Series and SeriesBuilder must
+; match in the respective indicies.
+(: do-filter ((Vectorof Series) (Vectorof SeriesBuilder) (Vectorof Boolean) -> Void))
+(define (do-filter cols builders filter-vec)
+
+  (define: col-cnt : Fixnum (vector-length cols))
+  (define: df-len   : Fixnum (series-length (vector-ref cols #{0 : Index} )))
+
+  (for ((df-row (in-range df-len)))
+       (let ((df-row : Index (assert df-row index?)))
+         (when (vector-ref filter-vec df-row)
+	      (copy-column-row cols builders df-row)))))
+
+; ***********************************************************
+
+(: data-frame-filter (DataFrame BSeries -> DataFrame))
+(define (data-frame-filter data-frame bseries)
+
+  ; This function consumes a DataFrame and LabelProjection and
+  ; projects those columns.
+  (: data-frame-cols (DataFrame LabelProjection -> Columns))
+  (define (data-frame-cols data-frame project)
+    (data-frame-explode data-frame #:project project))
+
+  ; This function consumes a Listof Column and returns a Vectorof
+  ; Series contained in those columns.
+  (: src-series (Columns -> (Vectorof Series)))
+  (define (src-series cols)
+    (list->vector (map column-series cols)))
+
+  (define: df-cols : Columns (data-frame-cols data-frame '()))
+  
+  ; Get series builders of default length 10 for all columns in fb.
+  (define: dest-builders : (Vectorof SeriesBuilder)
+    (list->vector (dest-mapping-series-builders (data-frame-description data-frame) 10)))
+
+  (do-filter (src-series df-cols) dest-builders (bseries-data bseries))
+
+  (define: new-series : Columns
+    (for/list ([builder (in-vector dest-builders)]
+	       [col     (in-list df-cols)])
+	      (cons (column-heading col) (series-complete builder))))
+
+  (new-data-frame new-series))
+
+(displayln "data-frame-filter test")
+
+(displayln "data-frame-integer-3")
+(data-frame-write-tab data-frame-integer-3 (current-output-port))
+
+; data-frame-filter tests
+(displayln "data-frame-filter result")
+(data-frame-write-tab (data-frame-filter data-frame-integer-3 (new-BSeries (vector #f #t #t #f) #f)) (current-output-port))
+
+; ***********************************************************

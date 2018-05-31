@@ -61,10 +61,14 @@
 	  GenSeries GenSeries? GenericType gen-series-iref new-GenSeries
 	  gen-series-referencer)
  (only-in "numeric-series.rkt"
-	  NSeries NSeries? nseries-iref nseries-label-ref new-NSeries)
+	  NSeries NSeries? nseries-iref nseries-label-ref new-NSeries
+          nseries-referencer)
  (only-in "integer-series.rkt"
 	  ISeries ISeries? iseries-iref new-ISeries
 	  iseries-referencer)
+ (only-in "boolean-series.rkt"
+	  BSeries BSeries? bseries-iref new-BSeries
+	  bseries-referencer)
  (only-in "categorical-series.rkt"
 	  cseries-referencer cseries-length cseries-iref
 	  CSeries CSeries? new-CSeries)
@@ -78,6 +82,10 @@
 	  ISeriesBuilder ISeriesBuilder?
 	  append-ISeriesBuilder complete-ISeriesBuilder
 	  new-ISeriesBuilder)
+ (only-in "boolean-series-builder.rkt"
+	  BSeriesBuilder BSeriesBuilder?
+	  append-BSeriesBuilder complete-BSeriesBuilder
+	  new-BSeriesBuilder)
  (only-in "categorical-series-builder.rkt"
 	  CSeriesBuilder CSeriesBuilder?
 	  append-CSeriesBuilder complete-CSeriesBuilder
@@ -242,6 +250,46 @@
   (let ((cseries-ref (cseries-referencer series)))
     (λ: ((i : Index))
 	(append-CSeriesBuilder builder (cseries-ref i)))))
+
+; This function consumes an ISeries and a ISeriesBuilder and
+; returns a function which consumes an index which indexes into
+; the ISeries and retrieves the item to append onto the
+; ISeriesBuilder.
+(: iseries-copy-fn (ISeries ISeriesBuilder -> (Index -> Void)))
+(define (iseries-copy-fn series builder)
+  (let ((iseries-ref (iseries-referencer series)))
+    (λ: ((i : Index))
+	(append-ISeriesBuilder builder (iseries-ref i)))))
+
+; This function consumes an NSeries and a NSeriesBuilder and
+; returns a function which consumes an index which indexes into
+; the NSeries and retrieves the item to append onto the
+; NSeriesBuilder.
+(: nseries-copy-fn (NSeries NSeriesBuilder -> (Index -> Void)))
+(define (nseries-copy-fn series builder)
+  (let ((nseries-ref (nseries-referencer series)))
+    (λ: ((i : Index))
+	(append-NSeriesBuilder builder (nseries-ref i)))))
+
+; This function consumes an ISeries and a ISeriesBuilder and
+; returns a function which consumes an index which indexes into
+; the ISeries and retrieves the item to append onto the
+; ISeriesBuilder.
+(: gen-series-copy-fn (GenSeries GenSeriesBuilder -> (Index -> Void)))
+(define (gen-series-copy-fn series builder)
+  (let ((gen-series-ref (gen-series-referencer series)))
+    (λ: ((i : Index))
+	(append-GenSeriesBuilder builder (gen-series-ref i)))))
+
+; This function consumes an BSeries and a BSeriesBuilder and
+; returns a function which consumes an index which indexes into
+; the BSeries and retrieves the item to append onto the
+; BSeriesBuilder.
+(: bseries-copy-fn (BSeries BSeriesBuilder -> (Index -> Void)))
+(define (bseries-copy-fn series builder)
+  (let ((bseries-ref (bseries-referencer series)))
+    (λ: ((i : Index))
+	(append-BSeriesBuilder builder (bseries-ref i)))))
 
 ; This function is self explanatory, returns a formated error
 ; on a copy column row error.

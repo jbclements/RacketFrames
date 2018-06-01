@@ -177,4 +177,4 @@
  (assert (data-frame-iloc-label data-frame-integer-labeled (list 1 2 3) (list 'col1 'col2)) DataFrame?)
  (current-output-port))
 
-(data-frame-iloc-label data-frame-integer-labeled 1 (list 'col1 'col2))
+(gen-series-data (assert (data-frame-iloc-label data-frame-integer-labeled 1 (list 'col1 'col2)) GenSeries?))

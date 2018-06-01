@@ -32,6 +32,7 @@
  [data-frame-extend  (DataFrame (U Column Columns DataFrame) -> DataFrame)]
  [data-frame-description (DataFrame [#:project LabelProjection] -> DataFrameDescription)]
  [show-data-frame-description (DataFrameDescription -> Void)]
+ [data-frame-iloc (DataFrame (U Index (Listof Index)) (U Index (Listof Index)) -> (U Series DataFrame))]
  [data-frame-iloc-label (DataFrame (U Index (Listof Index)) LabelProjection -> (U Series DataFrame))])
 
 (provide
@@ -60,7 +61,7 @@
 	  label-sort-positional
           Label LabelProjection LabelIndex LabelIndex-index
           GSeries SIndex
-          build-index-from-labels label-index)
+          build-index-from-labels label-index idx->label)
  (only-in "series-description.rkt"
 	  series-description series-length series-type series-data
           Series Series?
@@ -463,28 +464,52 @@
 ;(define (data-frame-loc labels projection)
 ;)
 
-; iloc works based on integer positioning. So no matter what your row labels are, you can always, e.g., get the first row by doing
-; df.iloc[0]
+; doesn't preserve index currently, just gives new Range index
+
+(: data-frame-iloc (DataFrame (U Index (Listof Index)) (U Index (Listof Index)) -> (U Series DataFrame)))
+(define (data-frame-iloc data-frame idx-row idx-col)
+  (if (and (list? idx-row) (list? idx-col))
+      (data-frame-iloc-lsts data-frame idx-row idx-col)
+      (data-frame-iloc-singles data-frame idx-row idx-col)))
 
 ; iloc works based on integer positioning. So no matter what your row labels are, you can always, e.g., get the first row by doing
 ; df.iloc[0, 0], takes in row and col indicies
-#| (: data-frame-iloc (DataFrame (U Index (Listof Index)) (U Index (Listof Index)) -> (U Series DataFrame))) 
-(define (data-frame-iloc data-frame idx-row idx-col)
+(: data-frame-iloc-singles (DataFrame (U Index (Listof Index)) (U Index (Listof Index)) -> Series))
+(define (data-frame-iloc-singles data-frame idx-row idx-col)
   ; This function consumes a DataFrame and LabelProjection and
   ; projects those columns.
   (: data-frame-cols (DataFrame LabelProjection -> Columns))
   (define (data-frame-cols data-frame project)
     (data-frame-explode data-frame #:project project))
-  
-  (define cols (data-frame-cols data-frame projection))
 
-  (if (list? idx)  
-      (new-data-frame
+  (let* ((project : LabelProjection
+          (if (list? idx-col)
+              (map (lambda ([idx : Index]) (idx->label data-frame idx)) idx-col)
+              (list (idx->label data-frame idx-col))))
+         (cols (data-frame-cols data-frame project)))
+
+    (new-GenSeries
+     (for/vector: : (Vectorof GenericType) ([col cols])
+       (series-iloc (column-series col) idx-row)) #f)))
+
+; iloc works based on integer positioning. So no matter what your row labels are, you can always, e.g., get the first row by doing
+; df.iloc[0, 0], takes in row and col indicies
+(: data-frame-iloc-lsts (DataFrame (Listof Index) (Listof Index) -> DataFrame))
+(define (data-frame-iloc-lsts data-frame idx-row idx-col)
+  ; This function consumes a DataFrame and LabelProjection and
+  ; projects those columns.
+  (: data-frame-cols (DataFrame LabelProjection -> Columns))
+  (define (data-frame-cols data-frame project)
+    (data-frame-explode data-frame #:project project))
+
+  (: project LabelProjection)
+  (define project (map (lambda ([idx : Index]) (idx->label data-frame idx)) idx-col))
+
+  (define cols (data-frame-cols data-frame project))
+
+  (new-data-frame
        (for/list: : Columns ([col cols])
-         (cons (column-heading col) (assert (series-iloc (column-series col) idx) Series?))))
-      (new-GenSeries
-       (for/vector: : (Vectorof GenericType) ([col cols])
-         (series-iloc (column-series col) idx)) #f))) |#
+         (cons (column-heading col) (assert (series-iloc (column-series col) idx-row) Series?)))))
 
 (: data-frame-iloc-label (DataFrame (U Index (Listof Index)) LabelProjection -> (U Series DataFrame))) 
 (define (data-frame-iloc-label data-frame idx projection)
@@ -525,8 +550,6 @@
 
 ; create new data-frame-integer
 (define data-frame-integer (new-data-frame columns-integer))
-
-;(data-frame-write-tab (data-frame-iloc data-frame-integer (list 1 2 3) (list 'col1 'col2)) (current-output-port))
 
 ;******************
 ;data-frame-float

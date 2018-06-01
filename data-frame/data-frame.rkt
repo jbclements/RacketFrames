@@ -488,9 +488,13 @@
               (list (idx->label data-frame idx-col))))
          (cols (data-frame-cols data-frame project)))
 
-    (new-GenSeries
-     (for/vector: : (Vectorof GenericType) ([col cols])
-       (series-iloc (column-series col) idx-row)) #f)))
+     (if (list? idx-row)
+         ; there will be only one column in this case, 2 lists can't be
+         ; passed into this function
+         (assert (series-iloc (column-series (car cols)) idx-row) Series?)
+         (new-GenSeries
+          (for/vector: : (Vectorof GenericType) ([col cols])
+           (series-iloc (column-series col) idx-row)) #f))))
 
 ; iloc works based on integer positioning. So no matter what your row labels are, you can always, e.g., get the first row by doing
 ; df.iloc[0, 0], takes in row and col indicies

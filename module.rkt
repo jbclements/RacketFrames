@@ -161,6 +161,7 @@
 (data-frame-write-tab (data-frame-join-outer data-frame-mixed-5  data-frame-mixed-6 #:on (list 'col2)) (current-output-port))
 
 (displayln "DataFrame iloc")
+
 (define columns-integer-labeled
   (list 
    (cons 'col1 (new-ISeries (vector 1 2 3 4)
@@ -173,11 +174,16 @@
 ; create new data-frame-integer
 (define data-frame-integer-labeled (new-data-frame columns-integer-labeled))
 
+(data-frame-write-tab data-frame-integer-labeled
+                      (current-output-port))
+
 (data-frame-write-tab
  (assert (data-frame-iloc data-frame-integer-labeled (list 1 2 3) (list 0 1)) DataFrame?)
  (current-output-port))
 
-(data-frame-iloc data-frame-integer-labeled (list 1 2 3) (list 0 1))
+(gen-series-data (assert (data-frame-iloc data-frame-integer-labeled (list 1 2 3) 1) GenSeries?))
+
+(gen-series-data (assert (data-frame-iloc data-frame-integer-labeled 3 1) GenSeries?))
 
 (data-frame-write-tab
  (assert (data-frame-iloc-label data-frame-integer-labeled (list 1 2 3) (list 'col1 'col2)) DataFrame?)

@@ -111,4 +111,28 @@
 
 (: cseries-data (CSeries -> (Vectorof Symbol)))
 (define (cseries-data series)
-  (CSeries-nominals series))	
+  (CSeries-nominals series))
+
+; label based
+;(: cseries-loc ((Listof Label) -> Series)) ;
+;(define (cseries-loc labels)
+;)
+
+; index based
+;(: cseries-iloc ((U Index (Listof Index)) -> Series)) ;
+;(define (cseries-iloc labels)
+;)
+
+; index based
+(: cseries-iloc (CSeries (U Index (Listof Index)) -> (U Label CSeries)))
+(define (cseries-iloc cseries idx)
+  (let ((referencer (cseries-referencer cseries)))
+  (if (list? idx)
+      ; get labels from SIndex that refer to given indicies
+      ; make a new index from these labels using build-index-from-labels
+      ; sub-vector the data vector to get the data and create a new-BSeries
+      (new-CSeries
+       (for/vector: : (Vectorof Label) ([i idx])
+         (vector-ref (cseries-data cseries) i)))
+      (referencer idx))))
+

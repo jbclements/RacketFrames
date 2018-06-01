@@ -93,7 +93,8 @@
 	  label-index label->lst-idx
 	  build-index-from-labels
 	  Label SIndex
-	  LabelIndex LabelIndex-index)
+	  LabelIndex LabelIndex-index
+          idx->label)
  (only-in "boolean-series.rkt"
           BSeries BSeries-data)
  (only-in "integer-series.rkt"
@@ -686,6 +687,35 @@
     [(eq? function-name 'stddev) (stddev (flvector->list (NSeries-data series) 0))]
     [(eq? function-name 'skewness) (skewness (flvector->list (NSeries-data series) 0))]
     [else (error 'apply-stat-ns "Unknown stat function.")]))
+
+; ***********************************************************
+
+; ***********************************************************
+
+; label based
+; need to check if a label index exists first, so check if SIndex exists
+;(: nseries-loc ((Listof Label) -> Series)) ;
+;(define (nseries-loc labels)
+;)
+
+; index based
+;(: nseries-iloc ((U Index (Listof Index)) -> (U Float Series))) ;
+;(define (nseries-iloc indicies)
+;)
+
+; index based
+(: nseries-iloc (NSeries (U Index (Listof Index)) -> (U Float NSeries)))
+(define (nseries-iloc nseries idx)
+  (let ((referencer (nseries-referencer nseries)))
+    (if (list? idx)
+        ; get labels from SIndex that refer to given indicies
+        ; make a new index from these labels using build-index-from-labels
+        ; sub-vector the data vector to get the data and create a new-BSeries
+        (new-NSeries
+         (list->flvector (for/list: : (Listof Float) ([i idx])
+                           (flvector-ref (nseries-data nseries) i)))
+         (build-index-from-labels (map (lambda ([i : Index]) (idx->label nseries i)) idx)))
+        (referencer idx))))
 
 ; ***********************************************************
 

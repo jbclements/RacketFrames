@@ -68,7 +68,8 @@
  (only-in "indexed-series.rkt"
 	  build-index-from-labels
 	  Label SIndex LabelIndex
-          label-index label->lst-idx)
+          label-index label->lst-idx
+          idx->label)
  (only-in "boolean-series.rkt"
           BSeries))
 ; ***********************************************************
@@ -462,6 +463,35 @@
     [(eq? function-name 'stddev) (stddev (vector->list (ISeries-data series)))]
     [(eq? function-name 'skewness) (skewness (vector->list (ISeries-data series)))]
     [else (error 'apply-stat-is "Unknown stat function.")]))
+
+; ***********************************************************
+
+; ***********************************************************
+; indexing
+
+; label based
+;(: iseries-loc ((Listof Label) -> Series)) ;
+;(define (iseries-loc labels)
+;)
+
+; index based
+;(: iseries-iloc ((U Index (Listof Index)) -> (U Fixnum Series))) ;
+;(define (iseries-iloc labels)
+;)
+
+; index based
+(: iseries-iloc (ISeries (U Index (Listof Index)) -> (U Fixnum ISeries)))
+(define (iseries-iloc iseries idx)
+  (let ((referencer (iseries-referencer iseries)))
+  (if (list? idx)
+      ; get labels from SIndex that refer to given indicies
+      ; make a new index from these labels using build-index-from-labels
+      ; sub-vector the data vector to get the data and create a new-BSeries
+      (new-ISeries
+       (for/vector: : (Vectorof Fixnum) ([i idx])
+         (vector-ref (iseries-data iseries) i))
+       (build-index-from-labels (map (lambda ([i : Index]) (idx->label iseries i)) idx)))
+      (referencer idx))))
 
 ; ***********************************************************
 

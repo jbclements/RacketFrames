@@ -446,6 +446,19 @@
 ; ***********************************************************
 
 ; ***********************************************************
+; Indexing into data-frame
+
+;(: data-frame-loc ((Listof Label) LabelProjection -> DataFrame)) ;
+;(define (data-frame-loc labels projection)
+;)
+
+;(: data-frame-iloc ((U Index (Listof Index)) LabelProjection -> (U Series DataFrame))) 
+;(define (data-frame-iloc idx projection)
+;)
+
+; ***********************************************************
+
+; ***********************************************************
 ; Test Cases
 ; ***********************************************************
 ; data frame tests

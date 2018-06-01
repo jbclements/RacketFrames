@@ -42,7 +42,7 @@
  new-GSeries 
  series-ref gseries-iref
  map/GSeries 
- build-index-from-labels label-index label->lst-idx)
+ build-index-from-labels label-index label->lst-idx idx->label)
 ; ***********************************************************
 
 ; ***********************************************************
@@ -154,6 +154,18 @@
   (let ((index (LabelIndex-index series)))
     (if index
         (hash-ref index label)
+        (let ((k (current-continuation-marks)))
+          (raise (make-exn:fail:contract "Cannot obtain the index of a label for a series which is unlabeled" k))))))
+
+
+; This function consumes LabelIndex and Label and returns the
+; numerical Index of the Label in the LabelIndex. The index
+; must be a SIndex else an exception is raised.
+(: idx->label (LabelIndex Index -> Label))
+(define (idx->label series idx)
+  (let ((index (LabelIndex-index series)))
+    (if index
+        (car (car (filter (lambda ([pair : (Pair Label (Listof Index))]) (member idx (cdr pair))) (hash->list index))))
         (let ((k (current-continuation-marks)))
           (raise (make-exn:fail:contract "Cannot obtain the index of a label for a series which is unlabeled" k))))))
 ; ***********************************************************
@@ -302,7 +314,12 @@
 (check-equal? (label->lst-idx (LabelIndex (build-index-from-labels (list 'a 'b 'c 'd))) 'd) (list 3))
 (check-equal? (label->lst-idx (LabelIndex (build-index-from-labels (list 'a 'b 'c 'd))) 'c) (list 2))
 
+; checks numerical idx of LabelIndex
+(check-equal? (idx->label (LabelIndex (build-index-from-labels (list 'a 'b 'c 'd))) 3) 'd)
+(check-equal? (idx->label (LabelIndex (build-index-from-labels (list 'a 'b 'c 'd))) 2) 'c)
+
 ; checks to see if we have a labelled index
+
 (check-equal? (is-labeled? (LabelIndex (build-index-from-labels (list 'a 'b 'c 'd)))) #t)
 (check-equal? (is-labeled? (LabelIndex #f)) #f)
 

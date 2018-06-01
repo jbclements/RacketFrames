@@ -43,8 +43,9 @@
  racket/unsafe/ops
  (only-in "indexed-series.rkt"
 	  build-index-from-labels
-	  Label SIndex LabelIndex
-          label-index label->lst-idx))
+	  Label LabelIndex-index SIndex
+          LabelIndex label-index label->lst-idx
+          idx->label))
 ; ***********************************************************
 
 ; ***********************************************************
@@ -159,6 +160,29 @@
 ; ***********************************************************
 
 ; ***********************************************************
+; Indexing
+
+; label based
+;(: bseries-loc ((Listof Label) -> Series)) ;
+;(define (bseries-loc labels)
+; (when (not is-labeled?) #f)
+;)
+
+; index based
+(: bseries-iloc (BSeries (U Index (Listof Index)) -> (U Boolean BSeries)))
+(define (bseries-iloc bseries idx)
+  (let ((referencer (bseries-referencer bseries)))
+  (if (list? idx)
+      ; get labels from SIndex that refer to given indicies
+      ; make a new index from these labels using build-index-from-labels
+      ; sub-vector the data vector to get the data and create a new-BSeries
+      (new-BSeries
+       (for/vector: : (Vectorof Boolean) ([i idx])
+         (vector-ref (bseries-data bseries) i))
+       (build-index-from-labels (map (lambda ([i : Index]) (idx->label bseries i)) idx)))
+      (referencer idx))))
+
+; ***********************************************************
 ; Test Cases
 ; ***********************************************************
 
@@ -188,3 +212,9 @@
 (check-equal? (bseries-length series-boolean) 4)
 
 (check-equal? (bseries-data (map/bs series-boolean (lambda (b) (if (not b) #t #f)))) (vector #t #f #f #f))
+
+(check-equal? (bseries-iloc series-boolean 1) #t)
+
+(check-equal? (bseries-data (assert (bseries-iloc series-boolean (list 2 3)) BSeries?)) (vector #t #t))
+
+(check-equal? (bseries-data (assert (bseries-iloc series-boolean (range 4)) BSeries?)) (vector #f #t #t #t))

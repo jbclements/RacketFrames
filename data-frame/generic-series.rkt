@@ -6,7 +6,8 @@
  (only-in "indexed-series.rkt"
 	  build-index-from-labels
 	  Label SIndex LabelIndex
-          label-index label->lst-idx))
+          label-index label->lst-idx
+          idx->label))
 
 ; **************************
 ; Test cases are at bottom
@@ -134,6 +135,30 @@
     (GenSeries #f (build-vector (vector-length old-data)
                               (λ: ((idx : Natural))
                                 (fn (vector-ref old-data idx)))))))
+; ***********************************************************
+
+; ***********************************************************
+; indexing
+
+; label based
+;(: gen-series-loc ((Listof Label) -> Series)) ;
+;(define (gen-series-loc labels)
+;)
+
+; index based
+(: gen-series-iloc (GenSeries (U Index (Listof Index)) -> (U GenericType GenSeries)))
+(define (gen-series-iloc gen-series idx)
+  (let ((referencer (gen-series-referencer gen-series)))
+  (if (list? idx)
+      ; get labels from SIndex that refer to given indicies
+      ; make a new index from these labels using build-index-from-labels
+      ; sub-vector the data vector to get the data and create a new-BSeries
+      (new-GenSeries
+       (for/vector: : (Vectorof GenericType) ([i idx])
+         (vector-ref (gen-series-data gen-series) i))
+       (build-index-from-labels (map (lambda ([i : Index]) (idx->label gen-series i)) idx)))
+      (referencer idx))))
+
 ; ***********************************************************
 
 ; create generic series

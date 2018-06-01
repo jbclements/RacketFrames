@@ -562,9 +562,6 @@
 ; DataFrame.aggregate(func[, axis])	Aggregate using callable, string, dict, or list of string/callables
 ; (: data-frame-aggregate func)
 
-; DataFrame.transform(func, *args, **kwargs)	Call function producing a like-indexed NDFrame
-; (: data-frame-transform func)
-
 ; DataFrame.groupby([by, axis, level, ...])	Group series using mapper (dict or key function, apply given function to group, return result as series) or by a series of columns.
 ; (: data-frame-groupby [#:by (Listof Symbol)])
 

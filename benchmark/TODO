@@ -1,3 +1,0 @@
-- Don't use benchmark-group? with "" name. Instead use lists directly.
-- Use parameters instead of benchmark-opts? Will make the documentation clearerat t
-- force itrs-per-trial to be set by user

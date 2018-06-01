@@ -30,6 +30,7 @@
  [new-ISeries ((Vectorof Fixnum) (Option (U (Listof Label) SIndex)) -> ISeries)]
  [set-ISeries-index (ISeries (U (Listof Label) SIndex) -> ISeries)]
  [iseries-iref (ISeries (Listof Index) -> (Listof Fixnum))]
+ [iseries-iloc (ISeries (U Index (Listof Index)) -> (U Fixnum ISeries))]
  [iseries-label-ref (ISeries Label -> (Listof Integer))]
  [iseries-range (ISeries Index -> (Vectorof Fixnum))]
  [iseries-length (ISeries -> Index)]

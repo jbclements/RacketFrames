@@ -33,7 +33,8 @@
  [bseries-length (BSeries -> Index)]
  [bseries-referencer (BSeries -> (Index -> Boolean))]
  [bseries-data (BSeries -> (Vectorof Boolean))]
- [map/bs (BSeries (Boolean -> Boolean) -> BSeries)])
+ [map/bs (BSeries (Boolean -> Boolean) -> BSeries)]
+ [bseries-iloc (BSeries (U Index (Listof Index)) -> (U Boolean BSeries))])
 ; ***********************************************************
 
 ; ***********************************************************

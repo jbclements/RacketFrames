@@ -29,6 +29,7 @@
  [series-length (Series -> Index)]
  [series-data (Series -> (U (Vectorof GenericType) FlVector (Vectorof Symbol) (Vectorof Fixnum) (Vectorof Boolean)))]
  [series-iref (Series Index -> Any)]
+ [series-iloc (Series (U Index (Listof Index)) -> (U Any Series))]
  [set-series-index! (Series (U (Listof Label) SIndex) -> Void)])
 
 ; ***********************************************************
@@ -42,18 +43,19 @@
           Label SIndex)
  (only-in "generic-series.rkt"
           GenericType GenSeries GenSeries? GenSeries-data gen-series-length gen-series-data gen-series-iref
-          set-GenSeries-index)
+          set-GenSeries-index gen-series-iloc)
  (only-in "categorical-series.rkt"
-          CSeries CSeries? CSeries-data cseries-length cseries-data cseries-iref)
+          CSeries CSeries? CSeries-data cseries-length cseries-data cseries-iref
+          cseries-iloc)
  (only-in "numeric-series.rkt"
           NSeries NSeries? NSeries-data nseries-length nseries-data nseries-iref
-          set-NSeries-index)
+          set-NSeries-index nseries-iloc)
  (only-in "integer-series.rkt"
 	  ISeries ISeries? ISeries-data iseries-length iseries-data iseries-iref
-          set-ISeries-index)
+          set-ISeries-index iseries-iloc)
  (only-in "boolean-series.rkt"
 	  BSeries BSeries? BSeries-data bseries-length bseries-data bseries-iref
-          set-BSeries-index))
+          set-BSeries-index bseries-iloc))
 
 ; ***********************************************************
 
@@ -124,6 +126,16 @@
     [(CSeries? series) (cseries-iref series (list idx))]    
     [(ISeries? series) (iseries-iref series (list idx))]
     [(BSeries? series) (bseries-iref series (list idx))]
+    [else (error "Unknown Series type in DataFrame")]))
+
+(: series-iloc (Series (U Index (Listof Index)) -> (U Any Series)))
+(define (series-iloc series idx)
+  (cond
+    [(GenSeries? series) (gen-series-iloc series idx)]
+    [(NSeries? series) (nseries-iloc series idx)]
+    [(CSeries? series) (cseries-iloc series idx)]   
+    [(ISeries? series) (iseries-iloc series idx)]
+    [(BSeries? series) (bseries-iloc series idx)]
     [else (error "Unknown Series type in DataFrame")]))
 
 ; ***********************************************************

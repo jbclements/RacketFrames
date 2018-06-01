@@ -159,3 +159,18 @@
 
 (displayln "DataFrame Outer Join")
 (data-frame-write-tab (data-frame-join-outer data-frame-mixed-5  data-frame-mixed-6 #:on (list 'col2)) (current-output-port))
+
+(displayln "DataFrame iloc")
+(define columns-integer
+  (list 
+   (cons 'col1 (new-ISeries (vector 1 2 3 4)
+                            (build-index-from-labels (list 'a 'b 'c 'd))))
+   (cons 'col2 (new-ISeries (vector 5 6 7 8)
+                            (build-index-from-labels (list 'e 'f 'g 'h))))
+   (cons 'col3 (new-ISeries (vector 9 10 11 12)
+                            (build-index-from-labels (list 'i 'j 'k 'l))))))
+
+; create new data-frame-integer
+(define data-frame-integer (new-data-frame columns-integer))
+
+;(data-frame-write-tab (data-frame-iloc data-frame-integer (list 1 2 3) (list 'col1 'col2)) (current-output-port))

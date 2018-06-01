@@ -62,12 +62,12 @@
           build-index-from-labels label-index)
  (only-in "series-description.rkt"
 	  series-description series-length series-type series-data
-          Series 
+          Series Series?
           SeriesDescription SeriesDescription-name
           SeriesDescription-type SeriesDescription-length
-          set-series-index!)
+          set-series-index! series-iloc)
  (only-in "generic-series.rkt"
-         GenSeries GenSeries?
+         GenSeries GenericType GenSeries?
          GenSeries-data
          new-GenSeries)
  (only-in "categorical-series.rkt"
@@ -81,7 +81,11 @@
  (only-in "integer-series.rkt"
 	  ISeries ISeries?
 	  ISeries-data
-	  new-ISeries))
+	  new-ISeries)
+ (only-in "boolean-series.rkt"
+	  BSeries BSeries?
+	  BSeries-data
+	  new-BSeries))
 
 ; ***********************************************************
 
@@ -222,6 +226,12 @@
 (: data-frame-iseries (DataFrame Symbol -> ISeries))
 (define (data-frame-iseries data-frame name)
   (assert (data-frame-series data-frame name) ISeries?))
+
+; This function uses the above function and the assert function
+; to ensure the series returned is an BSeries.
+(: data-frame-bseries (DataFrame Symbol -> BSeries))
+(define (data-frame-bseries data-frame name)
+  (assert (data-frame-series data-frame name) BSeries?))
 
 ; This function consumes a DataFrame and returns a Listof pairs
 ; consisting of the column name and its associated index in the
@@ -452,9 +462,25 @@
 ;(define (data-frame-loc labels projection)
 ;)
 
-;(: data-frame-iloc ((U Index (Listof Index)) LabelProjection -> (U Series DataFrame))) 
-;(define (data-frame-iloc idx projection)
-;)
+; iloc works based on integer positioning. So no matter what your row labels are, you can always, e.g., get the first row by doing
+; df.iloc[0]
+(: data-frame-iloc (DataFrame (U Index (Listof Index)) LabelProjection -> (U Series DataFrame))) 
+(define (data-frame-iloc data-frame idx projection)
+  ; This function consumes a DataFrame and LabelProjection and
+  ; projects those columns.
+  (: data-frame-cols (DataFrame LabelProjection -> Columns))
+  (define (data-frame-cols data-frame project)
+    (data-frame-explode data-frame #:project project))
+  
+  (define cols (data-frame-cols data-frame projection))
+
+  (if (list? idx)  
+      (new-data-frame
+       (for/list: : Columns ([col cols])
+         (cons (column-heading col) (assert (series-iloc (column-series col) idx) Series?))))
+      (new-GenSeries
+       (for/vector: : (Vectorof GenericType) ([col cols])
+         (series-iloc (column-series col) idx)) #f)))
 
 ; ***********************************************************
 
@@ -477,6 +503,8 @@
 
 ; create new data-frame-integer
 (define data-frame-integer (new-data-frame columns-integer))
+
+;(data-frame-write-tab (data-frame-iloc data-frame-integer (list 1 2 3) (list 'col1 'col2)) (current-output-port))
 
 ;******************
 ;data-frame-float

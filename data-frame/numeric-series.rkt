@@ -27,6 +27,7 @@
 (provide:
  [set-NSeries-index (NSeries (U (Listof Label) SIndex) -> NSeries)]
  [nseries-iref (NSeries (Listof Index) -> (Listof Float))]
+ [nseries-iloc (NSeries (U Index (Listof Index)) -> (U Float NSeries))]
  [nseries-label-ref (NSeries Label -> (Listof Float))]
  [nseries-range (NSeries Index -> FlVector)]
  [nseries-referencer (NSeries -> (Index -> Float))]

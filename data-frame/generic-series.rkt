@@ -31,6 +31,7 @@
  [gen-series-length (GenSeries -> Index)]
  [gen-series-referencer (GenSeries -> (Index -> GenericType))]
  [gen-series-data (GenSeries -> (Vectorof GenericType))]
+ [gen-series-iloc (GenSeries (U Index (Listof Index)) -> (U GenericType GenSeries))]
  [map/gen-s (GenSeries (GenericType -> GenericType) -> GenSeries)])
 
 ; ***********************************************************

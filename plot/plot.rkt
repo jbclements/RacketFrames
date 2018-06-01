@@ -333,7 +333,7 @@ Options to pass to matplotlib plotting method |#
 (define (list-of-vec-from-hist-bin hist-bin)
   (hash-map hist-bin (lambda ([key : Any] [value : Real]) : (Vector Any Real) (vector key value))))
 
-(define-predicate vectorof-real? (Vectorof Real))
+#| (define-predicate vectorof-real? (Vectorof Real))
 ;ann
 (: make-discrete-histogram ((U Series (Listof Series) DataFrame Column Columns) -> Any))
 (define (make-discrete-histogram data)
@@ -348,7 +348,7 @@ Options to pass to matplotlib plotting method |#
            ;[(DataFrame? data) (map make-points (get-data-frame-point-sequence data))]
            [else (error 'make-scatter-plot "Invalid data to plot")])))
     (plot
-     plot-points)))
+     plot-points))) |#
 
 ; ***********************************************************
 

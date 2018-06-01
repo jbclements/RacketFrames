@@ -11,7 +11,8 @@
  [cseries-iref        (CSeries (Listof Index) -> (Listof Label))]
  [cseries-range (CSeries Index -> (Vectorof Label))]
  [cseries-data        (CSeries -> (Vectorof Symbol))]
- [cseries-referencer (CSeries -> (Fixnum -> Label))])
+ [cseries-referencer (CSeries -> (Fixnum -> Label))]
+ [cseries-iloc (CSeries (U Index (Listof Index)) -> (U Label CSeries))])
 
 (require
  (only-in "indexed-series.rkt"
@@ -119,11 +120,6 @@
 ;)
 
 ; index based
-;(: cseries-iloc ((U Index (Listof Index)) -> Series)) ;
-;(define (cseries-iloc labels)
-;)
-
-; index based
 (: cseries-iloc (CSeries (U Index (Listof Index)) -> (U Label CSeries)))
 (define (cseries-iloc cseries idx)
   (let ((referencer (cseries-referencer cseries)))
@@ -135,4 +131,3 @@
        (for/vector: : (Vectorof Label) ([i idx])
          (vector-ref (cseries-data cseries) i)))
       (referencer idx))))
-

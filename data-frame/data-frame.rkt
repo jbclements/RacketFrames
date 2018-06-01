@@ -31,7 +31,8 @@
  [data-frame-replace (DataFrame Column -> DataFrame)]
  [data-frame-extend  (DataFrame (U Column Columns DataFrame) -> DataFrame)]
  [data-frame-description (DataFrame [#:project LabelProjection] -> DataFrameDescription)]
- [show-data-frame-description (DataFrameDescription -> Void)])
+ [show-data-frame-description (DataFrameDescription -> Void)]
+ [data-frame-iloc-label (DataFrame (U Index (Listof Index)) LabelProjection -> (U Series DataFrame))])
 
 (provide
  DataFrame DataFrame? Column Column? Columns Columns?
@@ -234,7 +235,7 @@
   (assert (data-frame-series data-frame name) BSeries?))
 
 ; This function consumes a DataFrame and returns a Listof pairs
-; consisting of the column name and its associated index in the
+; consisting of the column name and its associated indices in the
 ; DataFrame.
 (: data-frame-labels (DataFrame -> (Listof (Pair Symbol (Listof Index)))))
 (define (data-frame-labels data-frame)
@@ -464,8 +465,11 @@
 
 ; iloc works based on integer positioning. So no matter what your row labels are, you can always, e.g., get the first row by doing
 ; df.iloc[0]
-(: data-frame-iloc (DataFrame (U Index (Listof Index)) LabelProjection -> (U Series DataFrame))) 
-(define (data-frame-iloc data-frame idx projection)
+
+; iloc works based on integer positioning. So no matter what your row labels are, you can always, e.g., get the first row by doing
+; df.iloc[0, 0], takes in row and col indicies
+#| (: data-frame-iloc (DataFrame (U Index (Listof Index)) (U Index (Listof Index)) -> (U Series DataFrame))) 
+(define (data-frame-iloc data-frame idx-row idx-col)
   ; This function consumes a DataFrame and LabelProjection and
   ; projects those columns.
   (: data-frame-cols (DataFrame LabelProjection -> Columns))
@@ -478,6 +482,24 @@
       (new-data-frame
        (for/list: : Columns ([col cols])
          (cons (column-heading col) (assert (series-iloc (column-series col) idx) Series?))))
+      (new-GenSeries
+       (for/vector: : (Vectorof GenericType) ([col cols])
+         (series-iloc (column-series col) idx)) #f))) |#
+
+(: data-frame-iloc-label (DataFrame (U Index (Listof Index)) LabelProjection -> (U Series DataFrame))) 
+(define (data-frame-iloc-label data-frame idx projection)
+  ; This function consumes a DataFrame and LabelProjection and
+  ; projects those columns.
+  (: data-frame-cols (DataFrame LabelProjection -> Columns))
+  (define (data-frame-cols data-frame project)
+    (data-frame-explode data-frame #:project project))
+  
+  (define cols (data-frame-cols data-frame projection))
+
+  (if (list? idx)  
+      (new-data-frame
+       (for/list: : Columns ([col cols])
+         (column (column-heading col) (assert (series-iloc (column-series col) idx) Series?))))
       (new-GenSeries
        (for/vector: : (Vectorof GenericType) ([col cols])
          (series-iloc (column-series col) idx)) #f)))

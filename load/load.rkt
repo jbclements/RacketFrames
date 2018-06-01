@@ -157,9 +157,9 @@
 ;(data-frame-write-tab fruits-data-frame-csv-no-schema (current-output-port))
 
 ; read delimited
-(define random-demographic-data-frame-delimited (load-delimited-file "../sample-csv/random_demographic.csv" "|" #:schema random-demographic-schema))
+;(define random-demographic-data-frame-delimited (load-delimited-file "../sample-csv/random_demographic.csv" "|" #:schema random-demographic-schema))
 
-(data-frame-head random-demographic-data-frame-delimited)
+;(data-frame-head random-demographic-data-frame-delimited)
 
 ;(series-data (data-frame-series random-demographic-data-frame-delimited 'char))
 

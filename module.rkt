@@ -174,6 +174,12 @@
 (define data-frame-integer-labeled (new-data-frame columns-integer-labeled))
 
 (data-frame-write-tab
+ (assert (data-frame-iloc data-frame-integer-labeled (list 1 2 3) (list 0 1)) DataFrame?)
+ (current-output-port))
+
+(data-frame-iloc data-frame-integer-labeled (list 1 2 3) (list 0 1))
+
+(data-frame-write-tab
  (assert (data-frame-iloc-label data-frame-integer-labeled (list 1 2 3) (list 'col1 'col2)) DataFrame?)
  (current-output-port))
 

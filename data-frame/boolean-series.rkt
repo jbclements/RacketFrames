@@ -34,6 +34,7 @@
  [bseries-referencer (BSeries -> (Index -> Boolean))]
  [bseries-data (BSeries -> (Vectorof Boolean))]
  [map/bs (BSeries (Boolean -> Boolean) -> BSeries)]
+ [bseries-loc (BSeries (U Label (Listof Label) (Listof Boolean)) -> (U Boolean BSeries))]
  [bseries-iloc (BSeries (U Index (Listof Index)) -> (U Boolean BSeries))])
 ; ***********************************************************
 
@@ -46,7 +47,7 @@
 	  build-index-from-labels
 	  Label LabelIndex-index SIndex
           LabelIndex label-index label->lst-idx
-          idx->label))
+          idx->label is-labeled?))
 ; ***********************************************************
 
 ; ***********************************************************
@@ -163,11 +164,88 @@
 ; ***********************************************************
 ; Indexing
 
+(: build-labels-by-count ((Listof Label) (Listof Integer) -> (Listof Label)))
+(define (build-labels-by-count label-lst count-lst)
+  (if (null? label-lst)
+      null
+      (append
+       (for/list: : (Listof Label)
+         ([i (car count-lst)])
+         (car label-lst))
+       
+       (build-labels-by-count (cdr label-lst) (cdr count-lst)))))
+
+(: convert-to-label-lst ((U Label (Listof Label)) -> (Listof Label)))
+(define (convert-to-label-lst label)
+  (if (list? label)
+      label
+      (list label)))
+
+(define-predicate ListofBoolean? (Listof Boolean))
+
 ; label based
-;(: bseries-loc ((Listof Label) -> Series)) ;
-;(define (bseries-loc labels)
-; (when (not is-labeled?) #f)
-;)
+; for two different use cases:
+; a.) Selecting rows by label/index
+; b.) Selecting rows with a boolean / conditional lookup
+
+; Valid inputs
+; A single label, e.g. 'a'.
+; A list or array of labels ['a', 'b', 'c'].
+; A boolean array.
+
+(: true? (Boolean -> Boolean))
+(define (true? boolean)
+  (not (false? boolean)))
+
+(: bseries-loc-boolean (BSeries (Listof Boolean) -> (U Boolean BSeries)))
+(define (bseries-loc-boolean bseries boolean-lst)
+  (: data (Vectorof Boolean))
+  (define data (bseries-data bseries))
+
+  (: new-data (Vectorof Boolean))
+  (define new-data (make-vector (length (filter true? boolean-lst)) #f))
+  
+  (define data-idx 0)
+  (define new-data-idx 0)
+
+  (if (= (length boolean-lst) 1)
+      (if (list-ref boolean-lst 0)
+          (vector-ref data 0)
+          ; empty BSeries
+          (new-BSeries (vector) #f))
+       
+      (for ([b boolean-lst]
+            [d data])
+        (begin
+          (when b
+            (begin              
+              (vector-set! new-data new-data-idx (vector-ref data data-idx))
+              (set! new-data-idx (add1 new-data-idx))))
+          (set! data-idx (add1 data-idx)))))
+
+  (if (= (vector-length new-data) 1)
+      (vector-ref new-data 0)
+      (new-BSeries new-data #f)))
+    
+(: bseries-loc (BSeries (U Label (Listof Label) (Listof Boolean)) -> (U Boolean BSeries)))
+(define (bseries-loc bseries label)
+  (unless (is-labeled? bseries)
+    (let ((k (current-continuation-marks)))
+      (raise (make-exn:fail:contract "BSeries must have a label index." k))))
+
+  (if (ListofBoolean? label)
+      (bseries-loc-boolean bseries label)
+      (let ((associated-indices-length : (Listof Integer)
+                                       (map (lambda ([l : Label]) (length (bseries-label-ref bseries l))) (convert-to-label-lst label)))
+            (vals : (Vectorof Boolean)
+             (if (list? label)
+                 (list->vector (assert (flatten (map (lambda ([l : Label]) (bseries-label-ref bseries l)) label)) ListofBoolean?))
+                 (list->vector (assert (bseries-label-ref bseries label) ListofBoolean?)))))
+
+        (if (= (vector-length vals) 1)
+            (vector-ref vals 0)
+            (new-BSeries vals (build-index-from-labels (build-labels-by-count (convert-to-label-lst label) associated-indices-length)))))))
+
 
 ; index based
 (: bseries-iloc (BSeries (U Index (Listof Index)) -> (U Boolean BSeries)))
@@ -219,3 +297,22 @@
 (check-equal? (bseries-data (assert (bseries-iloc series-boolean (list 2 3)) BSeries?)) (vector #t #t))
 
 (check-equal? (bseries-data (assert (bseries-iloc series-boolean (range 4)) BSeries?)) (vector #f #t #t #t))
+
+; bseries-loc
+(bseries-data series-boolean)
+
+(bseries-loc series-boolean 'a)
+
+(bseries-data (assert (bseries-loc series-boolean (list 'a 'd)) BSeries?))
+
+(bseries-loc-boolean series-boolean (list #t #f #f #f))
+
+(bseries-data (assert (bseries-loc-boolean series-boolean (list #t #t #f #f)) BSeries?))
+
+(bseries-data (assert (bseries-loc-boolean series-boolean (list #t #f #f #t)) BSeries?))
+
+(bseries-loc series-boolean (list #t #f #f #f))
+
+(bseries-data (assert (bseries-loc series-boolean (list #t #t #f #f)) BSeries?))
+
+(bseries-data (assert (bseries-loc series-boolean (list #t #f #f #t)) BSeries?))

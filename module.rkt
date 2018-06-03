@@ -177,6 +177,32 @@
 (data-frame-write-tab data-frame-integer-labeled
                       (current-output-port))
 
+(displayln "data-frame-loc")
+(data-frame-write-tab
+ (assert (data-frame-loc data-frame-integer-labeled (list 'i 'k) (list 'col3)) DataFrame?)
+ (current-output-port))
+
+(define columns-integer-labeled-2
+  (list 
+   (cons 'col1 (new-ISeries (vector 1 2 3 4)
+                            (build-index-from-labels (list 'a 'b 'c 'd))))
+   (cons 'col2 (new-ISeries (vector 5 6 7 8)
+                            (build-index-from-labels (list 'a 'b 'c 'd))))
+   (cons 'col3 (new-ISeries (vector 9 10 11 12)
+                            (build-index-from-labels (list 'a 'b 'c 'd))))))
+
+; create new data-frame-integer
+(define data-frame-integer-labeled-2 (new-data-frame columns-integer-labeled-2))
+
+(displayln "data-frame-loc-2")
+(data-frame-write-tab
+ (assert (data-frame-loc data-frame-integer-labeled-2 (list 'b 'c 'd) (list 'col2 'col3)) DataFrame?)
+ (current-output-port))
+
+(data-frame-write-tab
+ (assert (data-frame-loc (data-frame-set-index! data-frame-integer-labeled-2 (list 'a 'b 'c 'd))) DataFrame?)
+ (current-output-port))
+
 (data-frame-write-tab
  (assert (data-frame-iloc data-frame-integer-labeled (list 1 2 3) (list 0 1)) DataFrame?)
  (current-output-port))

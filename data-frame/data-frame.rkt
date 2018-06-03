@@ -32,6 +32,7 @@
  [data-frame-extend  (DataFrame (U Column Columns DataFrame) -> DataFrame)]
  [data-frame-description (DataFrame [#:project LabelProjection] -> DataFrameDescription)]
  [show-data-frame-description (DataFrameDescription -> Void)]
+ [data-frame-loc (DataFrame (U Label (Listof Label) (Listof Boolean)) LabelProjection -> (U Series DataFrame))]
  [data-frame-iloc (DataFrame (U Index (Listof Index)) (U Index (Listof Index)) -> (U Series DataFrame))]
  [data-frame-iloc-label (DataFrame (U Index (Listof Index)) LabelProjection -> (U Series DataFrame))])
 
@@ -460,9 +461,23 @@
 ; ***********************************************************
 ; Indexing into data-frame
 
-;(: data-frame-loc (LabelProjection LabelProjection -> (U Series DataFrame) -> DataFrame)) ;
-;(define (data-frame-loc labels projection)
-;)
+(: data-frame-loc (DataFrame (U Label (Listof Label) (Listof Boolean)) LabelProjection -> (U Series DataFrame)))
+(define (data-frame-loc data-frame label projection)
+  ; This function consumes a DataFrame and LabelProjection and
+  ; projects those columns.
+  (: data-frame-cols (DataFrame LabelProjection -> Columns))
+  (define (data-frame-cols data-frame project)
+    (data-frame-explode data-frame #:project project))
+  
+  (define cols (data-frame-cols data-frame projection))
+
+  (if (list? label)  
+      (new-data-frame
+       (for/list: : Columns ([col cols])
+         (column (column-heading col) (assert (series-loc (column-series col) label) Series?))))
+      (new-GenSeries
+       (for/vector: : (Vectorof GenericType) ([col cols])
+         (series-loc (column-series col) label)) #f)))
 
 ; doesn't preserve index currently, just gives new Range index
 

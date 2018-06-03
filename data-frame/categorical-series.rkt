@@ -17,7 +17,7 @@
 (require
  (only-in "indexed-series.rkt"
 	  SIndex Label
-	  LabelIndex))
+	  LabelIndex is-labeled?))
 
 (define-type CSeriesFn (Label -> Label))
 
@@ -115,9 +115,89 @@
   (CSeries-nominals series))
 
 ; label based
-;(: cseries-loc ((Listof Label) -> Series)) ;
-;(define (cseries-loc labels)
-;)
+
+#| (: build-labels-by-count ((Listof Label) (Listof Integer) -> (Listof Label)))
+(define (build-labels-by-count label-lst count-lst)
+  (if (null? label-lst)
+      null
+      (append
+       (for/list: : (Listof Label)
+         ([i (car count-lst)])
+         (car label-lst))
+       
+       (build-labels-by-count (cdr label-lst) (cdr count-lst)))))
+
+(: convert-to-label-lst ((U Label (Listof Label)) -> (Listof Label)))
+(define (convert-to-label-lst label)
+  (if (list? label)
+      label
+      (list label)))
+
+(define-predicate ListofBoolean? (Listof Boolean))
+(define-predicate ListofFixnum? (Listof Fixnum))
+
+; label based
+; for two different use cases:
+; a.) Selecting rows by label/index
+; b.) Selecting rows with a boolean / conditional lookup
+
+; Valid inputs
+; A single label, e.g. 'a'.
+; A list or array of labels ['a', 'b', 'c'].
+; A boolean array.
+
+(: true? (Boolean -> Boolean))
+(define (true? boolean)
+  (not (false? boolean)))
+
+(: cseries-loc-boolean (CSeries (Listof Boolean) -> (U Fixnum CSeries)))
+(define (cseries-loc-boolean cseries boolean-lst)
+  (: data (Vectorof Fixnum))
+  (define data (cseries-data cseries))
+
+  (: new-data (Vectorof Fixnum))
+  (define new-data (make-vector (length (filter true? boolean-lst)) 0))
+  
+  (define data-idx 0)
+  (define new-data-idx 0)
+
+  (if (= (length boolean-lst) 1)
+      (if (list-ref boolean-lst 0)
+          (vector-ref data 0)
+          ; empty cseries
+          (new-CSeries (vector) #f))
+       
+      (for ([b boolean-lst]
+            [d data])
+        (begin
+          (when b
+            (begin              
+              (vector-set! new-data new-data-idx (vector-ref data data-idx))
+              (set! new-data-idx (add1 new-data-idx))))
+          (set! data-idx (add1 data-idx)))))
+
+  (if (= (vector-length new-data) 1)
+      (vector-ref new-data 0)
+      (new-CSeries new-data #f)))
+    
+(: cseries-loc (CSeries (U Label (Listof Label) (Listof Boolean)) -> (U Fixnum CSeries)))
+(define (cseries-loc cseries label)
+  (unless (is-labeled? cseries)
+    (let ((k (current-continuation-marks)))
+      (raise (make-exn:fail:contract "cseries must have a label index." k))))
+
+  (if (ListofBoolean? label)
+      (cseries-loc-boolean cseries label)
+      (let ((associated-indices-length : (Listof Integer)
+                                       (map (lambda ([l : Label]) (length (cseries-label-ref cseries l))) (convert-to-label-lst label)))
+            (vals : (Vectorof Fixnum)
+             (if (list? label)
+                 (list->vector (assert (flatten (map (lambda ([l : Label]) (cseries-label-ref cseries l)) label)) ListofFixnum?))
+                 (list->vector (assert (cseries-label-ref cseries label) ListofFixnum?)))))
+
+        (if (= (vector-length vals) 1)
+            (vector-ref vals 0)
+            (new-CSeries vals (build-index-from-labels (build-labels-by-count (convert-to-label-lst label) associated-indices-length))))))) |#
 
 ; index based
 (: cseries-iloc (CSeries (U Index (Listof Index)) -> (U Label CSeries)))

@@ -34,6 +34,7 @@
  [bseries-referencer (BSeries -> (Index -> Boolean))]
  [bseries-data (BSeries -> (Vectorof Boolean))]
  [map/bs (BSeries (Boolean -> Boolean) -> BSeries)]
+ [bseries-loc-boolean (BSeries (Listof Boolean) -> (U Boolean BSeries))]
  [bseries-loc (BSeries (U Label (Listof Label) (Listof Boolean)) -> (U Boolean BSeries))]
  [bseries-iloc (BSeries (U Index (Listof Index)) -> (U Boolean BSeries))])
 ; ***********************************************************
@@ -172,7 +173,7 @@
        (for/list: : (Listof Label)
          ([i (car count-lst)])
          (car label-lst))
-       
+    
        (build-labels-by-count (cdr label-lst) (cdr count-lst)))))
 
 (: convert-to-label-lst ((U Label (Listof Label)) -> (Listof Label)))

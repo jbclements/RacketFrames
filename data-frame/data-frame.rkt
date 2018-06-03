@@ -67,7 +67,7 @@
           Series Series?
           SeriesDescription SeriesDescription-name
           SeriesDescription-type SeriesDescription-length
-          set-series-index! series-iloc)
+          set-series-index! series-loc-boolean series-loc series-iloc)
  (only-in "generic-series.rkt"
          GenSeries GenericType GenSeries?
          GenSeries-data
@@ -460,7 +460,7 @@
 ; ***********************************************************
 ; Indexing into data-frame
 
-;(: data-frame-loc ((Listof Label) LabelProjection -> DataFrame)) ;
+;(: data-frame-loc (LabelProjection LabelProjection -> (U Series DataFrame) -> DataFrame)) ;
 ;(define (data-frame-loc labels projection)
 ;)
 

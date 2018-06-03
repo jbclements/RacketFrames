@@ -7,7 +7,7 @@
 	  build-index-from-labels
 	  Label SIndex LabelIndex
           label-index label->lst-idx
-          idx->label))
+          idx->label is-labeled?))
 
 ; **************************
 ; Test cases are at bottom
@@ -31,6 +31,8 @@
  [gen-series-length (GenSeries -> Index)]
  [gen-series-referencer (GenSeries -> (Index -> GenericType))]
  [gen-series-data (GenSeries -> (Vectorof GenericType))]
+ [gen-series-loc-boolean (GenSeries (Listof Boolean) -> (U GenericType GenSeries))]
+ [gen-series-loc (GenSeries (U Label (Listof Label) (Listof Boolean)) -> (U GenericType GenSeries))]
  [gen-series-iloc (GenSeries (U Index (Listof Index)) -> (U GenericType GenSeries))]
  [map/gen-s (GenSeries (GenericType -> GenericType) -> GenSeries)])
 
@@ -141,10 +143,87 @@
 ; ***********************************************************
 ; indexing
 
+(: build-labels-by-count ((Listof Label) (Listof Integer) -> (Listof Label)))
+(define (build-labels-by-count label-lst count-lst)
+  (if (null? label-lst)
+      null
+      (append
+       (for/list: : (Listof Label)
+         ([i (car count-lst)])
+         (car label-lst))
+    
+       (build-labels-by-count (cdr label-lst) (cdr count-lst)))))
+
+(: convert-to-label-lst ((U Label (Listof Label)) -> (Listof Label)))
+(define (convert-to-label-lst label)
+  (if (list? label)
+      label
+      (list label)))
+
+(define-predicate ListofBoolean? (Listof Boolean))
+
 ; label based
-;(: gen-series-loc ((Listof Label) -> Series)) ;
-;(define (gen-series-loc labels)
-;)
+; for two different use cases:
+; a.) Selecting rows by label/index
+; b.) Selecting rows with a boolean / conditional lookup
+
+; Valid inputs
+; A single label, e.g. 'a'.
+; A list or array of labels ['a', 'b', 'c'].
+; A boolean array.
+
+(: true? (Boolean -> Boolean))
+(define (true? boolean)
+  (not (false? boolean)))
+
+(: gen-series-loc-boolean (GenSeries (Listof Boolean) -> (U GenericType GenSeries)))
+(define (gen-series-loc-boolean gen-series boolean-lst)
+  (: data (Vectorof GenericType))
+  (define data (gen-series-data gen-series))
+
+  (: new-data (Vectorof GenericType))
+  (define new-data (make-vector (length (filter true? boolean-lst)) #f))
+  
+  (define data-idx 0)
+  (define new-data-idx 0)
+
+  (if (= (length boolean-lst) 1)
+      (if (list-ref boolean-lst 0)
+          (vector-ref data 0)
+          ; empty GenSeries
+          (new-GenSeries (vector) #f))
+       
+      (for ([b boolean-lst]
+            [d data])
+        (begin
+          (when b
+            (begin              
+              (vector-set! new-data new-data-idx (vector-ref data data-idx))
+              (set! new-data-idx (add1 new-data-idx))))
+          (set! data-idx (add1 data-idx)))))
+
+  (if (= (vector-length new-data) 1)
+      (vector-ref new-data 0)
+      (new-GenSeries new-data #f)))
+    
+(: gen-series-loc (GenSeries (U Label (Listof Label) (Listof Boolean)) -> (U GenericType GenSeries)))
+(define (gen-series-loc gen-series label)
+  (unless (is-labeled? gen-series)
+    (let ((k (current-continuation-marks)))
+      (raise (make-exn:fail:contract "gen-series must have a label index." k))))
+
+  (if (ListofBoolean? label)
+      (gen-series-loc-boolean gen-series label)
+      (let ((associated-indices-length : (Listof Integer)
+                                       (map (lambda ([l : Label]) (length (gen-series-label-ref gen-series l))) (convert-to-label-lst label)))
+            (vals : (Vectorof GenericType)
+             (if (list? label)
+                 (list->vector (assert (flatten (map (lambda ([l : Label]) (gen-series-label-ref gen-series l)) label)) ListofBoolean?))
+                 (list->vector (assert (gen-series-label-ref gen-series label) ListofBoolean?)))))
+
+        (if (= (vector-length vals) 1)
+            (vector-ref vals 0)
+            (new-GenSeries vals (build-index-from-labels (build-labels-by-count (convert-to-label-lst label) associated-indices-length)))))))
 
 ; index based
 (: gen-series-iloc (GenSeries (U Index (Listof Index)) -> (U GenericType GenSeries)))
@@ -153,7 +232,7 @@
   (if (list? idx)
       ; get labels from SIndex that refer to given indicies
       ; make a new index from these labels using build-index-from-labels
-      ; sub-vector the data vector to get the data and create a new-BSeries
+      ; sub-vector the data vector to get the data and create a new-GenSeries
       (new-GenSeries
        (for/vector: : (Vectorof GenericType) ([i idx])
          (vector-ref (gen-series-data gen-series) i))

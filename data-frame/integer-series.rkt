@@ -30,6 +30,8 @@
  [new-ISeries ((Vectorof Fixnum) (Option (U (Listof Label) SIndex)) -> ISeries)]
  [set-ISeries-index (ISeries (U (Listof Label) SIndex) -> ISeries)]
  [iseries-iref (ISeries (Listof Index) -> (Listof Fixnum))]
+ [iseries-loc-boolean (ISeries (Listof Boolean) -> (U Fixnum ISeries))]
+ [iseries-loc (ISeries (U Label (Listof Label) (Listof Boolean)) -> (U Fixnum ISeries))]
  [iseries-iloc (ISeries (U Index (Listof Index)) -> (U Fixnum ISeries))]
  [iseries-label-ref (ISeries Label -> (Listof Integer))]
  [iseries-range (ISeries Index -> (Vectorof Fixnum))]
@@ -70,7 +72,7 @@
 	  build-index-from-labels
 	  Label SIndex LabelIndex
           label-index label->lst-idx
-          idx->label)
+          idx->label is-labeled?)
  (only-in "boolean-series.rkt"
           BSeries))
 ; ***********************************************************
@@ -470,15 +472,88 @@
 ; ***********************************************************
 ; indexing
 
-; label based
-;(: iseries-loc ((Listof Label) -> Series)) ;
-;(define (iseries-loc labels)
-;)
+(: build-labels-by-count ((Listof Label) (Listof Integer) -> (Listof Label)))
+(define (build-labels-by-count label-lst count-lst)
+  (if (null? label-lst)
+      null
+      (append
+       (for/list: : (Listof Label)
+         ([i (car count-lst)])
+         (car label-lst))
+       
+       (build-labels-by-count (cdr label-lst) (cdr count-lst)))))
 
-; index based
-;(: iseries-iloc ((U Index (Listof Index)) -> (U Fixnum Series))) ;
-;(define (iseries-iloc labels)
-;)
+(: convert-to-label-lst ((U Label (Listof Label)) -> (Listof Label)))
+(define (convert-to-label-lst label)
+  (if (list? label)
+      label
+      (list label)))
+
+(define-predicate ListofBoolean? (Listof Boolean))
+(define-predicate ListofFixnum? (Listof Fixnum))
+
+; label based
+; for two different use cases:
+; a.) Selecting rows by label/index
+; b.) Selecting rows with a boolean / conditional lookup
+
+; Valid inputs
+; A single label, e.g. 'a'.
+; A list or array of labels ['a', 'b', 'c'].
+; A boolean array.
+
+(: true? (Boolean -> Boolean))
+(define (true? boolean)
+  (not (false? boolean)))
+
+(: iseries-loc-boolean (ISeries (Listof Boolean) -> (U Fixnum ISeries)))
+(define (iseries-loc-boolean iseries boolean-lst)
+  (: data (Vectorof Fixnum))
+  (define data (iseries-data iseries))
+
+  (: new-data (Vectorof Fixnum))
+  (define new-data (make-vector (length (filter true? boolean-lst)) 0))
+  
+  (define data-idx 0)
+  (define new-data-idx 0)
+
+  (if (= (length boolean-lst) 1)
+      (if (list-ref boolean-lst 0)
+          (vector-ref data 0)
+          ; empty iseries
+          (new-ISeries (vector) #f))
+       
+      (for ([b boolean-lst]
+            [d data])
+        (begin
+          (when b
+            (begin              
+              (vector-set! new-data new-data-idx (vector-ref data data-idx))
+              (set! new-data-idx (add1 new-data-idx))))
+          (set! data-idx (add1 data-idx)))))
+
+  (if (= (vector-length new-data) 1)
+      (vector-ref new-data 0)
+      (new-ISeries new-data #f)))
+    
+(: iseries-loc (ISeries (U Label (Listof Label) (Listof Boolean)) -> (U Fixnum ISeries)))
+(define (iseries-loc iseries label)
+  (unless (is-labeled? iseries)
+    (let ((k (current-continuation-marks)))
+      (raise (make-exn:fail:contract "iseries must have a label index." k))))
+
+  (if (ListofBoolean? label)
+      (iseries-loc-boolean iseries label)
+      (let ((associated-indices-length : (Listof Integer)
+                                       (map (lambda ([l : Label]) (length (iseries-label-ref iseries l))) (convert-to-label-lst label)))
+            (vals : (Vectorof Fixnum)
+             (if (list? label)
+                 (list->vector (assert (flatten (map (lambda ([l : Label]) (iseries-label-ref iseries l)) label)) ListofFixnum?))
+                 (list->vector (assert (iseries-label-ref iseries label) ListofFixnum?)))))
+
+        (if (= (vector-length vals) 1)
+            (vector-ref vals 0)
+            (new-ISeries vals (build-index-from-labels (build-labels-by-count (convert-to-label-lst label) associated-indices-length)))))))
 
 ; index based
 (: iseries-iloc (ISeries (U Index (Listof Index)) -> (U Fixnum ISeries)))
@@ -487,7 +562,7 @@
   (if (list? idx)
       ; get labels from SIndex that refer to given indicies
       ; make a new index from these labels using build-index-from-labels
-      ; sub-vector the data vector to get the data and create a new-BSeries
+      ; sub-vector the data vector to get the data and create a new-ISeries
       (new-ISeries
        (for/vector: : (Vectorof Fixnum) ([i idx])
          (vector-ref (iseries-data iseries) i))

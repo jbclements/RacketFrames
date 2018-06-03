@@ -29,6 +29,8 @@
  [series-length (Series -> Index)]
  [series-data (Series -> (U (Vectorof GenericType) FlVector (Vectorof Symbol) (Vectorof Fixnum) (Vectorof Boolean)))]
  [series-iref (Series Index -> Any)]
+ [series-loc-boolean (Series (Listof Boolean) -> (U Any Series))]
+ [series-loc (Series (U Label (Listof Label) (Listof Boolean)) -> (U Any Series))]
  [series-iloc (Series (U Index (Listof Index)) -> (U Any Series))]
  [set-series-index! (Series (U (Listof Label) SIndex) -> Void)])
 
@@ -43,19 +45,19 @@
           Label SIndex)
  (only-in "generic-series.rkt"
           GenericType GenSeries GenSeries? GenSeries-data gen-series-length gen-series-data gen-series-iref
-          set-GenSeries-index gen-series-iloc)
+          set-GenSeries-index gen-series-loc-boolean gen-series-loc gen-series-iloc)
  (only-in "categorical-series.rkt"
           CSeries CSeries? CSeries-data cseries-length cseries-data cseries-iref
           cseries-iloc)
  (only-in "numeric-series.rkt"
           NSeries NSeries? NSeries-data nseries-length nseries-data nseries-iref
-          set-NSeries-index nseries-iloc)
+          set-NSeries-index nseries-loc-boolean nseries-loc nseries-iloc)
  (only-in "integer-series.rkt"
 	  ISeries ISeries? ISeries-data iseries-length iseries-data iseries-iref
-          set-ISeries-index iseries-iloc)
+          set-ISeries-index iseries-loc-boolean iseries-loc iseries-iloc)
  (only-in "boolean-series.rkt"
 	  BSeries BSeries? BSeries-data bseries-length bseries-data bseries-iref
-          set-BSeries-index bseries-iloc))
+          set-BSeries-index bseries-loc-boolean bseries-loc bseries-iloc))
 
 ; ***********************************************************
 
@@ -126,6 +128,26 @@
     [(CSeries? series) (cseries-iref series (list idx))]    
     [(ISeries? series) (iseries-iref series (list idx))]
     [(BSeries? series) (bseries-iref series (list idx))]
+    [else (error "Unknown Series type in DataFrame")]))
+
+(: series-loc-boolean (Series (Listof Boolean) -> (U Any Series)))
+(define (series-loc-boolean series boolean-lst)
+  (cond
+    [(GenSeries? series) (gen-series-loc-boolean series boolean-lst)]
+    [(NSeries? series) (nseries-loc-boolean series boolean-lst)]
+    ;[(CSeries? series) (cseries-loc series idx)]   
+    [(ISeries? series) (iseries-loc-boolean series boolean-lst)]
+    [(BSeries? series) (bseries-loc-boolean series boolean-lst)]
+    [else (error "Unknown Series type in DataFrame")]))
+
+(: series-loc (Series (U Label (Listof Label) (Listof Boolean)) -> (U Any Series)))
+(define (series-loc series label)
+  (cond
+    [(GenSeries? series) (gen-series-loc series label)]
+    [(NSeries? series) (nseries-loc series label)]
+    ;[(CSeries? series) (cseries-loc series idx)]   
+    [(ISeries? series) (iseries-loc series label)]
+    [(BSeries? series) (bseries-loc series label)]
     [else (error "Unknown Series type in DataFrame")]))
 
 (: series-iloc (Series (U Index (Listof Index)) -> (U Any Series)))

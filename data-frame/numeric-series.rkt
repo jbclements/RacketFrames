@@ -27,6 +27,8 @@
 (provide:
  [set-NSeries-index (NSeries (U (Listof Label) SIndex) -> NSeries)]
  [nseries-iref (NSeries (Listof Index) -> (Listof Float))]
+ [nseries-loc-boolean (NSeries (Listof Boolean) -> (U Float NSeries))]
+ [nseries-loc (NSeries (U Label (Listof Label) (Listof Boolean)) -> (U Float NSeries))]
  [nseries-iloc (NSeries (U Index (Listof Index)) -> (U Float NSeries))]
  [nseries-label-ref (NSeries Label -> (Listof Float))]
  [nseries-range (NSeries Index -> FlVector)]
@@ -95,7 +97,7 @@
 	  build-index-from-labels
 	  Label SIndex
 	  LabelIndex LabelIndex-index
-          idx->label)
+          idx->label is-labeled?)
  (only-in "boolean-series.rkt"
           BSeries BSeries-data)
  (only-in "integer-series.rkt"
@@ -694,15 +696,89 @@
 ; ***********************************************************
 
 ; label based
-; need to check if a label index exists first, so check if SIndex exists
-;(: nseries-loc ((Listof Label) -> Series)) ;
-;(define (nseries-loc labels)
-;)
 
-; index based
-;(: nseries-iloc ((U Index (Listof Index)) -> (U Float Series))) ;
-;(define (nseries-iloc indicies)
-;)
+(: build-labels-by-count ((Listof Label) (Listof Integer) -> (Listof Label)))
+(define (build-labels-by-count label-lst count-lst)
+  (if (null? label-lst)
+      null
+      (append
+       (for/list: : (Listof Label)
+         ([i (car count-lst)])
+         (car label-lst))
+       
+       (build-labels-by-count (cdr label-lst) (cdr count-lst)))))
+
+(: convert-to-label-lst ((U Label (Listof Label)) -> (Listof Label)))
+(define (convert-to-label-lst label)
+  (if (list? label)
+      label
+      (list label)))
+
+(define-predicate ListofBoolean? (Listof Boolean))
+(define-predicate ListofFloat? (Listof Float))
+
+; label based
+; for two different use cases:
+; a.) Selecting rows by label/index
+; b.) Selecting rows with a boolean / conditional lookup
+
+; Valid inputs
+; A single label, e.g. 'a'.
+; A list or array of labels ['a', 'b', 'c'].
+; A boolean array.
+
+(: true? (Boolean -> Boolean))
+(define (true? boolean)
+  (not (false? boolean)))
+
+(: nseries-loc-boolean (NSeries (Listof Boolean) -> (U Float NSeries)))
+(define (nseries-loc-boolean nseries boolean-lst)
+  (: data FlVector)
+  (define data (nseries-data nseries))
+
+  (: new-data FlVector)
+  (define new-data (make-flvector (length (filter true? boolean-lst)) 0.0))
+  
+  (define data-idx 0)
+  (define new-data-idx 0)
+
+  (if (= (length boolean-lst) 1)
+      (if (list-ref boolean-lst 0)
+          (flvector-ref data 0)
+          ; empty nseries
+          (new-NSeries (flvector) #f))
+       
+      (for ([b boolean-lst]
+            [d (flvector->list data (flvector-length data))])
+        (begin
+          (when b
+            (begin              
+              (flvector-set! new-data new-data-idx (flvector-ref data data-idx))
+              (set! new-data-idx (add1 new-data-idx))))
+          (set! data-idx (add1 data-idx)))))
+
+  (if (= (flvector-length new-data) 1)
+      (flvector-ref new-data 0)
+      (new-NSeries new-data #f)))
+    
+(: nseries-loc (NSeries (U Label (Listof Label) (Listof Boolean)) -> (U Float NSeries)))
+(define (nseries-loc nseries label)
+  (unless (is-labeled? nseries)
+    (let ((k (current-continuation-marks)))
+      (raise (make-exn:fail:contract "nseries must have a label index." k))))
+
+  (if (ListofBoolean? label)
+      (nseries-loc-boolean nseries label)
+      (let ((associated-indices-length : (Listof Integer)
+                                       (map (lambda ([l : Label]) (length (nseries-label-ref nseries l))) (convert-to-label-lst label)))
+            (vals : FlVector
+             (if (list? label)
+                 (list->flvector (assert (flatten (map (lambda ([l : Label]) (nseries-label-ref nseries l)) label)) ListofFloat?))
+                 (list->flvector (assert (nseries-label-ref nseries label) ListofFloat?)))))
+
+        (if (= (flvector-length vals) 1)
+            (flvector-ref vals 0)
+            (new-NSeries vals (build-index-from-labels (build-labels-by-count (convert-to-label-lst label) associated-indices-length)))))))
 
 ; index based
 (: nseries-iloc (NSeries (U Index (Listof Index)) -> (U Float NSeries)))
@@ -732,7 +808,7 @@
 (define series-float-2 (new-NSeries (flvector 5.0 6.0 7.0 8.0)
                                       (build-index-from-labels (list 'a 'b 'c 'd))))
 
-; iseries reference tests
+; nseries reference tests
 (check-equal? ((nseries-referencer series-float) 0) 1.5)
 
 (check-equal? ((nseries-referencer series-float) 1) 2.4)

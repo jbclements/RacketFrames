@@ -60,7 +60,7 @@
  (only-in "types.rkt"
           Dim Dim-rows Dim-cols)
  (only-in "indexed-series.rkt"
-	  label-sort-positional
+	  label-sort-positional ListofLabel?
           Label LabelProjection LabelIndex LabelIndex-index
           GSeries SIndex
           build-index-from-labels label-index idx->label)
@@ -454,9 +454,16 @@
 (: data-frame-set-index! (DataFrame (U (Listof Label) SIndex) -> Void))
 (define (data-frame-set-index! data-frame new-index)
   (define src-series (DataFrame-series data-frame))
+
+  (: new-SIndex SIndex)
+  (define new-SIndex (hash))
+  
+  (if (ListofLabel? new-index)
+    (set! new-SIndex (build-index-from-labels (assert new-index ListofLabel?)))
+    (set! new-SIndex new-index))
   
   (for ([pos (in-range (vector-length src-series))])
-    (set-series-index! (vector-ref src-series pos) new-index)))
+    (set-series-index! (vector-ref src-series pos) new-SIndex)))
 ; ***********************************************************
 
 ; ***********************************************************

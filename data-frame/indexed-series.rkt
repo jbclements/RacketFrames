@@ -35,7 +35,7 @@
  [build-multi-index-from-list ((Listof (Listof GenericType)) -> SIndex)])
 
 (provide
- SIndex Labeling
+ SIndex Labeling ListofLabel?
  Label Label? LabelProjection
  LabelIndex LabelIndex-index
  (struct-out GSeries)
@@ -60,6 +60,8 @@
 (define-type Label Symbol)
 
 (define-predicate Label? Label)
+
+(define-predicate ListofLabel? (Listof Label))
 
 (define-type Labeling (Listof (Pair Label (Listof Index))))
 
@@ -156,7 +158,6 @@
         (hash-ref index label)
         (let ((k (current-continuation-marks)))
           (raise (make-exn:fail:contract "Cannot obtain the index of a label for a series which is unlabeled" k))))))
-
 
 ; This function consumes LabelIndex and Label and returns the
 ; numerical Index of the Label in the LabelIndex. The index

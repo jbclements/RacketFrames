@@ -32,7 +32,7 @@
  [series-loc-boolean (Series (Listof Boolean) -> (U Any Series))]
  [series-loc (Series (U Label (Listof Label) (Listof Boolean)) -> (U Any Series))]
  [series-iloc (Series (U Index (Listof Index)) -> (U Any Series))]
- [set-series-index! (Series (U (Listof Label) SIndex) -> Void)])
+ [set-series-index! (Series SIndex -> Void)])
 
 ; ***********************************************************
 
@@ -164,7 +164,7 @@
 
 ; ***********************************************************
 
-(: set-series-index! (Series (U (Listof Label) SIndex) -> Void))
+(: set-series-index! (Series SIndex -> Void))
 (define (set-series-index! series index)
   (cond
     [(GenSeries? series) (set! series (set-GenSeries-index (assert series GenSeries?) index))]

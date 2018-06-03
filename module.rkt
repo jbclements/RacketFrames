@@ -199,8 +199,10 @@
  (assert (data-frame-loc data-frame-integer-labeled-2 (list 'b 'c 'd) (list 'col2 'col3)) DataFrame?)
  (current-output-port))
 
+(data-frame-set-index! data-frame-integer-labeled (list 'a 'b 'c 'd))
+
 (data-frame-write-tab
- (assert (data-frame-loc (data-frame-set-index! data-frame-integer-labeled-2 (list 'a 'b 'c 'd))) DataFrame?)
+ (assert (data-frame-loc data-frame-integer-labeled (list 'b 'c 'd) (list 'col2 'col3)) DataFrame?)
  (current-output-port))
 
 (data-frame-write-tab

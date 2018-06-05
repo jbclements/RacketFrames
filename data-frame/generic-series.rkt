@@ -241,6 +241,26 @@
 
 ; ***********************************************************
 
+; ***********************************************************
+(: gen-series-print (GenSeries Output-Port -> Void))
+(define (gen-series-print gen-series port)
+  (define v (gen-series-data gen-series))
+  (let ((len (vector-length v))
+	(out (current-output-port)))
+    (if (zero? len)
+	(displayln "Empty $GenSeries" port)
+	(begin
+          (displayln "*********")
+          (displayln "$GenSeries" port)
+          (displayln "*********")
+	  (do ((i 0 (add1 i)))
+	      ((>= i len) (void))
+	    (let ((val (vector-ref v i)))
+              (display (idx->label gen-series (assert i index?)) port)
+              (display " " port)
+              (displayln val port)))))))
+; ***********************************************************
+
 ; create generic series
 (define series-generic (new-GenSeries (vector 1 2.5 'categorical #t)
                                       (build-index-from-labels (list 'a 'b 'c 'd))))

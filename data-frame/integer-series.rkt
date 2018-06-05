@@ -137,6 +137,26 @@
 ; ***********************************************************
 
 ; ***********************************************************
+(: iseries-print (ISeries Output-Port -> Void))
+(define (iseries-print iseries port)
+  (define v (iseries-data iseries))
+  (let ((len (vector-length v))
+	(out (current-output-port)))
+    (if (zero? len)
+	(displayln "Empty $ISeries" port)
+	(begin
+          (displayln "*********")
+          (displayln "$ISeries" port)
+          (displayln "*********")
+	  (do ((i 0 (add1 i)))
+	      ((>= i len) (void))
+	    (let ((num (vector-ref v i)))
+              (display (idx->label iseries (assert i index?)) port)
+              (display " " port)
+              (displayln num port)))))))
+; ***********************************************************
+
+; ***********************************************************
 ; This function consumes an integer series and returns a
 ; lambda function which consumes an index and provides the
 ; value of the data at that index in the series. It can be

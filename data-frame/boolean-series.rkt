@@ -263,6 +263,26 @@
       (referencer idx))))
 
 ; ***********************************************************
+(: bseries-print (BSeries Output-Port -> Void))
+(define (bseries-print bseries port)
+  (define v (bseries-data bseries))
+  (let ((len (vector-length v))
+	(out (current-output-port)))
+    (if (zero? len)
+	(displayln "Empty $BSeries" port)
+	(begin
+          (displayln "*********")
+          (displayln "$BSeries" port)
+          (displayln "*********")
+	  (do ((i 0 (add1 i)))
+	      ((>= i len) (void))
+	    (let ((val (vector-ref v i)))
+              (display (idx->label bseries (assert i index?)) port)
+              (display " " port)
+              (displayln val port)))))))
+; ***********************************************************
+
+; ***********************************************************
 ; Test Cases
 ; ***********************************************************
 

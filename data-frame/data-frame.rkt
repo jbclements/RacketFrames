@@ -737,3 +737,8 @@
 ;(data-frame-description data-frame-integer)
 
 ;(show-data-frame-description (data-frame-description data-frame-integer))
+
+(data-frame-set-index! data-frame-integer (list 'a 'b 'c 'd))
+(LabelIndex-index (cdr (list-ref (data-frame-explode data-frame-integer) 0)))
+
+

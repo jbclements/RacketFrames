@@ -77,7 +77,7 @@
  [list->flvector ((Listof Float) -> FlVector)])
 
 (provide
- flvector-print
+ ;flvector-print
  (struct-out NSeries)
  new-NSeries)
 
@@ -106,24 +106,28 @@
 ; ***********************************************************
 
 ; ***********************************************************
-(: flvector-print (FlVector Output-Port -> Void))
-(define (flvector-print flv port)
+(: nseries-print (NSeries Output-Port -> Void))
+(define (nseries-print nseries port)
+  (define flv (nseries-data nseries))
   (let ((len (flvector-length flv))
 	(out (current-output-port))
 	(decs (Settings-decimals (settings)))
 	(max-output (Settings-max-output (settings))))
     (if (zero? len)
-	(displayln "[ ]" port)
+	(displayln "Empty NSeries{}" port)
 	(begin
-	  (display "[ " port)
+          (displayln "*********")
+          (displayln "$NSeries" port)
+          (displayln "*********")
 	  (do ((i 0 (add1 i)))
 	      ((>= i len) (void))
 	    (let ((num (flvector-ref flv i)))
+              (display (idx->label nseries (assert i index?)) port)
+              (display " " port)
 	      (if (eqv? num +nan.0)
-		  (display num port)
-		  (display (real->decimal-string num decs) port)))
-	    (display " " port))))
-    (display "]" port)))
+		  (displayln num port)
+		  (displayln (real->decimal-string num decs) port))))))
+    ))
 
 ; ***********************************************************
 
@@ -867,3 +871,5 @@
 (check-equal? (apply-stat-ns 'stddev series-float) 1.0173494974687902)
 
 (check-equal? (apply-stat-ns 'skewness series-float) -0.18946647505895)
+
+(nseries-print series-float (current-output-port))

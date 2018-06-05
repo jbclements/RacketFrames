@@ -36,7 +36,8 @@
  [map/bs (BSeries (Boolean -> Boolean) -> BSeries)]
  [bseries-loc-boolean (BSeries (Listof Boolean) -> (U Boolean BSeries))]
  [bseries-loc (BSeries (U Label (Listof Label) (Listof Boolean)) -> (U Boolean BSeries))]
- [bseries-iloc (BSeries (U Index (Listof Index)) -> (U Boolean BSeries))])
+ [bseries-iloc (BSeries (U Index (Listof Index)) -> (U Boolean BSeries))]
+ [bseries-print (BSeries Output-Port -> Void)])
 ; ***********************************************************
 
 ; ***********************************************************
@@ -261,6 +262,8 @@
          (vector-ref (bseries-data bseries) i))
        (build-index-from-labels (map (lambda ([i : Index]) (idx->label bseries i)) idx)))
       (referencer idx))))
+
+; ***********************************************************
 
 ; ***********************************************************
 (: bseries-print (BSeries Output-Port -> Void))

@@ -60,7 +60,8 @@
  [=/is (ISeries ISeries -> BSeries)]
  [!=/is (ISeries ISeries -> BSeries)]
  [apply-agg-is (Symbol ISeries -> Real)]
- [apply-stat-is (Symbol ISeries -> Real)])
+ [apply-stat-is (Symbol ISeries -> Real)]
+ [iseries-print (ISeries Output-Port -> Void)])
 ; ***********************************************************
 
 ; ***********************************************************

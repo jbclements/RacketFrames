@@ -74,7 +74,8 @@
  [apply-agg-ns (Symbol NSeries -> Real)]
  [apply-stat-ns (Symbol NSeries -> Real)]
  [flvector->list (FlVector Fixnum -> (Listof Float))]
- [list->flvector ((Listof Float) -> FlVector)])
+ [list->flvector ((Listof Float) -> FlVector)]
+ [nseries-print (NSeries Output-Port -> Void)])
 
 (provide
  ;flvector-print

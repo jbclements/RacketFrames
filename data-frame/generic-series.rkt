@@ -34,7 +34,8 @@
  [gen-series-loc-boolean (GenSeries (Listof Boolean) -> (U GenericType GenSeries))]
  [gen-series-loc (GenSeries (U Label (Listof Label) (Listof Boolean)) -> (U GenericType GenSeries))]
  [gen-series-iloc (GenSeries (U Index (Listof Index)) -> (U GenericType GenSeries))]
- [map/gen-s (GenSeries (GenericType -> GenericType) -> GenSeries)])
+ [map/gen-s (GenSeries (GenericType -> GenericType) -> GenSeries)]
+ [gen-series-print (GenSeries Output-Port -> Void)])
 
 ; ***********************************************************
 

@@ -12,26 +12,30 @@
  [cseries-range (CSeries Index -> (Vectorof Label))]
  [cseries-data        (CSeries -> (Vectorof Symbol))]
  [cseries-referencer (CSeries -> (Fixnum -> Label))]
- [cseries-iloc (CSeries (U Index (Listof Index)) -> (U Label CSeries))])
+ [cseries-iloc (CSeries (U Index (Listof Index)) -> (U Label CSeries))]
+ [cseries-print (CSeries Output-Port -> Void)])
 
 (require
  (only-in "indexed-series.rkt"
-	  SIndex Label
-	  LabelIndex is-labeled?))
+	  SIndex Label idx->label
+	  LabelIndex LabelIndex-index is-labeled?))
 
 (define-type CSeriesFn (Label -> Label))
 
 ;; Categorical Series
 ;; Encoded as an array of integer values with an associated nominal.
 ;; Custom Structure Writer
-;; See 12.8 Printer Extensions in Racket doc.
-(: writer-CSeries (CSeries Output-Port Boolean -> Void))
-(define (writer-CSeries series port mode)
-  (let* ([data (CSeries-data series)]
-	 [nominals (CSeries-nominals series)]
+(: cseries-print (CSeries Output-Port -> Void))
+(define (cseries-print cseries port)
+  (let* ([data (CSeries-data cseries)]
+	 [nominals (CSeries-nominals cseries)]
 	 [len (vector-length data)])
     (do ([i 0 (add1 i)])
 	((>= i len) (void))
+      (if (LabelIndex-index cseries)                  
+          (display (idx->label cseries (assert i index?)) port)
+          (display (assert i index?) port))
+      (display " " port)
       (displayln  (vector-ref nominals (vector-ref data i))))))
 
 (struct: CSeries LabelIndex ([data     : (Vectorof Index)]

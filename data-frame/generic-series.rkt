@@ -5,7 +5,7 @@
 (require
  (only-in "indexed-series.rkt"
 	  build-index-from-labels
-	  Label SIndex LabelIndex
+	  Label SIndex LabelIndex LabelIndex-index
           label-index label->lst-idx
           idx->label is-labeled?))
 
@@ -257,7 +257,9 @@
 	  (do ((i 0 (add1 i)))
 	      ((>= i len) (void))
 	    (let ((val (vector-ref v i)))
-              (display (idx->label gen-series (assert i index?)) port)
+              (if (LabelIndex-index gen-series)
+                  (display (idx->label gen-series (assert i index?)) port)
+                  (display (assert i index?) port))
               (display " " port)
               (displayln val port)))))))
 ; ***********************************************************

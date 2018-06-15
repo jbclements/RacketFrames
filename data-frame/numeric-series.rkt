@@ -123,12 +123,13 @@
 	  (do ((i 0 (add1 i)))
 	      ((>= i len) (void))
 	    (let ((num (flvector-ref flv i)))
-              (display (idx->label nseries (assert i index?)) port)
+              (if (LabelIndex-index nseries)
+                  (display (idx->label nseries (assert i index?)) port)
+                  (display (assert i index?) port))
               (display " " port)
 	      (if (eqv? num +nan.0)
 		  (displayln num port)
-		  (displayln (real->decimal-string num decs) port))))))
-    ))
+		  (displayln (real->decimal-string num decs) port))))))))
 
 ; ***********************************************************
 

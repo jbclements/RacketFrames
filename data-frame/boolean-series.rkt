@@ -280,7 +280,9 @@
 	  (do ((i 0 (add1 i)))
 	      ((>= i len) (void))
 	    (let ((val (vector-ref v i)))
-              (display (idx->label bseries (assert i index?)) port)
+              (if (LabelIndex-index bseries)
+                  (display (idx->label bseries (assert i index?)) port)
+                  (display (assert i index?) port))
               (display " " port)
               (displayln val port)))))))
 ; ***********************************************************

@@ -71,7 +71,7 @@
  racket/unsafe/ops
  (only-in "indexed-series.rkt"
 	  build-index-from-labels
-	  Label SIndex LabelIndex
+	  Label SIndex LabelIndex LabelIndex-index
           label-index label->lst-idx
           idx->label is-labeled?)
  (only-in "boolean-series.rkt"
@@ -146,13 +146,15 @@
     (if (zero? len)
 	(displayln "Empty $ISeries" port)
 	(begin
-          (displayln "*********")
+          (displayln "*********" port)
           (displayln "$ISeries" port)
-          (displayln "*********")
+          (displayln "*********" port)
 	  (do ((i 0 (add1 i)))
 	      ((>= i len) (void))
 	    (let ((num (vector-ref v i)))
-              (display (idx->label iseries (assert i index?)) port)
+              (if (LabelIndex-index iseries)                  
+                  (display (idx->label iseries (assert i index?)) port)
+                  (display (assert i index?) port))
               (display " " port)
               (displayln num port)))))))
 ; ***********************************************************
@@ -690,3 +692,6 @@
 (check-equal? (apply-stat-is 'stddev series-integer) 1.118033988749895)
 
 (check-equal? (apply-stat-is 'skewness series-integer) 0.0)
+
+; iseries print
+(iseries-print series-integer (current-output-port))

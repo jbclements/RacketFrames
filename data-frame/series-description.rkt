@@ -32,7 +32,7 @@
  [series-loc-boolean (Series (Listof Boolean) -> (U Any Series))]
  [series-loc (Series (U Label (Listof Label) (Listof Boolean)) -> (U Any Series))]
  [series-iloc (Series (U Index (Listof Index)) -> (U Any Series))]
- [set-series-index! (Series SIndex -> Void)])
+ [set-series-index (Series SIndex -> Series)])
 
 ; ***********************************************************
 
@@ -45,19 +45,19 @@
           Label SIndex)
  (only-in "generic-series.rkt"
           GenericType GenSeries GenSeries? GenSeries-data gen-series-length gen-series-data gen-series-iref
-          set-GenSeries-index gen-series-loc-boolean gen-series-loc gen-series-iloc gen-series-print)
+          set-GenSeries-index gen-series-loc-boolean gen-series-loc gen-series-iloc)
  (only-in "categorical-series.rkt"
           CSeries CSeries? CSeries-data cseries-length cseries-data cseries-iref
           cseries-iloc)
  (only-in "numeric-series.rkt"
           NSeries NSeries? NSeries-data nseries-length nseries-data nseries-iref
-          set-NSeries-index nseries-loc-boolean nseries-loc nseries-iloc nseries-print)
+          set-NSeries-index nseries-loc-boolean nseries-loc nseries-iloc)
  (only-in "integer-series.rkt"
 	  ISeries ISeries? ISeries-data iseries-length iseries-data iseries-iref
-          set-ISeries-index iseries-loc-boolean iseries-loc iseries-iloc iseries-print)
+          set-ISeries-index iseries-loc-boolean iseries-loc iseries-iloc)
  (only-in "boolean-series.rkt"
 	  BSeries BSeries? BSeries-data bseries-length bseries-data bseries-iref
-          set-BSeries-index bseries-loc-boolean bseries-loc bseries-iloc bseries-print))
+          set-BSeries-index bseries-loc-boolean bseries-loc bseries-iloc))
 
 ; ***********************************************************
 
@@ -164,29 +164,15 @@
 
 ; ***********************************************************
 
-(: set-series-index! (Series SIndex -> Void))
-(define (set-series-index! series index)
+(: set-series-index (Series SIndex -> Series))
+(define (set-series-index series index)
   (cond
-    [(GenSeries? series) (set! series (set-GenSeries-index (assert series GenSeries?) index))]
-    [(NSeries? series) (set! series (set-NSeries-index (assert series NSeries?) index))]    
+    [(GenSeries? series) (set-GenSeries-index (assert series GenSeries?) index)]
+    [(NSeries? series) (set-NSeries-index (assert series NSeries?) index)]
     ;[(CSeries? series) (cseries-data series)]    
-    [(ISeries? series) (set! series (set-ISeries-index (assert series ISeries?) index))]
-    [(BSeries? series) (set! series (set-BSeries-index (assert series BSeries?) index))]
+    [(ISeries? series) (set-ISeries-index (assert series ISeries?) index)]
+    [(BSeries? series) (set-BSeries-index (assert series BSeries?) index)]
     [else (error "Unknown or not supported series type in DataFrame")]))
-
-; ***********************************************************
-
-; ***********************************************************
-
-(: series-print (Series Output-Port -> Void))
-(define (series-print series port)
-  (cond
-    [(GenSeries? series) (gen-series-print (assert series GenSeries?) port)]
-    [(NSeries? series) (nseries-print (assert series NSeries?) port)]    
-    ;[(CSeries? series) (cseries-data series)]    
-    [(ISeries? series) (iseries-print (assert series ISeries?) port)]
-    [(BSeries? series) (bseries-print (assert series BSeries?) port)]
-    [else (error "Unknown or not supported series type.")]))
 
 ; ***********************************************************
 

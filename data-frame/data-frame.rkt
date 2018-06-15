@@ -32,7 +32,7 @@
  [data-frame-extend  (DataFrame (U Column Columns DataFrame) -> DataFrame)]
  [data-frame-description (DataFrame [#:project LabelProjection] -> DataFrameDescription)]
  [show-data-frame-description (DataFrameDescription -> Void)]
- [data-frame-set-index! (DataFrame (U (Listof Label) SIndex) -> Void)]
+ [data-frame-set-index (DataFrame (U (Listof Label) SIndex) -> DataFrame)]
  [data-frame-loc (DataFrame (U Label (Listof Label) (Listof Boolean)) LabelProjection -> (U Series DataFrame))]
  [data-frame-iloc (DataFrame (U Index (Listof Index)) (U Index (Listof Index)) -> (U Series DataFrame))]
  [data-frame-iloc-label (DataFrame (U Index (Listof Index)) LabelProjection -> (U Series DataFrame))])
@@ -69,7 +69,7 @@
           Series Series?
           SeriesDescription SeriesDescription-name
           SeriesDescription-type SeriesDescription-length
-          set-series-index! series-loc-boolean series-loc series-iloc)
+          set-series-index series-loc-boolean series-loc series-iloc)
  (only-in "generic-series.rkt"
          GenSeries GenericType GenSeries?
          GenSeries-data
@@ -96,7 +96,7 @@
 ; ***********************************************************
 ; Data Structure Definitions
 
-(define-type Column  (Pair Label Series))
+(define-type Column (Pair Label Series))
 (define-type Columns (Listof Column))
 
 (define-predicate Column? Column)
@@ -450,20 +450,26 @@
 ; ***********************************************************
 
 ; ***********************************************************
-; Sets data-frame index in place
-(: data-frame-set-index! (DataFrame (U (Listof Label) SIndex) -> Void))
-(define (data-frame-set-index! data-frame new-index)
+(: data-frame-set-index (DataFrame (U (Listof Label) SIndex) -> DataFrame))
+(define (data-frame-set-index data-frame new-index)
   (define src-series (DataFrame-series data-frame))
+  (define src-column-names (map column-heading (data-frame-explode data-frame)))
 
   (: new-SIndex SIndex)
   (define new-SIndex (hash))
-  
+
+  ; convert new-index to SIndex
   (if (ListofLabel? new-index)
     (set! new-SIndex (build-index-from-labels (assert new-index ListofLabel?)))
     (set! new-SIndex new-index))
-  
-  (for ([pos (in-range (vector-length src-series))])
-    (set-series-index! (vector-ref src-series pos) new-SIndex)))
+
+  (: new-columns Columns)
+  (define new-columns
+    (for/list ([pos (in-range (vector-length src-series))])
+      ; define new column
+      (cons (list-ref src-column-names pos) (set-series-index (vector-ref src-series pos) new-SIndex))))
+
+  (new-data-frame new-columns))
 ; ***********************************************************
 
 ; ***********************************************************
@@ -738,7 +744,7 @@
 
 ;(show-data-frame-description (data-frame-description data-frame-integer))
 
-(data-frame-set-index! data-frame-integer (list 'a 'b 'c 'd))
+(data-frame-set-index data-frame-integer (list 'a 'b 'c 'd))
 (LabelIndex-index (cdr (list-ref (data-frame-explode data-frame-integer) 0)))
 
 

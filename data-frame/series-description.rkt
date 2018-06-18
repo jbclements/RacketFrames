@@ -4,17 +4,11 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 #lang typed/racket
-(require typed/rackunit)
 
 ; ***********************************************************
 ; A map of series to label names, represented as a collection
 ; of columns.
 ; ***********************************************************
-
-; **************************
-; Test cases are at bottom
-; of file.
-; **************************
 
 ; ***********************************************************
 ; Provide functions in this file to other files.
@@ -174,8 +168,4 @@
     [(BSeries? series) (set-BSeries-index (assert series BSeries?) index)]
     [else (error "Unknown or not supported series type in DataFrame")]))
 
-; ***********************************************************
-
-; ***********************************************************
-; Test Cases
 ; ***********************************************************

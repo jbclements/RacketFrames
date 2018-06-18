@@ -116,36 +116,6 @@
                                    (set-member? append-cols name))
                                  (data-frame-names dfa)))))
 
-; Test Cases
-
-(define columns-integer-1
-  (list 
-   (cons 'col1 (new-ISeries (vector 1 2 3 4) #f))
-   (cons 'col2 (new-ISeries (vector 5 6 7 8) #f))
-   (cons 'col3 (new-ISeries (vector 9 10 11 12) #f))
-   (cons 'col4 (new-ISeries (vector 21 22 23 24) #f))))
-
-(define columns-integer-2
-  (list 
-   (cons 'col1 (new-ISeries (vector 1 2 3 4) #f))
-   (cons 'col2 (new-ISeries (vector 25 26 27 28) #f))
-   (cons 'col3 (new-ISeries (vector 29 30 31 32) #f))
-   (cons 'col4 (new-ISeries (vector 1 2 3 4) #f))))
-
-; create new data-frame-integer-1
-(define data-frame-integer-1 (new-data-frame columns-integer-1))
-
-; create new data-frame-integer-2
-(define data-frame-integer-2 (new-data-frame columns-integer-2))
-
-(displayln "data-frame+ Test 1")
-
-(data-frame-write-tab data-frame-integer-1 (current-output-port))
-
-(data-frame-write-tab data-frame-integer-2 (current-output-port))
-
-(data-frame-write-tab (data-frame+ data-frame-integer-1 data-frame-integer-2) (current-output-port))
-
 ;(: data-frame- (DataFrame DataFrame [#:on (Listof Symbol)] -> DataFrame))
 (: data-frame- (DataFrame DataFrame -> DataFrame))
 (define (data-frame- dfa dfb)
@@ -172,14 +142,6 @@
                          (filter (λ: ((name : Label))
                                    (set-member? append-cols name))
                                  (data-frame-names dfa)))))
-
-(displayln "data-frame- Test 1")
-
-(data-frame-write-tab data-frame-integer-1 (current-output-port))
-
-(data-frame-write-tab data-frame-integer-2 (current-output-port))
-
-(data-frame-write-tab (data-frame- data-frame-integer-1 data-frame-integer-2) (current-output-port))
 
 ;(: data-frame* (DataFrame DataFrame [#:on (Listof Symbol)] -> DataFrame))
 (: data-frame* (DataFrame DataFrame -> DataFrame))
@@ -208,14 +170,6 @@
                                    (set-member? append-cols name))
                                  (data-frame-names dfa)))))
 
-(displayln "data-frame* Test 1")
-
-(data-frame-write-tab data-frame-integer-1 (current-output-port))
-
-(data-frame-write-tab data-frame-integer-2 (current-output-port))
-
-(data-frame-write-tab (data-frame* data-frame-integer-1 data-frame-integer-2) (current-output-port))
-
 ;(: data-frame/ (DataFrame DataFrame [#:on (Listof Symbol)] -> DataFrame))
 (: data-frame/ (DataFrame DataFrame -> DataFrame))
 (define (data-frame/ dfa dfb)
@@ -243,14 +197,6 @@
                                    (set-member? append-cols name))
                                  (data-frame-names dfa)))))
 
-(displayln "data-frame/ Test 1")
-
-(data-frame-write-tab data-frame-integer-1 (current-output-port))
-
-(data-frame-write-tab data-frame-integer-2 (current-output-port))
-
-(data-frame-write-tab (data-frame/ data-frame-integer-1 data-frame-integer-2) (current-output-port))
-
 ;(: data-frame% (DataFrame DataFrame [#:on (Listof Symbol)] -> DataFrame))
 (: data-frame% (DataFrame DataFrame -> DataFrame))
 (define (data-frame% dfa dfb)
@@ -272,14 +218,6 @@
                                    (set-member? append-cols name))
                                  (data-frame-names dfa)))))
 
-(displayln "data-frame% Test 1")
-
-(data-frame-write-tab data-frame-integer-1 (current-output-port))
-
-(data-frame-write-tab data-frame-integer-2 (current-output-port))
-
-(data-frame-write-tab (data-frame% data-frame-integer-1 data-frame-integer-2) (current-output-port))
-
 (: data-frame-r (DataFrame DataFrame -> DataFrame))
 (define (data-frame-r dfa dfb)
   (define: cols-a    : (Setof Label) (list->set (data-frame-names dfa)))
@@ -299,15 +237,6 @@
                          (filter (λ: ((name : Label))
                                    (set-member? append-cols name))
                                  (data-frame-names dfa)))))
-
-(displayln "data-frame-r Test 1")
-
-(data-frame-write-tab data-frame-integer-1 (current-output-port))
-
-(data-frame-write-tab data-frame-integer-2 (current-output-port))
-
-(data-frame-write-tab (data-frame-r data-frame-integer-1 data-frame-integer-2) (current-output-port))
-
 
 ;(: data-frame= (DataFrame DataFrame [#:on (Listof Symbol)] -> DataFrame))
 (: data-frame= (DataFrame DataFrame -> DataFrame))
@@ -336,14 +265,6 @@
                                    (set-member? matching-cols name))
                                  (data-frame-names dfa)))))
 
-(displayln "data-frame= Test 1")
-
-(data-frame-write-tab data-frame-integer-1 (current-output-port))
-
-(data-frame-write-tab data-frame-integer-2 (current-output-port))
-
-(data-frame-write-tab (data-frame= data-frame-integer-1 data-frame-integer-2) (current-output-port))
-
 ;(: data-frame!= (DataFrame DataFrame [#:on (Listof Symbol)] -> DataFrame))
 (: data-frame!= (DataFrame DataFrame -> DataFrame))
 (define (data-frame!= dfa dfb)
@@ -370,14 +291,6 @@
                          (filter (λ: ((name : Label))
                                    (set-member? matching-cols name))
                                  (data-frame-names dfa)))))
-
-(displayln "data-frame!= Test 1")
-
-(data-frame-write-tab data-frame-integer-1 (current-output-port))
-
-(data-frame-write-tab data-frame-integer-2 (current-output-port))
-
-(data-frame-write-tab (data-frame!= data-frame-integer-1 data-frame-integer-2) (current-output-port))
 
 ;(: data-frame< (DataFrame DataFrame [#:on (Listof Symbol)] -> DataFrame))
 (: data-frame< (DataFrame DataFrame -> DataFrame))
@@ -406,14 +319,6 @@
                                    (set-member? matching-cols name))
                                  (data-frame-names dfa)))))
 
-(displayln "data-frame< Test 1")
-
-(data-frame-write-tab data-frame-integer-1 (current-output-port))
-
-(data-frame-write-tab data-frame-integer-2 (current-output-port))
-
-(data-frame-write-tab (data-frame< data-frame-integer-1 data-frame-integer-2) (current-output-port))
-
 ;(: data-frame> (DataFrame DataFrame [#:on (Listof Symbol)] -> DataFrame))
 (: data-frame> (DataFrame DataFrame -> DataFrame))
 (define (data-frame> dfa dfb)
@@ -440,14 +345,6 @@
                          (filter (λ: ((name : Label))
                                    (set-member? matching-cols name))
                                  (data-frame-names dfa)))))
-
-(displayln "data-frame> Test 1")
-
-(data-frame-write-tab data-frame-integer-1 (current-output-port))
-
-(data-frame-write-tab data-frame-integer-2 (current-output-port))
-
-(data-frame-write-tab (data-frame> data-frame-integer-1 data-frame-integer-2) (current-output-port))
 
 ;(: data-frame<= (DataFrame DataFrame [#:on (Listof Symbol)] -> DataFrame))
 (: data-frame<= (DataFrame DataFrame -> DataFrame))
@@ -476,14 +373,6 @@
                                    (set-member? matching-cols name))
                                  (data-frame-names dfa)))))
 
-(displayln "data-frame<= Test 1")
-
-(data-frame-write-tab data-frame-integer-1 (current-output-port))
-
-(data-frame-write-tab data-frame-integer-2 (current-output-port))
-
-(data-frame-write-tab (data-frame<= data-frame-integer-1 data-frame-integer-2) (current-output-port))
-
 ;(: data-frame>= (DataFrame DataFrame [#:on (Listof Symbol)] -> DataFrame))
 (: data-frame>= (DataFrame DataFrame -> DataFrame))
 (define (data-frame>= dfa dfb)
@@ -511,13 +400,6 @@
                                    (set-member? matching-cols name))
                                  (data-frame-names dfa)))))
 
-(displayln "data-frame>= Test 1")
-
-(data-frame-write-tab data-frame-integer-1 (current-output-port))
-
-(data-frame-write-tab data-frame-integer-2 (current-output-port))
-
-(data-frame-write-tab (data-frame>= data-frame-integer-1 data-frame-integer-2) (current-output-port))
 
 ;(: data-frame-abs (DataFrame [#:on (Listof Symbol)] -> DataFrame))
 (: data-frame-abs (DataFrame -> DataFrame))
@@ -532,26 +414,6 @@
                                                 "Incorrect series type ~a, must be Integer or Numeric."
                                                 (series-type df-series)))))))
                        (data-frame-names df))))
-
-(displayln "data-frame-abs Test 1")
-
-(data-frame-write-tab data-frame-integer-1 (current-output-port))
-
-(define columns-integer-3
-  (list 
-   (cons 'col1 (new-ISeries (vector -1 -2 -3 -4) #f))
-   (cons 'col2 (new-ISeries (vector -5 -6 -7 -8) #f))
-   (cons 'col3 (new-ISeries (vector -9 -10 -11 -12) #f))
-   (cons 'col4 (new-ISeries (vector -21 -22 -23 -24) #f))))
-
-; create new data-frame-integer-3
-(define data-frame-integer-3 (new-data-frame columns-integer-3))
-
-(data-frame-write-tab data-frame-integer-3 (current-output-port))
-
-(data-frame-write-tab (data-frame-abs data-frame-integer-1) (current-output-port))
-
-(data-frame-write-tab (data-frame-abs data-frame-integer-3) (current-output-port))
 
 ; DataFrame.apply(func[, axis, broadcast, ...])	Applies function along input axis of DataFrame.
 ; (: data-frame-apply func)
@@ -610,14 +472,5 @@
 	      (cons (column-heading col) (series-complete builder))))
 
   (new-data-frame new-series))
-
-(displayln "data-frame-filter test")
-
-(displayln "data-frame-integer-3")
-(data-frame-write-tab data-frame-integer-3 (current-output-port))
-
-; data-frame-filter tests
-(displayln "data-frame-filter result")
-(data-frame-write-tab (data-frame-filter data-frame-integer-3 (new-BSeries (vector #f #t #t #f) #f)) (current-output-port))
 
 ; ***********************************************************

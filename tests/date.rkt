@@ -10,10 +10,10 @@
  (only-in grip/data/datetime/parse
 	  parse-date)
  (only-in "categorical-series.rkt"
-	  CSeries new-CSeries cseries-data
+	  CSeries
 	  cseries-length cseries-referencer)
  (only-in "integer-series.rkt"
-	  ISeries iseries-data
+	  ISeries
 	  new-ISeries)
  (only-in "integer-series-builder.rkt"
 	  new-ISeriesBuilder
@@ -29,10 +29,5 @@
 	((= idx clen) (complete-ISeriesBuilder ibuilder))
       (let ((date (parse-date (symbol->string (cref idx)))))
 	(if date
-            (begin
-              (displayln date)
-              (displayln (date->julian-day-number date))
-	    (append-ISeriesBuilder ibuilder (assert (date->julian-day-number date) fixnum?)))
+	    (append-ISeriesBuilder ibuilder (assert (date->julian-day-number date) fixnum?))
 	    (error 'as-julian-day-numbers "Invalid date: ~s" date))))))
-
-(iseries-data (as-julian-day-numbers (new-CSeries (vector '12/25/2015 '01/01/2016 '05/19/1995 '11/10/1996))))

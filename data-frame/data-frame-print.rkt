@@ -12,11 +12,6 @@
 ; This module provides data frame printing functionality.
 ; ***********************************************************
 
-; **************************
-; Test cases are at bottom
-; of file.
-; **************************
-
 ; ***********************************************************
 ; Provide functions in this file to other files.
 
@@ -217,16 +212,16 @@
 	 (let ((a-series (vector-ref series col)))
 	   (cond
              ((GenSeries? a-series)
-              (display (gen-series-iref a-series (list row)) outp))
+              (display (car (assert (gen-series-iref a-series (list row)) list?)) outp))
              ((NSeries? a-series)
-              (let ((n (nseries-iref a-series (list row))))
+              (let ((n (car (assert (nseries-iref a-series (list row)) list?))))
                 (display n outp)))
              ((CSeries? a-series)
-              (display (cseries-iref a-series (list row)) outp))
+              (display (car (assert (cseries-iref a-series (list row)) list?)) outp))
              ((ISeries? a-series)
-              (display (iseries-iref a-series (list row)) outp))
+              (display (car (assert (iseries-iref a-series (list row)) list?)) outp))
              ((BSeries? a-series)
-              (display (bseries-iref a-series (list row)) outp))
+              (display (car (assert (bseries-iref a-series (list row)) list?)) outp))
              (else
               (error 'frame-head "Unknown series types ~s"
                      (series-type a-series)))))))

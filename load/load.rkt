@@ -1,8 +1,8 @@
 #lang typed/racket
 
 (provide:
- [determine-schema (FilePath Integer -> Schema)]
- [load-csv-file (String [#:schema (Option Schema)] [#:delim (Option String)] -> DataFrame)]
+ [determine-schema (FilePath Integer String -> Schema)]
+ [load-csv-file (String [#:schema (Option Schema)] -> DataFrame)]
  [load-delimited-file (String String [#:schema (Option Schema)] -> DataFrame)])
 
 (require
@@ -110,16 +110,16 @@
 		       (anon-headers (length cols)))))
       (new-data-frame ((inst zip Symbol Series) headers cols)))))
 
-(: schema-if-needed ((Option Schema) FilePath -> Schema))
-(define (schema-if-needed schema fpath)
+(: schema-if-needed ((Option Schema) FilePath (Option String) -> Schema))
+(define (schema-if-needed schema fpath delim)
   (define SAMPLE-SIZE 20)
-  (if schema schema (determine-schema fpath SAMPLE-SIZE)))
+  (if schema schema (determine-schema fpath SAMPLE-SIZE (if delim delim ","))))
 
 ; delimiter must be specified by user if no schema provided, need to still do this
-(: load-csv-file (String [#:schema (Option Schema)] [#:delim (Option String)] -> DataFrame))
-(define (load-csv-file fpath-str #:schema [schema #f] #:delim [delim #f])
+(: load-csv-file (String [#:schema (Option Schema)] -> DataFrame))
+(define (load-csv-file fpath-str #:schema [schema #f])
   (let* ((fpath (FilePath fpath-str))
-         (schema (schema-if-needed schema fpath)))
+         (schema (schema-if-needed schema fpath #f)))
     (make-data-frame schema (read-csv-file fpath
 				      (Schema-has-headers schema)
 				      (new-DataFrameBuilder-from-Schema schema)))))
@@ -127,43 +127,47 @@
 (: load-delimited-file (String String [#:schema (Option Schema)] -> DataFrame))
 (define (load-delimited-file fpath-str delim #:schema [schema #f])
   (let* ((fpath (FilePath fpath-str))
-         (schema (schema-if-needed schema fpath)))
+         (schema (schema-if-needed schema fpath delim)))
     (make-data-frame schema (read-delimited-file fpath
                                                  (Schema-has-headers schema)
                                                  (new-DataFrameBuilder-from-Schema schema)
                                                  delim))))
 
-(: determine-schema (FilePath Integer -> Schema))
-(define (determine-schema fpath cnt)
+(: determine-schema (FilePath Integer String -> Schema))
+(define (determine-schema fpath cnt delim)
   (check-data-file-exists fpath)
-  (determine-schema-from-sample (sample-formatted-file fpath cnt) ","))
+  (determine-schema-from-sample (sample-formatted-file fpath cnt) delim))
 
 ; test cases
 
-;(data-frame-explode fruits-data-frame)
+(define salary-schema (Schema #t (list (ColumnInfo 'first 'CATEGORICAL) (ColumnInfo 'last 'CATEGORICAL)
+                                       (ColumnInfo 'age 'INTEGER) (ColumnInfo 'dollar 'CATEGORICAL)
+                                       (ColumnInfo 'phone 'CATEGORICAL))))
 
 (define random-demographic-schema (Schema #t (list (ColumnInfo 'first 'CATEGORICAL) (ColumnInfo 'last 'CATEGORICAL)
                                                    (ColumnInfo 'gender 'CATEGORICAL) (ColumnInfo 'yn 'CATEGORICAL)
                                                    (ColumnInfo 'char 'GENERIC) (ColumnInfo 'float 'NUMERIC))))
 
 ; read csv
-;(define fruits-data-frame-csv (load-csv-file (FilePath "../data-frame/fruits.csv") #:schema fruits-schema))
+(define salary-data-frame-csv-schema (load-csv-file "../sample-csv/salary.csv" #:schema salary-schema))
 
-;(data-frame-write-tab fruits-data-frame-csv (current-output-port))
+(data-frame-head salary-data-frame-csv-schema)
+
+(displayln "NO SCHEMA");
 
 ; no schema
-;(define fruits-data-frame-csv-no-schema (load-csv-file (FilePath "../data-frame/fruits.csv") #:schema #f))
+(define salary-data-frame-csv-no-schema (load-csv-file "../sample-csv/salary.csv" #:schema #f))
 
-;(data-frame-write-tab fruits-data-frame-csv-no-schema (current-output-port))
+(data-frame-head salary-data-frame-csv-no-schema)
 
 ; read delimited
-;(define random-demographic-data-frame-delimited (load-delimited-file "../sample-csv/random_demographic.csv" "|" #:schema random-demographic-schema))
+(define random-demographic-data-frame-delimited (load-delimited-file "../sample-csv/random_demographic.csv" "|" #:schema random-demographic-schema))
 
-;(data-frame-head random-demographic-data-frame-delimited)
+(data-frame-head random-demographic-data-frame-delimited)
 
 ;(series-data (data-frame-series random-demographic-data-frame-delimited 'char))
 
 ; no schema
-;(define fruits-data-frame-delimited-no-schema (load-delimited-file (FilePath "../data-frame/fruits.csv") "," #:schema #f))
+(define fruits-data-frame-delimited-no-schema (load-delimited-file "../sample-csv/random_demographic.csv" "|" #:schema #f))
 
-;(data-frame-write-tab fruits-data-frame-delimited-no-schema (current-output-port))
+(data-frame-head fruits-data-frame-delimited-no-schema)

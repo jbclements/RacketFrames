@@ -1947,6 +1947,32 @@ data-frame-groupby aggregate count
 
 @section[#:style 'toc]{Loading}
 
+Read CSV (comma-separated or other delimitted) file into DataFrame.
+
+@codeblock|{
+; read csv
+(define salary-data-frame-csv-schema (load-csv-file "../sample-csv/salary.csv" #:schema salary-schema))
+
+(data-frame-head salary-data-frame-csv-schema)
+
+(displayln "NO SCHEMA");
+
+; no schema
+(define salary-data-frame-csv-no-schema (load-csv-file "../sample-csv/salary.csv" #:schema #f))
+
+(data-frame-head salary-data-frame-csv-no-schema)
+
+; read delimited
+(define random-demographic-data-frame-delimited (load-delimited-file "../sample-csv/random_demographic.csv" "|" #:schema random-demographic-schema))
+
+(data-frame-head random-demographic-data-frame-delimited)
+
+; no schema
+(define fruits-data-frame-delimited-no-schema (load-delimited-file "../sample-csv/random_demographic.csv" "|" #:schema #f))
+
+(data-frame-head fruits-data-frame-delimited-no-schema) }|
+
+
 @section[#:style 'toc]{Plotting}
 
 @section[#:style 'toc]{Aggregation}

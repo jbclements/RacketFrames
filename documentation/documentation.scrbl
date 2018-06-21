@@ -1028,6 +1028,55 @@ levels shown in the table-of-contents panel.
 
 @; ======================================================================
 
+@section[#:tag "Indexing"]{Indexing}
+
+@itemlist[
+
+ @item{
+The axis labeling information in RacketFrame objects serves many purposes:
+
+Identifies data (i.e. provides metadata) using known indicators, important for analysis, visualization, and interactive console display.
+Enables automatic and explicit data alignment.
+Allows intuitive getting and setting of subsets of the data set.
+In this section, we will focus on the final point: namely, how to slice, dice, and generally get and set subsets of pandas objects. The primary focus will be on Series and DataFrame as they have received more development attention in this area.
+}
+
+]
+
+@subsection[#:style 'toc]{Index}
+
+@subsubsection[#:tag "data-frame-loc"]{data-frame-loc}
+
+@"\U2190" data-frame-loc is primarily label based, but may also be used with a boolean array. data-frame-loc will raise KeyError when the items are not found. Allowed inputs are:
+
+A single label, e.g. 5 or 'a' (Note that 5 is interpreted as a label of the index. This use is not an integer position along the index.).
+
+A list or array of labels ['a', 'b', 'c'].
+
+A slice object with labels 'a':'f' (Note that contrary to usual python slices, both the start and the stop are included, when present in the index! See Slicing with labels.).
+
+A boolean array.
+
+A callable function with one argument (the calling Series, DataFrame or Panel) and that returns valid output for indexing (one of the above).
+
+@subsubsection[#:tag "data-frame-iloc"]{data-frame-iloc}
+
+data-frame-iloc is primarily integer position based (from 0 to length-1 of the axis), but may also be used with a boolean array. data-frame-iloc will raise IndexError if a requested indexer is out-of-bounds, except slice indexers which allow out-of-bounds indexing. (this conforms with Python/NumPy slice semantics). Allowed inputs are:
+
+An integer e.g. 5.
+
+A list or array of integers [4, 3, 0].
+
+A slice object with ints 1:7.
+
+A boolean array.
+
+A callable function with one argument (the calling Series, DataFrame or Panel) and that returns valid output for indexing (one of the above).
+
+@subsection[#:style 'toc]{MultiIndex}
+
+@subsection[#:style 'toc]{DateTimeIndex}
+
 @; ======================================================================
 @section{DataFrames}
 
@@ -1054,7 +1103,7 @@ Returns a new DataFrame.
 }
 
 @codeblock|{
-    ;******************
+   ;******************
   ;data-frame-integer
   ;******************
   ; will define parse to automatically build this columns structure
@@ -1896,9 +1945,11 @@ data-frame-groupby aggregate count
 ;; output ;;
   }|
 
-@subsection[#:style 'toc]{Loading}
+@section[#:style 'toc]{Loading}
 
-@subsection[#:style 'toc]{Plotting}
+@section[#:style 'toc]{Plotting}
+
+@section[#:style 'toc]{Aggregation}
 
 @local-table-of-contents[]
 

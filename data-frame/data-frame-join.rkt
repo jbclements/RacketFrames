@@ -837,10 +837,6 @@
 			      (λ () (list))))
 	      (loop (add1 i))))))
 
-#| (: group-hash-to-data-frame (GroupHash -> DataFrame))
-(deifne (group-hash-to-data-frame group-hash)
-        (new-data-frame)) |#
-
 ; ***********************************************************
 
 ; ***********************************************************
@@ -848,7 +844,7 @@
 
 ; Applies the aggregate function specificed by function-name to the values in
 ; the column-name column. Currently supports 3: sum, avg, count.
-(: apply-agg-data-frame (Symbol GroupHash -> AggValueHash))
+(: apply-agg-data-frame (Symbol GroupHash -> Series))
 (define (apply-agg-data-frame function-name group-hash)
   (define len (hash-count group-hash))
 
@@ -871,11 +867,38 @@
                                   [(eq? function-name 'max) (argmax (lambda ([x : Real]) x) val)]
                                   [else (error 'apply-agg-data-frame "Unknown aggregate function.")])))))
 
-  agg-value-hash)
+  (agg-value-hash-to-series agg-value-hash))
 
-#| (: agg-value-hash-to-data-frame (AggValueHash -> DataFrame))
-(deifne (group-hash-to-data-frame agg-value-hash)
-        (new-data-frame)) |#
+(: make-agg-value-hash-sindex ((Listof (Pair String GenericType)) -> SIndex))
+(define (make-agg-value-hash-sindex sorted-agg-value-hash)
+  (let ((index : SIndex (make-hash '()))
+          (len (length sorted-agg-value-hash)))
+    
+      (begin
+        (let loop ([i 0])
+          (if (>= i len)
+              index
+              (let: ((i : Index (assert i index?)))
+                (let ((key (car (list-ref sorted-agg-value-hash i))))
+                  (hash-update! index (string->symbol key)
+                                (λ: ((idx : (Listof Index)))
+                                  (append idx (list i)))
+                                (λ () (list))))
+                (loop (add1 i)))))
+        index)))
+
+(: agg-value-hash-to-series (AggValueHash -> Series))
+(define (agg-value-hash-to-series agg-value-hash)
+  (let ((sorted-agg-value-hash
+         ((inst sort (Pair String GenericType) (Pair String GenericType))
+         (hash->list agg-value-hash)
+         (λ: ((kv1 : (Pair String GenericType))
+              (kv2 : (Pair String GenericType)))
+           (string<? (car kv1) (car kv2))))))
+
+    (let ((index : SIndex (make-agg-value-hash-sindex sorted-agg-value-hash)))
+      (new-GenSeries (for/vector: : (Vectorof GenericType) ([p sorted-agg-value-hash])
+                       (cdr p)) index))))
 
 ; **********************************************************
 

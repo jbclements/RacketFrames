@@ -5,16 +5,8 @@
 ; LabelIndex structs from indexed-series.
 (require
  racket/unsafe/ops
- (only-in "../../data-frame/indexed-series.rkt"
-	  build-index-from-labels
-	  Label SIndex LabelIndex
-          label-index label->idx)
-
- (only-in "../../data-frame/integer-series.rkt"
-          new-ISeries
-          iseries-iref
-          iseries-label-ref
-          iseries-range))
+ "../../../data-frame/indexed-series.rkt"
+ "../../../data-frame/integer-series.rkt")
 
 (require racket/format)
 ; ***********************************************************
@@ -89,7 +81,7 @@
 #| def time_getitem_scalar(self, index):
       self.data[800000] |#
 (define i-ref-bench-before (now))
-(define iseries-iref-value (iseries-iref series-integer 80000))
+(define iseries-iref-value (iseries-iloc series-integer 80000))
 (define i-ref-bench-after (- (now) i-ref-bench-before))
 
 (fprintf (current-output-port)
@@ -105,6 +97,27 @@
 (fprintf (current-output-port)
          "Integer Series range bench ~v ms.\n"
          i-range-bench-after)
+
+#| def time_getitem_list_like(self, index):
+        self.data[[800000]] |#
+(define i-list-like-bench-before (now))
+(define iseries-list-like-80000 (iseries-iloc series-integer (list 80000)))
+(define i-list-like-bench-after (- (now) i-list-like-bench-before))
+
+(fprintf (current-output-port)
+         "Integer Series list-like bench ~v ms.\n"
+         i-list-like-bench-after)
+
+#| def time_iloc_slice(self, index):
+        self.data.iloc[:800000] |#
+
+(define i-iloc-range-80000-before (now))
+(define iseries-iloc-range-80000 (iseries-iloc series-integer (range 80000)))
+(define i-iloc-range-80000-after (- (now) i-list-like-bench-before))
+
+(fprintf (current-output-port)
+         "Integer Series iloc range bench ~v ms.\n"
+         i-iloc-range-80000-after)
 
 (: label-index (Listof Symbol))
 (define label-index (for/list: : (Listof Symbol)

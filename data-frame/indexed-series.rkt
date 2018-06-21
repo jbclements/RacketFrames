@@ -26,7 +26,8 @@
  [label-sort-lexical (LabelIndex -> Labeling)]
  [gseries-length (GSeries -> Index)]
  [gseries-data (All (A) (GSeries A) -> (Vectorof A))]
- [build-multi-index-from-list ((Listof (Listof GenericType)) -> SIndex)])
+ [build-multi-index-from-list ((Listof (Listof GenericType)) -> SIndex)]
+ [labeling (LabelIndex -> (Listof (Pair Label (Listof Index))))])
 
 (provide
  SIndex Labeling ListofLabel?
@@ -245,6 +246,8 @@
 		labels))))
 ; ***********************************************************
 
+; ***********************************************************
+
 (define-type GenericType Any)
 
 (define key-delimiter "\t")
@@ -292,5 +295,4 @@
 (build-multi-index-from-list (list (list 'a 'b 'c) (list 1 2 3)))
 
 (build-multi-index-from-list (list (list 'a 'b 'c 'a 'c) (list 1 2 3 4 3)))
-
 ; ***********************************************************

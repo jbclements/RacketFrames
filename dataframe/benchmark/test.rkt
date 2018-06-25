@@ -1,6 +1,10 @@
 #lang racket
 
-(require benchmark plot/pict racket/match racket/vector racket/list)
+(require "../main.rkt"
+         plot/pict
+         racket/match
+         racket/vector
+         racket/list)
 ; list/vector sizes
 (define sizes (list 50000 100000))
 (define lists (map (lambda (i) (range i)) sizes))

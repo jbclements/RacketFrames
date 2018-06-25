@@ -8,7 +8,7 @@
 
 (require racket/flonum)
 
-(require RacketFrames)
+(require "../main.rkt")
 
 ; ***********************************************************
 ; Test Cases

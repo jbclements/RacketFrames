@@ -11,50 +11,50 @@
 	  set-intersect set-subtract)
  (only-in grip/data/symbol
 	  symbol-prefix)
- (only-in "../../data-frame/indexed-series.rkt"
+ (only-in "../../../data-frame/indexed-series.rkt"
 	  Label Labeling LabelProjection)
- (only-in "../../data-frame/series.rkt"
+ (only-in "../../../data-frame/series.rkt"
 	  series-complete)
- (only-in "../../data-frame/series-description.rkt"
+ (only-in "../../../data-frame/series-description.rkt"
 	  SeriesType Series
 	  SeriesDescription-type
 	  series-type series-length
           series-data)
- (only-in "../../data-frame/data-frame.rkt"
+ (only-in "../../../data-frame/data-frame.rkt"
 	  DataFrame new-data-frame data-frame-names
 	  data-frame-cseries data-frame-explode data-frame-extend
 	  DataFrameDescription DataFrameDescription-series data-frame-description
           Column Columns)
- (only-in "../../data-frame/data-frame-concat.rkt"
+ (only-in "../../../data-frame/data-frame-concat.rkt"
           data-frame-concat-vertical
           data-frame-concat-vertical-list
           data-frame-concat-horizontal
           data-frame-concat-horizontal-list)
- (only-in "../../data-frame/numeric-series.rkt"
+ (only-in "../../../data-frame/numeric-series.rkt"
 	  NSeries NSeries? nseries-iref nseries-label-ref new-NSeries)
- (only-in "../../data-frame/integer-series.rkt"
+ (only-in "../../../data-frame/integer-series.rkt"
 	  ISeries ISeries? iseries-iref new-ISeries
 	  iseries-referencer)
- (only-in "../../data-frame/categorical-series.rkt"
+ (only-in "../../../data-frame/categorical-series.rkt"
 	  cseries-referencer cseries-length cseries-iref
 	  CSeries CSeries? new-CSeries)
- (only-in "../../data-frame/series-builder.rkt"
+ (only-in "../../../data-frame/series-builder.rkt"
 	  SeriesBuilder)
- (only-in "../../data-frame/integer-series-builder.rkt"
+ (only-in "../../../data-frame/integer-series-builder.rkt"
 	  ISeriesBuilder ISeriesBuilder?
 	  append-ISeriesBuilder complete-ISeriesBuilder
 	  new-ISeriesBuilder)
- (only-in "../../data-frame/categorical-series-builder.rkt"
+ (only-in "../../../data-frame/categorical-series-builder.rkt"
 	  CSeriesBuilder CSeriesBuilder?
 	  append-CSeriesBuilder complete-CSeriesBuilder
 	  new-CSeriesBuilder)
- (only-in "../../data-frame/categorical-series-ops.rkt"
+ (only-in "../../../data-frame/categorical-series-ops.rkt"
 	  cseries-append)
- (only-in "../../data-frame/numeric-series-builder.rkt"
+ (only-in "../../../data-frame/numeric-series-builder.rkt"
 	  NSeriesBuilder NSeriesBuilder?
 	  append-NSeriesBuilder complete-NSeriesBuilder
 	  new-NSeriesBuilder)
- (only-in "../../data-frame/data-frame-print.rkt"
+ (only-in "../../../data-frame/data-frame-print.rkt"
           frame-write-tab))
 
 #|  def setup(self, axis, ignore_index):

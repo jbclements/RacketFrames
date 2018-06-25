@@ -11,20 +11,20 @@
 	  set-intersect set-subtract)
  (only-in grip/data/symbol
 	  symbol-prefix)
- (only-in "../../data-frame/indexed-series.rkt"
+ (only-in "../../../data-frame/indexed-series.rkt"
 	  Label Labeling LabelProjection)
- (only-in "../../data-frame/series.rkt"
+ (only-in "../../../data-frame/series.rkt"
 	  series-complete)
- (only-in "../../data-frame/data-frame.rkt"
+ (only-in "../../../data-frame/data-frame.rkt"
 	  DataFrame new-data-frame
 	  data-frame-cseries data-frame-extend)
- (only-in "../../data-frame/data-frame-concat.rkt"
+ (only-in "../../../data-frame/data-frame-concat.rkt"
           data-frame-concat-vertical)
- (only-in "../../data-frame/numeric-series.rkt"
+ (only-in "../../../data-frame/numeric-series.rkt"
 	  NSeries nseries-iref nseries-label-ref new-NSeries)
- (only-in "../../data-frame/integer-series.rkt"
+ (only-in "../../../data-frame/integer-series.rkt"
 	  ISeries iseries-iref new-ISeries)
- (only-in "../../data-frame/categorical-series.rkt"
+ (only-in "../../../data-frame/categorical-series.rkt"
           cseries-iref
 	  CSeries new-CSeries))
 

@@ -6,7 +6,7 @@
 #lang typed/racket
 (require typed/rackunit)
 
-(require RacketFrames)
+(require "../main.rkt")
 
 ; create generic series
 (define series-generic (new-GenSeries (vector 1 2.5 'categorical #t)

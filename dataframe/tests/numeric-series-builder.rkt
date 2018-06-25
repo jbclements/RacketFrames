@@ -6,4 +6,4 @@
 #lang typed/racket
 (require typed/rackunit)
 
-(require RacketFrames)
+(require "../main.rkt")

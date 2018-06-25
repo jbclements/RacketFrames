@@ -7,7 +7,7 @@
 (require typed/rackunit)
 (require math/statistics)
 
-(require RacketFrames)
+(require "../main.rkt")
 
 ; ***********
 ; Test Cases

@@ -7,8 +7,8 @@
  [read-csv-file (FilePath Boolean DataFrameBuilder -> DataFrameBuilder)])
 
 (require
- (only-in grip/system/filepath
-	  FilePath)
+ (only-in "../util/filepath.rkt"
+	  FilePath FilePath->string)
  (only-in "types.rkt"
 	  LineParser)
  (only-in "delimited-common.rkt"

@@ -33,11 +33,11 @@
  racket/flonum
  racket/set
  (only-in racket/set
-	  set set-member?
+          set set-member?
 	  list->set set->list
 	  set-intersect set-subtract)
- (only-in grip/data/symbol
-	  symbol-prefix)
+ (only-in "../util/symbol.rkt"
+          symbol-prefix)
  (only-in "indexed-series.rkt"
 	  SIndex Label Labeling LabelProjection)
  (only-in "series.rkt"

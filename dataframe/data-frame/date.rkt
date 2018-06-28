@@ -5,9 +5,9 @@
 
 (require
  racket/fixnum
- (only-in grip/data/datetime/convert
+ (only-in "../util/datetime/convert.rkt"
           date->julian-day-number)
- (only-in grip/data/datetime/parse
+ (only-in "../util/datetime/parse.rkt"
 	  parse-date)
  (only-in "categorical-series.rkt"
 	  CSeries new-CSeries cseries-data

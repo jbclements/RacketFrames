@@ -1,4 +1,4 @@
-#lang typed/racket/base
+#lang typed/racket
 
 (provide:
  [check-data-file-exists (FilePath -> Void)]
@@ -7,7 +7,7 @@
  [read-formatted-file (FilePath Boolean (Tank String DataFrameBuilder) -> DataFrameBuilder)])
 
 (require
- (only-in grip/system/filepath
+ (only-in "../util/filepath.rkt"
 	  FilePath FilePath->string)
  (only-in pipe
 	  Tank Stream Continue Done

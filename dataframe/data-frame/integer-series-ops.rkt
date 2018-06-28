@@ -9,19 +9,19 @@
  [iseries-notna (ISeries -> BSeries)])
 
 (require
- (only-in grip/data/format
-	  ~a)
- (only-in racket/vector
-	  vector-copy)
- (only-in "integer-series.rkt"
-	  ISeries new-ISeries iseries-data iseries-length iseries-referencer iseries-iref)
- (only-in "boolean-series.rkt"
-	  BSeries new-BSeries bseries-data bseries-length bseries-referencer bseries-iref)
- (only-in "integer-series-builder.rkt"
-	  ISeriesBuilder
-	  new-ISeriesBuilder
-	  append-ISeriesBuilder
-	  complete-ISeriesBuilder))
+  (only-in racket/vector
+           vector-copy)
+  (only-in "../util/format.rkt"
+           ~a)
+  (only-in "integer-series.rkt"
+           ISeries new-ISeries iseries-data iseries-length iseries-referencer iseries-iref)
+  (only-in "boolean-series.rkt"
+           BSeries new-BSeries bseries-data bseries-length bseries-referencer bseries-iref)
+  (only-in "integer-series-builder.rkt"
+           ISeriesBuilder
+           new-ISeriesBuilder
+           append-ISeriesBuilder
+           complete-ISeriesBuilder))
 
 (: iseries-append (ISeries ISeries -> ISeries))
 (define (iseries-append isa isb)

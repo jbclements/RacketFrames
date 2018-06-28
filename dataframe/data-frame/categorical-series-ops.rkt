@@ -7,17 +7,17 @@
  [cseries-append (CSeries CSeries -> CSeries)])
 
 (require 
- (only-in grip/data/format
-	  ~a)
- (only-in racket/vector
-	  vector-copy)
- (only-in "categorical-series.rkt"
-	  CSeries new-CSeries cseries-data CSeries-nominals cseries-length cseries-referencer)
- (only-in "categorical-series-builder.rkt"
-	  CSeriesBuilder
-	  new-CSeriesBuilder
-	  append-CSeriesBuilder
-	  complete-CSeriesBuilder))
+  (only-in racket/vector
+           vector-copy)
+  (only-in "../util/format.rkt"
+           ~a)
+  (only-in "categorical-series.rkt"
+           CSeries new-CSeries cseries-data CSeries-nominals cseries-length cseries-referencer)
+  (only-in "categorical-series-builder.rkt"
+           CSeriesBuilder
+           new-CSeriesBuilder
+           append-CSeriesBuilder
+           complete-CSeriesBuilder))
 
 (: cseries-append (CSeries CSeries -> CSeries))
 (define (cseries-append csa csb)

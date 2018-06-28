@@ -8,7 +8,7 @@
 
 (require
  racket/flonum
- (only-in grip/data/format
+ (only-in "../util/format.rkt"
 	  ~a)
  (only-in racket/vector
 	  vector-copy)

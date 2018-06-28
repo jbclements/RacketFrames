@@ -44,8 +44,6 @@
 (require
  racket/pretty
  racket/match
- (only-in grip/data/prelude
-          vadd1)
  (only-in racket/flonum
           make-flvector
           flvector-ref

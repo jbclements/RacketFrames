@@ -26,8 +26,8 @@
 
 (require
  racket/match
- (only-in grip/data/format
-	  ~a ~r)
+ (only-in "../util/format.rkt"
+	  ~a)
  (only-in "types.rkt"
 	  Dim Dim-rows)
  (only-in "indexed-series.rkt"

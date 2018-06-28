@@ -27,7 +27,7 @@
 	  set set-member?
 	  list->set set->list
 	  set-intersect set-subtract)
- (only-in grip/data/symbol
+ (only-in "../util/symbol.rkt"
 	  symbol-prefix)
  (only-in "indexed-series.rkt"
 	  Label Labeling LabelProjection)

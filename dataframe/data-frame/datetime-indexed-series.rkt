@@ -7,7 +7,7 @@
 (require typed/rackunit)
 
 (require
-  grip/data/datetime
+  "../util/datetime.rkt"
   (only-in racket/flonum
            make-flvector flvector? flvector
            flvector-ref flvector-set!

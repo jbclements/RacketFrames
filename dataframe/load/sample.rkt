@@ -118,22 +118,22 @@
 			  (transpose-rows-to-cols samples))))
 	    (Schema headers? (guess-series-meta headers cols)))))))
 
-(define schema-1 (determine-schema-from-sample (list "categorical header" "world" "fizz" "buzz") ","))
+;(define schema-1 (determine-schema-from-sample (list "categorical header" "world" "fizz" "buzz") ","))
 
-(Schema-headers schema-1)
+;(Schema-headers schema-1)
 
-(Schema-SeriesTypes schema-1)
+;(Schema-SeriesTypes schema-1)
 
-(transpose-rows-to-cols (list (list "hello" "world") (list "fizz" "buzz")))
+;(transpose-rows-to-cols (list (list "hello" "world") (list "fizz" "buzz")))
 
-(define schema-2 (determine-schema-from-sample (list "5.7" "generic header" "world" "fizz" "buzz" "1" "2.5") ","))
+;(define schema-2 (determine-schema-from-sample (list "5.7" "generic header" "world" "fizz" "buzz" "1" "2.5") ","))
 
-(Schema-headers schema-2)
+;(Schema-headers schema-2)
 
-(Schema-SeriesTypes schema-2)
+;(Schema-SeriesTypes schema-2)
 
-(define schema-3 (determine-schema-from-sample (list "generic header" "5.7" "world" "fizz" "buzz" "1" "2.5") ","))
+;(define schema-3 (determine-schema-from-sample (list "generic header" "5.7" "world" "fizz" "buzz" "1" "2.5") ","))
 
-(Schema-headers schema-3)
+;(Schema-headers schema-3)
 
-(Schema-SeriesTypes schema-3)
+;(Schema-SeriesTypes schema-3)

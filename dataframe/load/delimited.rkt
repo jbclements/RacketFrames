@@ -10,7 +10,6 @@
  (only-in "types.rkt"
 	  LineParser)
  (only-in "delimited-common.rkt"
-	  data-frame-builder-tank
 	  read-formatted-file)
  (only-in "data-frame-builder.rkt"
 	  DataFrameBuilder))
@@ -26,5 +25,5 @@
 
 (: read-delimited-file (FilePath Boolean DataFrameBuilder String -> DataFrameBuilder))
 (define (read-delimited-file fpath header? data-frame-builder delim)
-  (read-formatted-file fpath header? 
-		       (data-frame-builder-tank data-frame-builder (set-delimiter delim))))
+  (begin (read-formatted-file fpath header? data-frame-builder (set-delimiter delim))
+         data-frame-builder))

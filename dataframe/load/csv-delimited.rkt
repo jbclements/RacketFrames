@@ -12,7 +12,6 @@
  (only-in "types.rkt"
 	  LineParser)
  (only-in "delimited-common.rkt"
-	  data-frame-builder-tank
 	  read-formatted-file)
  (only-in "data-frame-builder.rkt"
 	  DataFrameBuilder))
@@ -150,5 +149,5 @@
 
 (: read-csv-file (FilePath Boolean DataFrameBuilder -> DataFrameBuilder))
 (define (read-csv-file fpath header? data-frame-builder)
-  (read-formatted-file fpath header?
-		       (data-frame-builder-tank data-frame-builder parse-csv-line)))
+  (begin (read-formatted-file fpath header? data-frame-builder parse-csv-line)
+         data-frame-builder))

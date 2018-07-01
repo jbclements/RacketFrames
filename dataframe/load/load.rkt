@@ -168,6 +168,6 @@
 ;(series-data (data-frame-series random-demographic-data-frame-delimited 'char))
 
 ; no schema
-(define fruits-data-frame-delimited-no-schema (load-delimited-file "../sample-csv/random_demographic.csv" "|" #:schema #f))
+(define random-demographic-data-frame-delimited-no-schema (load-delimited-file "../sample-csv/random_demographic.csv" "|" #:schema #f))
 
-(data-frame-head fruits-data-frame-delimited-no-schema)
+(data-frame-head random-demographic-data-frame-delimited-no-schema)

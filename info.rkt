@@ -1,3 +1,3 @@
 #lang info
-(define deps '("grip" "typed-racket-lib" "pipe"))
+(define deps '("typed-racket-lib"))
 (define collection 'multi)

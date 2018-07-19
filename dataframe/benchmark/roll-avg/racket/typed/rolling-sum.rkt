@@ -24,7 +24,7 @@
       0
       (+ dest (add-up-to (sub1 dest)) (roll-average (sub1 dest)))))
 
-(: main (Integer Integer -> Void))
-(define (main start end)
+(: main (-> Void))
+(define (main)
   (for ([i (range start (add1 end))])
     (displayln (roll-average i))))

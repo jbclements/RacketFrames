@@ -23,7 +23,7 @@
   (for ([i count])
     (reverse-lst lst)))
 
-(define (main size count)
+(define (main)
   (reverse-iterations count (build-lst size)))
 
-(main 10 10)
+(main)

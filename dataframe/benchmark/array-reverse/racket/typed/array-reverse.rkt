@@ -29,6 +29,6 @@
   (for ([i count])
     (reverse-lst lst)))
 
-(: main (Integer Integer -> Void))
-(define (main size count)
+(: main (-> Void))
+(define (main)
   (reverse-iterations count (build-lst size)))

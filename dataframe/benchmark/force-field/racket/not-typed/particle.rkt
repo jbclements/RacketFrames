@@ -6,9 +6,6 @@
 
 (struct Particle [position mass velocity])
 
-(define (dot a b)
-    (apply + (vector->list (vector-map * a b))))
-
 (define (force-form particle1 particle2)
   (let* ([distance (vector-substract (Particle-position particle1) (Particle-position particle2))]
          [magnitude (/ (* (Particle-mass particle1) (Particle-mass particle2)) (vector-dot distance distance))])

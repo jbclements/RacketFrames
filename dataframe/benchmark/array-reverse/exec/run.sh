@@ -1,54 +1,40 @@
-echo Crystal
-../xtime.rb ./base64_cr
 echo Go
-../xtime.rb ./base64_go
-echo GccGo
-../xtime.rb ./base64_go_gccgo
-echo Cpp
-../xtime.rb ./base64_cpp
+../../util/xtime.rb ./array_reverse_go 10 5
 echo C
-../xtime.rb ./base64_c
-echo C aklomp SSSE3
-../xtime.rb ./base64_c_ak_ssse
-echo Rust
-../xtime.rb ./base64_rs
-echo D
-../xtime.rb ./base64_d
-echo D Gdc
-../xtime.rb ./base64_d_gdc
-echo D Ldc
-../xtime.rb ./base64_d_ldc
-echo Nim Gcc
-../xtime.rb ./base64_nim_gcc
-echo Nim Clang
-../xtime.rb ./base64_nim_clang
-echo Julia
-../xtime.rb julia test.jl
-echo Scala
-../xtime.rb scala Base64
-echo Java
-../xtime.rb java -XX:+AggressiveOpts Base64Java
-echo Kotlin
-../xtime.rb java -jar Test-kt.jar
+../../util/xtime.rb ./array_reverse_c 10 5
+#echo Julia
+#../xtime.rb julia test.jl
+#echo Scala
+#../xtime.rb scala Base64
+# echo Java
+# ../util/xtime.rb java Main
 echo Javascript Node
-../xtime.rb node test.js
+../../util/xtime.rb node ../js/main.js 10 5
+echo Javascript Builtin Node
+../../util/xtime.rb node ../js/main_builtin.js 10 5
 echo Python PyPy
-../xtime.rb pypy test.py
+../../util/xtime.rb pypy ../python/main2.py 10 5
+echo Python PyPy
+../../util/xtime.rb pypy ../python/main2_builtin.py 10 5
+echo Python PyPy
+../../util/xtime.rb pypy ../python/main3.py 10 5
+echo Python PyPy
+../../util/xtime.rb pypy ../python/main3_builtin.py 10 5
 echo Python
-../xtime.rb python test.py
+../../util/xtime.rb python ../python/main2.py 10 5
+echo Python
+../../util/xtime.rb python ../python/main2_builtin.py 10 5
 echo Python3
-../xtime.rb python3 test.py
+../../util/xtime.rb python3 ../python/main3.py 10 5
+echo Python3
+../../util/xtime.rb python3 ../python/main3_builtin.py 10 5
 echo Ruby
-../xtime.rb ruby test.rb
-echo Mono
-../xtime.rb mono -O=all --gc=sgen test.exe
-echo C# .Net Core
-../xtime.rb dotnet bin/Release/netcoreapp2.0/base64.dll
-echo Perl
-../xtime.rb perl -Iperllib/lib/perl5 test.pl
-echo Perl XS
-../xtime.rb perl test-xs.pl
-echo Tcl
-../xtime.rb tclsh test.tcl
+../../util/xtime.rb ruby ../ruby/main.rb 10 5
 echo Php
-../xtime.rb php test.php
+../../util/xtime.rb php ../php/main-user.php 10 5
+echo Php Builtin
+../../util/xtime.rb php ../php/main-builtin.php 10 5
+echo Rust
+../../util/xtime.rb ./array_reverse_rs 10 5
+echo Rust Builtin
+../../util/xtime.rb ./array_reverse_builtin_rs 10 5

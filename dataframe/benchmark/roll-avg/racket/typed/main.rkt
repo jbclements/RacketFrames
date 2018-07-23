@@ -27,4 +27,6 @@
 (: main (-> Void))
 (define (main)
   (for ([i (range start (add1 end))])
-    (displayln (roll-average i))))
+    (displayln (string-append "rollAverage(" (number->string i) ") = " (number->string (roll-average i))))))
+
+(main)

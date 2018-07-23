@@ -1,4 +1,4 @@
-require './Vector.rb'
+require_relative 'Vector'
 
 class Particle
   attr_accessor :position

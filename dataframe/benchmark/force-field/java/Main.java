@@ -11,6 +11,7 @@ class Main {
     
     Particle p1 = new Particle(new Vector(0.3, 0), -1);
     Particle p2 = new Particle(new Vector(-0.3, 1), 1);
+    
     for (int i = 0; i < count; i++) {
       Vector force1 = p1.forceFrom(p2);
       Vector force2 = p2.forceFrom(p1);

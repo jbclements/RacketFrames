@@ -1,54 +1,40 @@
-echo Crystal
-../xtime.rb ./base64_cr
+#!/bin/bash
+
+if [ "$#" -ne 2 ]; then
+    echo "Illegal number of parameters"
+    exit 1
+fi
+
+let start=$1
+let end=$2
+
 echo Go
-../xtime.rb ./base64_go
-echo GccGo
-../xtime.rb ./base64_go_gccgo
-echo Cpp
-../xtime.rb ./base64_cpp
+../../util/xtime.rb ./roll_avg_go $start $end
 echo C
-../xtime.rb ./base64_c
-echo C aklomp SSSE3
-../xtime.rb ./base64_c_ak_ssse
-echo Rust
-../xtime.rb ./base64_rs
-echo D
-../xtime.rb ./base64_d
-echo D Gdc
-../xtime.rb ./base64_d_gdc
-echo D Ldc
-../xtime.rb ./base64_d_ldc
-echo Nim Gcc
-../xtime.rb ./base64_nim_gcc
-echo Nim Clang
-../xtime.rb ./base64_nim_clang
-echo Julia
-../xtime.rb julia test.jl
-echo Scala
-../xtime.rb scala Base64
+../../util/xtime.rb ./roll_avg_c $start $end
+#echo Julia
+#../xtime.rb julia test.jl
+#echo Scala
+#../xtime.rb scala Base64
+cd ../java
 echo Java
-../xtime.rb java -XX:+AggressiveOpts Base64Java
-echo Kotlin
-../xtime.rb java -jar Test-kt.jar
+../../util/xtime.rb java Main $start $end
+cd ../exec
 echo Javascript Node
-../xtime.rb node test.js
+../../util/xtime.rb node ../js/main.js $start $end
 echo Python PyPy
-../xtime.rb pypy test.py
+../../util/xtime.rb pypy ../python/main.py $start $end
 echo Python
-../xtime.rb python test.py
+../../util/xtime.rb python ../python/main.py $start $end
 echo Python3
-../xtime.rb python3 test.py
+../../util/xtime.rb python3 ../python/main.py $start $end
 echo Ruby
-../xtime.rb ruby test.rb
-echo Mono
-../xtime.rb mono -O=all --gc=sgen test.exe
-echo C# .Net Core
-../xtime.rb dotnet bin/Release/netcoreapp2.0/base64.dll
-echo Perl
-../xtime.rb perl -Iperllib/lib/perl5 test.pl
-echo Perl XS
-../xtime.rb perl test-xs.pl
-echo Tcl
-../xtime.rb tclsh test.tcl
+../../util/xtime.rb ruby ../ruby/main.rb $start $end
 echo Php
-../xtime.rb php test.php
+../../util/xtime.rb php ../php/main.php $start $end
+echo Rust
+../../util/xtime.rb ./roll_avg_rs $start $end
+echo Not-Typed Racket
+../../util/xtime.rb racket ../racket/not-typed/main.rkt $start $end
+echo Typed Racket
+../../util/xtime.rb racket ../racket/typed/main.rkt $start $end

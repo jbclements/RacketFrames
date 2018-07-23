@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # go
 go build -o array_reverse_go ../go/main.go
 # c
@@ -5,7 +7,9 @@ gcc -O3 -std=c99 -o array_reverse_c ../c/main.c
 # scala
 # scalac -optimize main.scala
 # java
-javac ../java/Main.java
+cd ../java
+javac Main.java
+cd ../exec
 #julia -e 'Pkg.add("Codecs")'
 # c#
 # mcs -debug- -optimize+ ../ms/main.cs

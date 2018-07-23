@@ -1,5 +1,5 @@
-require './Particle.rb'
-require './Vector.rb'
+require_relative 'Particle'
+require_relative 'Vector'
 
 if ARGV.length != 2
   puts 'Usage: ruby main.rb <time delta> <count>'

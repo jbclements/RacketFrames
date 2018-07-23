@@ -38,3 +38,5 @@
 
   (displayln (particle-to-string particle1))
   (displayln (particle-to-string particle2)))
+
+(main)

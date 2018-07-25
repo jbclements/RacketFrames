@@ -2,6 +2,7 @@
 
 (provide
  parse-date
+ parse-date-dashed
  parse-julian-day
  parse-date-string)
 
@@ -29,6 +30,13 @@
 	(cdr ds)
 	#f)))
 
+(: parse-date-string-dashed (String -> (Option (Listof (Option String)))))
+(define (parse-date-string-dashed str)
+  (let ((ds (regexp-match ddmmyy-rx-dashed str)))
+    (if (pair? ds)
+	(cdr ds)
+	#f)))
+
 (: s->n ((Option String) -> (Option Number)))
 (define (s->n ostr)
   (opt-map ostr string->number))
@@ -45,6 +53,15 @@
 (: parse-date (String -> (Option Date)))
 (define (parse-date str)
   (opt-map (parse-date-string str)
+	   (λ: ((nums : (Listof (Option String))))	       
+	       (match (filter exact-integer? (map s->n nums))
+		      ((cons m (cons d (cons y _)))
+		       (Date y m d))
+		      (_ #f)))))
+
+(: parse-date-dashed (String -> (Option Date)))
+(define (parse-date-dashed str)
+  (opt-map (parse-date-string-dashed str)
 	   (λ: ((nums : (Listof (Option String))))	       
 	       (match (filter exact-integer? (map s->n nums))
 		      ((cons m (cons d (cons y _)))

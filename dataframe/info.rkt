@@ -2,8 +2,8 @@
 
 (define scribblings '(("documentation/dataframe.scrbl" ())))
 
-(define compile-omit-paths '("dataframe/tests/"                            
-                             "dataframe/benchmark/"
-                             "dataframe/thesis-paper/"
-                             "dataframe/images/"
-                             "dataframe/slides/"))
+(define compile-omit-paths '("tests/"                            
+                             "benchmark/"
+                             "thesis-paper/"
+                             "images/"
+                             "slides/"))

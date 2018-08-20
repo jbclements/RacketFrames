@@ -8,7 +8,9 @@
 	  Schema ColumnInfo SeriesTypes Schema-headers Schema-SeriesTypes
 	  generate-anon-series-names)
  (only-in "delimited.rkt"
-	 set-delimiter))
+	 set-delimiter)
+ (only-in "../util/datetime/parse.rkt"
+	 is-valid-date? is-valid-datetime? parse-date parse-datetime))
 
 (: canonicalize-to-string-or-num ((Listof String) -> (Listof (U Number String))))
 (define (canonicalize-to-string-or-num strs)
@@ -32,7 +34,10 @@
    ((andmap number? (canonicalize-to-string-or-num col))
     'NUMERIC)
    ((andmap string? (canonicalize-to-string-or-num col))
-    'CATEGORICAL)
+    (cond
+      [(andmap is-valid-date? (assert (canonicalize-to-string-or-num col) string?)) 'DATETIME]
+      [(andmap is-valid-datetime? (canonicalize-to-string-or-num col)) 'DATETIME]
+      [else 'CATEGORICAL]))
    (else 'GENERIC)))
 
 (: guess-series-meta ((Listof String) (Listof (Listof String)) -> (Listof ColumnInfo)))

@@ -20,7 +20,7 @@
 ;; OR
 ;; Dynamically determined by sampling the data files.
 
-(define-type SeriesTypes (U 'GENERIC 'CATEGORICAL 'NUMERIC 'INTEGER 'BOOLEAN))
+(define-type SeriesTypes (U 'GENERIC 'CATEGORICAL 'NUMERIC 'INTEGER 'BOOLEAN 'DATETIME))
 
 (struct: ColumnInfo ([name : Symbol]
 		     [type : SeriesTypes]))

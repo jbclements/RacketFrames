@@ -8,7 +8,7 @@
  (only-in "../util/datetime/convert.rkt"
           date->julian-day-number)
  (only-in "../util/datetime/parse.rkt"
-	  parse-date parse-date-dashed)
+	  parse-date)
  (only-in "categorical-series.rkt"
 	  CSeries new-CSeries cseries-data
 	  cseries-length cseries-referencer)
@@ -18,7 +18,13 @@
  (only-in "integer-series-builder.rkt"
 	  new-ISeriesBuilder
 	  append-ISeriesBuilder
-	  complete-ISeriesBuilder))
+	  complete-ISeriesBuilder)
+  (only-in "../util/datetime/types.rkt"	  
+	  Instant Instant? 
+	  Datetime Datetime? Datetime-date Datetime-time
+	  Date Date? Date-day Date-month Date-year
+	  Time Time? Time-offset Time-hour Time-minute Time-second Time-milli
+	  ))
 
 (: as-julian-day-numbers (CSeries -> ISeries))
 (define (as-julian-day-numbers cseries)
@@ -27,12 +33,12 @@
 	 (ibuilder (new-ISeriesBuilder clen)))
     (do: : ISeries ([idx : Fixnum #{0 : Fixnum} (fx+ idx #{1 : Fixnum})])
 	((= idx clen) (complete-ISeriesBuilder ibuilder))
-      (let ((date (parse-date-dashed (symbol->string (cref idx)))))
+      (let ((date (parse-date (symbol->string (cref idx)))))
 	(if date
             (begin
               (displayln date)
-              (displayln (date->julian-day-number date))
-	    (append-ISeriesBuilder ibuilder (assert (date->julian-day-number date) fixnum?)))
+              (displayln (date->julian-day-number (Datetime-date date)))
+	    (append-ISeriesBuilder ibuilder (assert (date->julian-day-number (Datetime-date date)) fixnum?)))
 	    (error 'as-julian-day-numbers "Invalid date: ~s" date))))))
 
 (iseries-data (as-julian-day-numbers (new-CSeries (vector '12-25-2015 '01-01-2016 '05-19-1995 '11-10-1996))))

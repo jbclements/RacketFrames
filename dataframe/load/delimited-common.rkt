@@ -53,6 +53,8 @@
            [(NSeriesBuilder? builder)
             (λ: ((str : String))
               (append-NSeriesBuilder builder str))]
+           [(DatetimeSeriesBuilder? builder)
+            (append-DatetimeSeriesBuilder builder str)]
            [else (λ: ((str : String)) (void))]))
        (DataFrameBuilder-builders data-frame-builder)))  
 

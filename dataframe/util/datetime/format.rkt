@@ -85,9 +85,8 @@
 
   (vector-find-int 0))
 
-
-					; return a string representing the decimal expansion of the fractional 
-					; portion of a number, limited by a specified precision
+; return a string representing the decimal expansion of the fractional 
+; portion of a number, limited by a specified precision
 (: decimal-expansion (Real Fixnum -> String))
 (define (decimal-expansion r precision)
   (let: loop : String ([num : Real (- r (round r))]
@@ -114,7 +113,6 @@
 (: locale-long-month->index (String -> (Option Index)))
 (define (locale-long-month->index string)
   (vector-find string locale-long-month-vector string=?))
-
 
 (: tz-printer (Integer Output-Port -> Void))
 (define (tz-printer offset port)

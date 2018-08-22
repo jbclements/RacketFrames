@@ -48,9 +48,13 @@
 	  new-BSeries BSeries BSeries? bseries-iref)
  (only-in "numeric-series.rkt"
 	  NSeries NSeries? nseries-iref)
+ (only-in "datetime-series.rkt"
+	  DatetimeSeries DatetimeSeries? datetime-series-iref)
  (only-in "categorical-series.rkt"
 	  cseries-referencer cseries-length cseries-iref
-	  CSeries CSeries?))
+	  CSeries CSeries?)
+ (only-in "../util/datetime/format.rkt"
+          date->string))
 
 ; ***********************************************************
 
@@ -86,6 +90,8 @@
            ((ISeries? series)
             (display (format-heading heading)))
            ((BSeries? series)
+            (display (format-heading heading)))
+           ((DatetimeSeries? series)
             (display (format-heading heading)))
 	  (else
 	   (error 'data-frame-head "Heading for unknown series types ~s"
@@ -152,6 +158,12 @@
       #:width WIDTH
       #:align 'left))
 
+(: format-datetime-series (DatetimeSeries Index -> String))
+(define (format-datetime-series datetime-series row)
+  (~a (date->string (car (datetime-series-iref datetime-series (list row))) #f)
+      #:width WIDTH
+      #:align 'left))
+
 ; ***********************************************************
 
 ; ***********************************************************
@@ -173,6 +185,8 @@
                   (display (format-iseries a-series row)))
                  ((BSeries? a-series)
                   (display (format-bseries a-series row)))
+                 ((DatetimeSeries? a-series)
+                  (display (format-datetime-series a-series row)))
                  (else
                   (error 'data-frame-head "Unknown series types ~s"
                          (series-type a-series)))))
@@ -222,6 +236,8 @@
               (display (car (assert (iseries-iref a-series (list row)) list?)) outp))
              ((BSeries? a-series)
               (display (car (assert (bseries-iref a-series (list row)) list?)) outp))
+             ((DatetimeSeries? a-series)
+              (display (car (assert (datetime-series-iref a-series (list row)) list?)) outp))
              (else
               (error 'frame-head "Unknown series types ~s"
                      (series-type a-series)))))))

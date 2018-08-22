@@ -26,6 +26,9 @@
  (only-in "../data-frame/numeric-series-builder.rkt"
 	  NSeriesBuilder NSeriesBuilder?
 	  append-NSeriesBuilder)
+ (only-in "../data-frame/datetime-series-builder.rkt"
+	  DatetimeSeriesBuilder DatetimeSeriesBuilder?
+	  append-DatetimeSeriesBuilder)
  (only-in "data-frame-builder.rkt"	  
 	  DataFrameBuilder DataFrameBuilder-builders
 	  append-data-fields)
@@ -54,7 +57,8 @@
             (λ: ((str : String))
               (append-NSeriesBuilder builder str))]
            [(DatetimeSeriesBuilder? builder)
-            (append-DatetimeSeriesBuilder builder str)]
+            (λ: ((str : String))
+              (append-DatetimeSeriesBuilder builder str))]
            [else (λ: ((str : String)) (void))]))
        (DataFrameBuilder-builders data-frame-builder)))  
 

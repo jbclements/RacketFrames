@@ -1,5 +1,8 @@
 #lang typed/racket/base
 
+(provide:
+ [date->string (Datetime (Option String) -> String)])
+
 (require
  racket/fixnum
  racket/match

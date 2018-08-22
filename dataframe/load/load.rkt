@@ -43,6 +43,12 @@
 	  CSeriesBuilder?
 	  complete-CSeriesBuilder
 	  append-CSeriesBuilder)
+ (only-in "../data-frame/datetime-series-builder.rkt"
+	  new-DatetimeSeriesBuilder
+	  DatetimeSeriesBuilder
+	  DatetimeSeriesBuilder?
+	  complete-DatetimeSeriesBuilder
+	  append-DatetimeSeriesBuilder)
  (only-in "../data-frame/series-description.rkt"
 	  Series)
  (only-in "../data-frame/data-frame.rkt"
@@ -75,7 +81,8 @@
       ['CATEGORICAL (new-CSeriesBuilder)]
       ['INTEGER     (new-ISeriesBuilder)]
       ['NUMERIC     (new-NSeriesBuilder)]
-      ['BOOLEAN     (new-BSeriesBuilder)]))
+      ['BOOLEAN     (new-BSeriesBuilder)]
+      ['DATETIME    (new-DatetimeSeriesBuilder)]))
 
   (DataFrameBuilder ((inst map SeriesBuilder SeriesTypes)
 		 determine-SeriesBuilder
@@ -95,6 +102,8 @@
             (complete-BSeriesBuilder builder)]
            [(NSeriesBuilder? builder)
             (complete-NSeriesBuilder builder)]
+           [(DatetimeSeriesBuilder? builder)
+            (complete-DatetimeSeriesBuilder builder)]
            [else (error "Inconsistent DataFrameBuilder")]))
        (DataFrameBuilder-builders frame-builder)))
 
@@ -142,7 +151,7 @@
 
 (define salary-schema (Schema #t (list (ColumnInfo 'first 'CATEGORICAL) (ColumnInfo 'last 'CATEGORICAL)
                                        (ColumnInfo 'age 'INTEGER) (ColumnInfo 'dollar 'CATEGORICAL)
-                                       (ColumnInfo 'phone 'CATEGORICAL))))
+                                       (ColumnInfo 'phone 'CATEGORICAL) (ColumnInfo 'join_date 'DATETIME))))
 
 (define random-demographic-schema (Schema #t (list (ColumnInfo 'first 'CATEGORICAL) (ColumnInfo 'last 'CATEGORICAL)
                                                    (ColumnInfo 'gender 'CATEGORICAL) (ColumnInfo 'yn 'CATEGORICAL)
@@ -153,12 +162,12 @@
 
 (data-frame-head salary-data-frame-csv-schema)
 
-(displayln "NO SCHEMA");
+;(displayln "NO SCHEMA");
 
 ; no schema
-(define salary-data-frame-csv-no-schema (load-csv-file "../sample-csv/salary.csv" #:schema #f))
+;(define salary-data-frame-csv-no-schema (load-csv-file "../sample-csv/salary.csv" #:schema #f))
 
-(data-frame-head salary-data-frame-csv-no-schema)
+;(data-frame-head salary-data-frame-csv-no-schema)
 
 ; read delimited
 (define random-demographic-data-frame-delimited (load-delimited-file "../sample-csv/random_demographic.csv" "|" #:schema random-demographic-schema))
@@ -168,6 +177,6 @@
 ;(series-data (data-frame-series random-demographic-data-frame-delimited 'char))
 
 ; no schema
-(define random-demographic-data-frame-delimited-no-schema (load-delimited-file "../sample-csv/random_demographic.csv" "|" #:schema #f))
+;(define random-demographic-data-frame-delimited-no-schema (load-delimited-file "../sample-csv/random_demographic.csv" "|" #:schema #f))
 
-(data-frame-head random-demographic-data-frame-delimited-no-schema)
+;(data-frame-head random-demographic-data-frame-delimited-no-schema)

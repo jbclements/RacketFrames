@@ -22,7 +22,10 @@
 	  complete-ISeriesBuilder)
  (only-in "boolean-series-builder.rkt"
 	  BSeriesBuilder BSeriesBuilder?
-	  complete-BSeriesBuilder))
+	  complete-BSeriesBuilder)
+ (only-in "datetime-series-builder.rkt"
+	  DatetimeSeriesBuilder DatetimeSeriesBuilder?
+	  complete-DatetimeSeriesBuilder))
 
 
 (: series-complete (SeriesBuilder -> Series))
@@ -37,6 +40,8 @@
     ((ISeriesBuilder? builder)
      (complete-ISeriesBuilder builder))
     ((BSeriesBuilder? builder)
-     (complete-BSeriesBuilder builder))))
+     (complete-BSeriesBuilder builder))
+    ((DatetimeSeriesBuilder? builder)
+     (complete-DatetimeSeriesBuilder builder))))
 
 

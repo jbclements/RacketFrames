@@ -7,4 +7,7 @@
                              "dataframe/benchmark/"
                              "dataframe/thesis-paper/"
                              "dataframe/images/"
-                             "dataframe/slides/"))
+                             "dataframe/slides/"
+                             "dataframe/validation/"
+                             "dataframe/jupyter-notebooks/"
+                             "dataframe/sample-csv/"))

@@ -41,6 +41,7 @@
  (all-from-out "data-frame/numeric-series.rkt")
  (all-from-out "data-frame/categorical-series.rkt")
  (all-from-out "data-frame/boolean-series.rkt")
+ (all-from-out "data-frame/datetime-series.rkt")
  (all-from-out "data-frame/categorical-series-ops.rkt")
  (all-from-out "data-frame/gen-nseries.rkt")
  (all-from-out "data-frame/series-print.rkt"))
@@ -62,6 +63,7 @@
  "data-frame/numeric-series.rkt"
  "data-frame/categorical-series.rkt"
  "data-frame/boolean-series.rkt"
+ "data-frame/datetime-series.rkt"
  "data-frame/categorical-series-ops.rkt"
  "data-frame/series-iter.rkt"
  "data-frame/series-print.rkt"

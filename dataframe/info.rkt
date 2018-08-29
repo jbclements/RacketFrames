@@ -6,4 +6,7 @@
                              "benchmark/"
                              "thesis-paper/"
                              "images/"
-                             "slides/"))
+                             "slides/"
+                             "validation/"
+                             "jupyter-notebooks/"
+                             "sample-csv/"))

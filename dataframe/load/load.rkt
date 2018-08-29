@@ -166,9 +166,9 @@
                                                    (ColumnInfo 'char 'GENERIC) (ColumnInfo 'float 'NUMERIC))))
 
 ; read csv
-(define salary-data-frame-csv-schema (load-csv-file "../sample-csv/salary_date.csv" #:schema salary-date-schema))
+;(define salary-data-frame-csv-schema (load-csv-file "../sample-csv/salary_date.csv" #:schema salary-date-schema))
 
-(data-frame-head salary-data-frame-csv-schema)
+;(data-frame-head salary-data-frame-csv-schema)
 
 (define salary-no-date-data-frame-csv-schema (load-csv-file "../sample-csv/salary_no_date.csv" #:schema salary-no-date-schema))
 

@@ -35,8 +35,8 @@
     'NUMERIC)
    ((andmap string? (canonicalize-to-string-or-num col))
     (cond
-      [(andmap is-valid-date? (assert (begin (displayln (canonicalize-to-string-or-num col)) (canonicalize-to-string-or-num col))  string?)) 'DATETIME]
-      [(andmap is-valid-datetime? (canonicalize-to-string-or-num col)) 'DATETIME]
+      [(andmap is-valid-datetime? (assert (canonicalize-to-string-or-num col) string?)) 'DATETIME]
+      [(andmap is-valid-date? (assert (canonicalize-to-string-or-num col) string?)) 'DATETIME]
       [else 'CATEGORICAL]))
    (else 'GENERIC)))
 

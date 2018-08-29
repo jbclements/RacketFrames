@@ -60,7 +60,7 @@
             (λ: ((str : String))
               (append-DatetimeSeriesBuilder builder str))]
            [else (λ: ((str : String)) (void))]))
-       (DataFrameBuilder-builders data-frame-builder)))  
+       (DataFrameBuilder-builders data-frame-builder)))
 
 (: check-data-file-exists (FilePath -> Void))
 (define (check-data-file-exists fpath)
@@ -68,10 +68,10 @@
 	  (error (format "File not found: ~s" (FilePath->string fpath)))))
 
 (: read-formatted-file (FilePath Boolean DataFrameBuilder LineParser -> (Listof Boolean)))
-(define (read-formatted-file fpath headers data-frame-builder line-parser)
+(define (read-formatted-file fpath headers? data-frame-builder line-parser)
   (check-data-file-exists fpath)
   (let* ((fpath (FilePath->string fpath))
-         (file-lines (file->lines fpath)))
+         (file-lines (if headers? (cdr (file->lines fpath)) (file->lines fpath))))
     (map (λ: ((line : Line))
            (append-data-fields (data-frame-builder-appenders data-frame-builder) (line-parser line))) file-lines)))
 

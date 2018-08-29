@@ -160,9 +160,10 @@
 
 (: format-datetime-series (DatetimeSeries Index -> String))
 (define (format-datetime-series datetime-series row)
-  (~a (date->string (car (datetime-series-iref datetime-series (list row))) #f)
-      #:width WIDTH
-      #:align 'left))
+  ;(~a (date->string (car (datetime-series-iref datetime-series (list row))) "~5")
+      ;#:width WIDTH
+      ;#:align 'left))
+  (pretty-format (car (datetime-series-iref datetime-series (list row)))))
 
 ; ***********************************************************
 
@@ -173,7 +174,7 @@
   ;;  (define: cols : (Sequenceof  (in-range (vector-length series)))
   (for: ([row : Index rows])
 	(for ([col (in-range (vector-length series))])
-	     (let ((a-series (vector-ref series col)))
+	     (let ((a-series (vector-ref series col)))               
 	       (cond
                  ((GenSeries? a-series)
                   (display (format-gen-series a-series row)))
@@ -205,6 +206,7 @@
   ;; (show-frame-description (frame-description frame))
 
   (display-heading cols)
+
   (let ((count (min (Dim-rows (data-frame-dim data-frame))
                     (if (not count) default-head-rows count))))
     (display-data-frame-row series (in-range count))))

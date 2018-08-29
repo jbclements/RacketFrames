@@ -34,14 +34,14 @@
 (define (parse-date-string str)
   (let ((ds (regexp-match date-rx str)))
     (if (pair? ds)
-	(begin (displayln ds) (cdr ds))
+	 (cdr ds)
 	#f)))
 
 (: parse-datetime-string (String -> (Option (Listof (Option String)))))
 (define (parse-datetime-string str)
   (let ((ds (regexp-match datetime-rx str)))
     (if (pair? ds)
-	(begin (displayln ds) (cdr ds))
+	(cdr ds)
 	#f)))
 
 (: s->n ((Option String) -> (Option Number)))
@@ -71,7 +71,7 @@
   (opt-map (parse-datetime-string str)
 	   (λ: ((nums : (Listof (Option String))))	       
 	       (match (filter exact-integer? (map s->n nums))
-		      ((cons mo (cons d (cons y (cons h (cons mn (cons s _))))))
+		      ((cons mo (cons d (cons y (cons h (cons mn (cons s (cons ms _)))))))
 		       #t)
 		      (_ #f)))))
 

@@ -17,6 +17,8 @@
 	  ISeries? iseries-print)
  (only-in "boolean-series.rkt"
 	  BSeries? bseries-print)
+ (only-in "datetime-series.rkt"
+	  DatetimeSeries? datetime-series-print)
  (only-in "data-frame.rkt"
           Column column-heading column-series))
 
@@ -33,7 +35,9 @@
     ((ISeries? series)
      (iseries-print series port))
     ((BSeries? series)
-     (bseries-print series port))))
+     (bseries-print series port))
+    ((DatetimeSeries? series)
+     (datetime-series-print series port))))
 
 (: column-print (Column Output-Port -> Void))
 (define (column-print column port)

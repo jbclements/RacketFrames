@@ -34,7 +34,8 @@
  [datetime-series-length (DatetimeSeries -> Index)]
  [datetime-series-referencer (DatetimeSeries -> (Index -> Datetime))]
  [datetime-series-data (DatetimeSeries -> (Vectorof Datetime))]
- [map/datetime-series-data (DatetimeSeries (Datetime -> Datetime) -> DatetimeSeries)])
+ [map/datetime-series-data (DatetimeSeries (Datetime -> Datetime) -> DatetimeSeries)]
+ [datetime-series-print (DatetimeSeries Output-Port -> Void)])
 ; ***********************************************************
 
 (struct DatetimeSeries LabelIndex ([data : (Vectorof Datetime)]))

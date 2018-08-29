@@ -17,7 +17,7 @@
  (only-in "datetime-series.rkt"
           DatetimeSeries)
  (only-in "../util/datetime/parse.rkt"
-          parse-datetime)
+          parse-date parse-datetime is-valid-date? is-valid-datetime?)
  (only-in "../util/datetime/types.rkt"
           Datetime Date Time))
 
@@ -59,8 +59,11 @@
   
   (if (< (DatetimeSeriesBuilder-index builder)         
          (vector-length (DatetimeSeriesBuilder-data builder)))
-      (let ((dt (if (string? datetime/str-value)
-		     (let ((dt (parse-datetime (string-trim datetime/str-value))))                      
+      (let ((dt (if (string? datetime/str-value)            
+		     (let ((dt (cond
+                                 [(is-valid-datetime? datetime/str-value)(parse-datetime (string-trim datetime/str-value))]
+                                 [(is-valid-date? datetime/str-value) (parse-date (string-trim datetime/str-value))]                                 
+                                 [else (error "invalid datetime format")])))                       
                        (if dt (assert dt Datetime?) (Datetime (Date 0 0 0) (Time 0 0 0 0 0))))
 		     datetime/str-value)))
         (vector-set! (DatetimeSeriesBuilder-data builder)

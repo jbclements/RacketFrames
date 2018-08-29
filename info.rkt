@@ -3,8 +3,8 @@
 (define collection 'RacketFrames)
 (define version "1.0")
 
-(define compile-omit-paths '("/RacketFrames/dataframe/tests/"                            
-                             "/RacketFrames/dataframe/benchmark/"
-                             "/RacketFrames/dataframe/thesis-paper/"
-                             "/RacketFrames/dataframe/images/"
-                             "/RacketFrames/dataframe/slides/"))
+(define compile-omit-paths '("dataframe/tests/"                            
+                             "dataframe/benchmark/"
+                             "dataframe/thesis-paper/"
+                             "dataframe/images/"
+                             "dataframe/slides/"))

@@ -193,7 +193,9 @@ Options to pass to matplotlib plotting method |#
 	  append-NSeriesBuilder complete-NSeriesBuilder
 	  new-NSeriesBuilder)
  (only-in "../data-frame/data-frame-print.rkt"
-          data-frame-write-tab))
+          data-frame-write-tab)
+  (only-in "../util/datetime/types.rkt"
+          Datetime))
 
 
 #|
@@ -312,17 +314,29 @@ Options to pass to matplotlib plotting method |#
 (define (make-hist-bins)
   (make-hash))
 
-;Used to determine the groups for the groupby. If by is a function, it’s called on each value of the object’s index. If a dict or Series is passed, the Series or dict VALUES will be used to determine the groups (the Series’ values are first aligned; see .align() method). If an ndarray is passed, the values are used as-is determine the groups. A label or list of labels may be passed to group by the columns in self. Notice that a tuple is interpreted a (single) key.
-(: get-discrete-hist-data ((Vectorof Real) -> HistBin))
+; Used to determine the groups for the groupby. If by is a function, it’s called
+; on each value of the object’s index. If a dict or Series is passed, the Series
+; or dict VALUES will be used to determine the groups (the Series’ values are first
+; aligned; see .align() method). If an ndarray is passed, the values are used as-is
+; determine the groups. A label or list of labels may be passed to group by the columns
+; in self. Notice that a tuple is interpreted a (single) key.
+(: get-discrete-hist-data ((U (Vectorof Any) (Vectorof Boolean) (Vectorof Datetime) (Vectorof Fixnum) (Vectorof Symbol) FlVector) -> HistBin))
 (define (get-discrete-hist-data data-vec)
   (define: hist-bin-index : HistBin (make-hist-bins))
-  (define len (vector-length data-vec))
+  (define len
+    (if (flvector? data-vec)
+        (flvector-length data-vec)
+        (vector-length data-vec)))
 
   (let loop ([i 0])
     (if (>= i len)
 	hist-bin-index
 	(let: ((i : Index (assert i index?)))
-	      (let ((key (vector-ref data-vec i)))
+	      (let ((key
+
+                     (if (flvector? data-vec)
+                         (flvector-ref data-vec i)
+                         (vector-ref data-vec i))))
 		(hash-update! hist-bin-index key
 			      (λ: ((incr : Real))
 				  (add1 incr))
@@ -333,14 +347,13 @@ Options to pass to matplotlib plotting method |#
 (define (list-of-vec-from-hist-bin hist-bin)
   (hash-map hist-bin (lambda ([key : Any] [value : Real]) : (Vector Any Real) (vector key value))))
 
-#| (define-predicate vectorof-real? (Vectorof Real))
 ;ann
 (: make-discrete-histogram ((U Series (Listof Series) DataFrame Column Columns) -> Any))
 (define (make-discrete-histogram data)
   (let: ((plot-points : renderer2d
          (cond
            [(and (Series? data) (is-plottable-series data))
-            (discrete-histogram (ann (list-of-vec-from-hist-bin (get-discrete-hist-data (assert (series-data data) vectorof-real?))) (Sequenceof
+            (discrete-histogram (cast (list-of-vec-from-hist-bin (get-discrete-hist-data (series-data data))) (Sequenceof
              (U (List Any (U False Real ivl)) (Vector Any (U False Real ivl))))))]
            ;[(and (SeriesList? data) (andmap is-plottable-series data)) (map make-points (get-series-list-point-sequence data))]
            ;[(Column? data) (list (points (get-column-point-sequence data)))]
@@ -348,7 +361,7 @@ Options to pass to matplotlib plotting method |#
            ;[(DataFrame? data) (map make-points (get-data-frame-point-sequence data))]
            [else (error 'make-scatter-plot "Invalid data to plot")])))
     (plot
-     plot-points))) |#
+     plot-points)))
 
 ; ***********************************************************
 
@@ -412,8 +425,10 @@ Options to pass to matplotlib plotting method |#
 
 (displayln "discrete histogram")
 
-;(make-discrete-histogram (new-ISeries (vector 1 2 3 4 5) #f))
+(make-discrete-histogram (new-ISeries (vector 1 2 3 4 5 5 5) #f))
 
-(get-discrete-hist-data (vector 1 2 3 4 5))
 
-(list-of-vec-from-hist-bin (get-discrete-hist-data (vector 1 2 3 4 5)))
+; individual testing does not work due to Racket type checking
+; (get-discrete-hist-data (vector 1 2 3 4 5))
+
+; (list-of-vec-from-hist-bin (get-discrete-hist-data (vector 1 2 3 4 5)))

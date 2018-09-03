@@ -4,7 +4,8 @@
  [check-data-file-exists (FilePath -> Void)]
  [sample-formatted-file (FilePath Integer -> (Listof String))]
  [data-frame-builder-appenders (DataFrameBuilder -> (Listof (Line -> Void)))]
- [read-formatted-file (FilePath Boolean DataFrameBuilder LineParser -> (Listof Boolean))])
+ [read-formatted-file (FilePath Boolean DataFrameBuilder LineParser -> (Listof Boolean))]
+ [read-sql-query ((Listof String) (Listof (Vectorof Any)) DataFrameBuilder -> (Listof Boolean))])
 
 (require
  (only-in "../util/filepath.rkt"
@@ -31,7 +32,7 @@
 	  append-DatetimeSeriesBuilder)
  (only-in "data-frame-builder.rkt"	  
 	  DataFrameBuilder DataFrameBuilder-builders
-	  append-data-fields)
+	  append-data-fields append-sql-data-fields)
  (only-in "schema.rkt"
 	  Schema)
  (only-in "types.rkt"
@@ -62,6 +63,32 @@
            [else (λ: ((str : String)) (void))]))
        (DataFrameBuilder-builders data-frame-builder)))
 
+(: data-frame-builder-sql-appenders (DataFrameBuilder -> (Listof (Any -> Void))))
+(define (data-frame-builder-sql-appenders data-frame-builder)
+  (map (λ: ((builder : SeriesBuilder))
+         (cond
+           [(GenSeriesBuilder? builder)
+            (λ: ((val : Any))
+              (append-GenSeriesBuilder builder val))]
+           [(CSeriesBuilder? builder)
+            (λ: ((val : Any))
+              (append-CSeriesBuilder builder (assert val symbol?)))]
+           [(ISeriesBuilder? builder)
+            (λ: ((val : Any))
+              (append-ISeriesBuilder builder (assert val fixnum?)))]
+           [(BSeriesBuilder? builder)
+            (λ: ((val : Any))
+              (append-BSeriesBuilder builder (assert val boolean?)))]
+           [(NSeriesBuilder? builder)
+            (λ: ((val : Any))
+              (append-NSeriesBuilder builder (assert val flonum?)))]
+           ;[(DatetimeSeriesBuilder? builder)
+            ;(λ: ((str : Datetime))
+             ; (append-DatetimeSeriesBuilder builder str))]
+           [else (λ: ((val : Any)) (void))]))
+       (DataFrameBuilder-builders data-frame-builder)))
+
+
 (: check-data-file-exists (FilePath -> Void))
 (define (check-data-file-exists fpath)
   (unless (file-exists? (FilePath->string fpath))
@@ -74,6 +101,11 @@
          (file-lines (if headers? (cdr (file->lines fpath)) (file->lines fpath))))
     (map (λ: ((line : Line))
            (append-data-fields (data-frame-builder-appenders data-frame-builder) (line-parser line))) file-lines)))
+
+(: read-sql-query ((Listof String) (Listof (Vectorof Any)) DataFrameBuilder -> (Listof Boolean)))
+(define (read-sql-query headers rows data-frame-builder)
+  (map (λ: ((row : (Vectorof Any)))
+         (append-sql-data-fields (data-frame-builder-sql-appenders data-frame-builder) (vector->list row))) rows))
 
 (: sample-formatted-file (FilePath Integer -> (Listof String)))
 (define (sample-formatted-file fpath cnt)

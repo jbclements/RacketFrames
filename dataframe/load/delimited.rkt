@@ -2,7 +2,8 @@
 
 (provide:
  [set-delimiter (String -> LineParser)]
- [read-delimited-file (FilePath Boolean DataFrameBuilder String -> DataFrameBuilder)])
+ [read-delimited-file (FilePath Boolean DataFrameBuilder String -> DataFrameBuilder)]
+ [read-sql-results ((Listof String) (Listof (Vectorof Any)) DataFrameBuilder -> DataFrameBuilder)])
 
 (require
  (only-in "../util/filepath.rkt"
@@ -10,7 +11,8 @@
  (only-in "types.rkt"
 	  LineParser)
  (only-in "delimited-common.rkt"
-	  read-formatted-file)
+	  read-formatted-file
+          read-sql-query)
  (only-in "data-frame-builder.rkt"
 	  DataFrameBuilder))
 
@@ -26,4 +28,11 @@
 (: read-delimited-file (FilePath Boolean DataFrameBuilder String -> DataFrameBuilder))
 (define (read-delimited-file fpath header? data-frame-builder delim)
   (begin (read-formatted-file fpath header? data-frame-builder (set-delimiter delim))
+         data-frame-builder))
+
+(: read-sql-results ((Listof String) (Listof (Vectorof Any)) DataFrameBuilder -> DataFrameBuilder))
+(define (read-sql-results headers rows data-frame-builder)
+  (begin (read-sql-query headers
+                         rows
+                         data-frame-builder)
          data-frame-builder))

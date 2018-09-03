@@ -2,7 +2,8 @@
 
 (provide 
  (struct-out DataFrameBuilder)
- append-data-fields)
+ append-data-fields
+ append-sql-data-fields)
 
 (require 
  (only-in "../data-frame/series-builder.rkt"
@@ -23,3 +24,13 @@
         ; call appropriate appender on each field, different appender per column
 	((car appenders) (car fields))
 	(append-data-fields (cdr appenders) (cdr fields)))))
+
+(: append-sql-data-fields ((Listof (Any -> Void)) (Listof Any) -> Boolean))
+(define (append-sql-data-fields appenders fields)
+  (if (or (null? appenders)
+	  (null? fields))      
+      (check-all-data-processed appenders fields)
+      (begin
+        ; call appropriate appender on each field, different appender per column
+	((car appenders) (car fields))
+	(append-sql-data-fields (cdr appenders) (cdr fields)))))

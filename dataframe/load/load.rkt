@@ -6,6 +6,7 @@
  [load-delimited-file (String String [#:schema (Option Schema)] -> DataFrame)])
 
 (require
+  typed/db
  racket/match
  (only-in "../util/list.rkt"
 	  zip)
@@ -61,7 +62,8 @@
  "data-frame-builder.rkt"
  (only-in "delimited-common.rkt"
 	  sample-formatted-file
-	  check-data-file-exists)
+	  check-data-file-exists
+          read-sql-query)
  (only-in "schema.rkt"
 	  Schema)
  (only-in "sample.rkt"
@@ -69,7 +71,12 @@
  (only-in "csv-delimited.rkt"
 	  read-csv-file)
  (only-in "delimited.rkt"
-	  read-delimited-file))
+	  read-delimited-file
+          read-sql-results))
+
+(struct: QueryResult ([headers : (Listof String)]
+                      [rows : (Listof (Vectorof Any))]
+                      [num-rows : Index]))
 
 (: new-DataFrameBuilder-from-Schema (Schema -> DataFrameBuilder))
 (define (new-DataFrameBuilder-from-Schema schema)
@@ -147,6 +154,47 @@
   (check-data-file-exists fpath)
   (determine-schema-from-sample (sample-formatted-file fpath cnt) delim))
 
+(: get-query-result (Connection String (Listof Any) -> QueryResult))
+(define (get-query-result conn sql-query params)
+  ;(mysql-connect #:socket "/Applications/MAMP/tmp/mysql/mysql.sock"
+   ;                                  #:database "database_name"
+    ;                                 #:user "root"
+     ;                                #:password "root")
+
+  (define result (query conn sql-query))
+
+  (: headers (Listof String))
+  (define headers (list "id" "artist"))
+    ;(for/list: : (Listof String) ([hdr (rows-result-headers result)])
+      ;(cond ((assq 'name hdr) => cdr)
+            ;(#t "unnamed"))))
+  (define rows (rows-result-rows (assert result rows-result?)))
+  (define num-rows (length rows))
+
+  (QueryResult headers (cast rows (Listof (Vectorof Any))) num-rows))
+
+; Create a data frame from the result of running SQL-QUERY on the database DB
+; with the supplied PARAMS.  SQL-QUERY can be either a string or a
+; virtual-query object.  Each column from the result set will become a series
+; in the data frame, sql-null values will be converted to #f.
+(: data-frame-from-sql (Connection Boolean String (Listof Any) -> DataFrame))
+(define (data-frame-from-sql conn schema-test sql-query params)
+
+  (define query-result (get-query-result conn sql-query params))
+
+  ; (QueryResult-num-rows query-result) 
+
+  ;; If query returned 0 rows, don't add any series to the data frame
+  (when (> 1 0)
+    (let* ((schema (Schema #t (list (ColumnInfo 'id 'INTEGER) (ColumnInfo 'genre 'GENERIC))))) ; determine schema from first row of data, fill this in later
+      ; make data-frame by passing in the schema and associated data-frame-builder
+           (make-data-frame schema (read-sql-results (QueryResult-headers query-result)
+                                                   (QueryResult-rows query-result)
+                                                   (new-DataFrameBuilder-from-Schema schema)))))
+
+  ; return empty dataframe if query returned 0 results
+  )
+
 ; test cases
 
 (define salary-date-schema (Schema #t (list (ColumnInfo 'first 'CATEGORICAL) (ColumnInfo 'last 'CATEGORICAL)
@@ -200,3 +248,7 @@
 ;(define random-demographic-data-frame-delimited-no-schema (load-delimited-file "../sample-csv/random_demographic.csv" "|" #:schema #f))
 
 ;(data-frame-head random-demographic-data-frame-delimited-no-schema)
+
+(define data-frame-from-sql-genres (data-frame-from-sql (sqlite3-connect #:database "/Users/skkahal/Downloads/chinook.db") #f "SELECT * FROM genres" empty))
+
+(data-frame-head data-frame-from-sql-genres)

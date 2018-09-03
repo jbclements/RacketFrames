@@ -425,7 +425,9 @@ Options to pass to matplotlib plotting method |#
 
 (displayln "discrete histogram")
 
-(make-discrete-histogram (new-ISeries (vector 1 2 3 4 5 5 5) #f))
+(make-discrete-histogram (new-ISeries (vector 1 2 2 3 4 5 5 5) #f))
+
+(make-discrete-histogram (new-GenSeries (vector 1 2 2 1.5 3 4 5 5 'a 5) #f))
 
 
 ; individual testing does not work due to Racket type checking

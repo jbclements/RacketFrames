@@ -1,6 +1,7 @@
 #lang typed/racket
 
 (require plot)
+(require plot/utils)
 
 #| data : DataFrame
 
@@ -347,21 +348,37 @@ Options to pass to matplotlib plotting method |#
 (define (list-of-vec-from-hist-bin hist-bin)
   (hash-map hist-bin (lambda ([key : Any] [value : Real]) : (Vector Any Real) (vector key value))))
 
+(: discrete-histogram-from-vector ((U (Vectorof Any) (Vectorof Boolean) (Vectorof Datetime) (Vectorof Fixnum) (Vectorof Symbol) FlVector) -> renderer2d))
+(define (discrete-histogram-from-vector vec)
+  (discrete-histogram (cast (list-of-vec-from-hist-bin (get-discrete-hist-data vec)) (Sequenceof
+             (U (List Any (U False Real ivl)) (Vector Any (U False Real ivl)))))))
+                            
+
 ;ann
 (: make-discrete-histogram ((U Series (Listof Series) DataFrame Column Columns) -> Any))
 (define (make-discrete-histogram data)
-  (let: ((plot-points : renderer2d
+  (let: ((plot-points : (U renderer2d (Listof renderer2d))
          (cond
            [(and (Series? data) (is-plottable-series data))
-            (discrete-histogram (cast (list-of-vec-from-hist-bin (get-discrete-hist-data (series-data data))) (Sequenceof
-             (U (List Any (U False Real ivl)) (Vector Any (U False Real ivl))))))]
-           ;[(and (SeriesList? data) (andmap is-plottable-series data)) (map make-points (get-series-list-point-sequence data))]
-           ;[(Column? data) (list (points (get-column-point-sequence data)))]
-           ;[(Columns? data) (map make-points (get-columns-point-sequence data))]
-           ;[(DataFrame? data) (map make-points (get-data-frame-point-sequence data))]
+            (discrete-histogram-from-vector (series-data data))]
+           [(and (SeriesList? data) (andmap is-plottable-series data))
+            (map (lambda ([d : Series]) : renderer2d
+                  (discrete-histogram-from-vector (series-data d))) data)]
+           [(and (Column? data) (is-plottable-series (column-series data)))
+            (discrete-histogram-from-vector (series-data (column-series data)))]
+           [(and (Columns? data) (andmap is-plottable-series (map (lambda ([d : Column]) (column-series d)) data)))
+            (map (lambda ([d : Column])
+             (discrete-histogram-from-vector (series-data (column-series d)))) data)]
+           ; A histogram is a representation of the distribution of data. This function calls matplotlib.pyplot.hist(),
+           ;on each series in the DataFrame, resulting in one histogram per column.
+           [(and (DataFrame? data) (andmap is-plottable-series (map (lambda ([d : Column]) (column-series d)) (data-frame-explode data))))
+            (map (lambda ([d : Column])
+             (discrete-histogram-from-vector (series-data (column-series d)))) (data-frame-explode data))]
            [else (error 'make-scatter-plot "Invalid data to plot")])))
-    (plot
-     plot-points)))
+    (if (list? plot-points)
+        (map (lambda ([p-p : renderer2d]) (plot p-p)) plot-points)
+        (plot
+         plot-points))))
 
 ; ***********************************************************
 
@@ -388,9 +405,9 @@ Options to pass to matplotlib plotting method |#
 ;******************
 (define columns-integer
   (list 
-   (cons 'col1 (new-ISeries (vector 1 2 3 4) #f))
-   (cons 'col2 (new-ISeries (vector 5 6 7 8) #f))
-   (cons 'col3 (new-ISeries (vector 9 10 11 12) #f))))
+   (cons 'col1 (new-ISeries (vector 1 2 3 4 4) #f))
+   (cons 'col2 (new-ISeries (vector 5 6 7 8 24) #f))
+   (cons 'col3 (new-ISeries (vector 9 10 11 12 24) #f))))
 
 ; create new data-frame-integer
 (define data-frame-integer (new-data-frame columns-integer))
@@ -428,6 +445,12 @@ Options to pass to matplotlib plotting method |#
 (make-discrete-histogram (new-ISeries (vector 1 2 2 3 4 5 5 5) #f))
 
 (make-discrete-histogram (new-GenSeries (vector 1 2 2 1.5 3 4 5 5 'a 5) #f))
+
+(make-discrete-histogram float-column)
+
+(make-discrete-histogram columns-integer)
+
+(make-discrete-histogram data-frame-float)
 
 
 ; individual testing does not work due to Racket type checking

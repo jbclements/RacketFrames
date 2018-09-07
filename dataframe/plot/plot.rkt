@@ -397,11 +397,20 @@ Options to pass to matplotlib plotting method |#
 (define (list-of-vec-from-hist-bin hist-bin)
   (hash-map hist-bin (lambda ([key : Any] [value : Real]) : (Vector Any Real) (vector key value))))
 
+(: list-of-vec-from-hist-bin-stacked (HistBinStacked -> (Listof (Vector Any (Listof Real)))))
+(define (list-of-vec-from-hist-bin-stacked hist-bin-stacked)
+  (hash-map hist-bin-stacked (lambda ([key : Any] [value : (Listof Real)]) : (Vector Any (Listof Real)) (vector key value))))
+
 (: discrete-histogram-from-vector ((U (Vectorof Any) (Vectorof Boolean) (Vectorof Datetime) (Vectorof Fixnum) (Vectorof Symbol) FlVector) -> renderer2d))
 (define (discrete-histogram-from-vector vec)
-  (discrete-histogram (cast (list-of-vec-from-hist-bin (get-discrete-hist-data vec)) (Sequenceof
-             (U (List Any (U False Real ivl)) (Vector Any (U False Real ivl)))))))
-                            
+  (discrete-histogram (cast (list-of-vec-from-hist-bin (get-discrete-hist-data vec))
+                            (Sequenceof (U (List Any (U False Real ivl)) (Vector Any (U False Real ivl)))))))
+
+(: discrete-histogram-stacked-from-vector ((U (Vectorof Any) (Vectorof Boolean) (Vectorof Datetime) (Vectorof Fixnum) (Vectorof Symbol) FlVector)
+                                           (U (Vectorof Fixnum) FlVector) -> (Listof renderer2d)))
+(define (discrete-histogram-stacked-from-vector data-vec-one data-vec-two)
+  (stacked-histogram (cast (list-of-vec-from-hist-bin-stacked (get-discrete-hist-data-vec data-vec-one data-vec-two)) 	
+                            (Sequenceof (U (Vector Any (Sequenceof Real)) (List Any (Sequenceof Real)))))))
 
 ;ann
 (: make-discrete-histogram ((U Series (Listof Series) DataFrame Column Columns) -> Any))

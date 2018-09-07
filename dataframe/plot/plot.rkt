@@ -309,11 +309,32 @@ Options to pass to matplotlib plotting method |#
 
 (define-type HistBin (HashTable Any Real))
 
+(define-type HistBinStacked (HashTable Any (Listof Real)))
+
 ; This function is self-explanatory, it consumes no arguments
 ; and creates a hash map which will represent a JoinHash.
-(: make-hist-bins (-> HistBin))
-(define (make-hist-bins)
+(: make-hist-bin (-> HistBin))
+(define (make-hist-bin)
   (make-hash))
+
+; This function is self-explanatory, it consumes no arguments
+; and creates a hash map which will represent a JoinHash.
+(: make-hist-bin-stacked (-> HistBinStacked))
+(define (make-hist-bin-stacked)
+  (make-hash))
+
+(: get-flvector/vector-length ((U FlVector (Vectorof Fixnum)) -> Index))
+(define (get-flvector/vector-length flvector/vector)
+  (if (flvector? flvector/vector)
+        (flvector-length flvector/vector)
+        (vector-length flvector/vector)))
+
+(: get-flvector/vector-ref ((U FlVector (Vectorof Fixnum)) Index -> (U Float Fixnum)))
+(define (get-flvector/vector-ref flvector/vector i)
+  (if (flvector? flvector/vector)
+        (flvector-ref flvector/vector i)
+        (vector-ref flvector/vector i)))
+  
 
 ; Used to determine the groups for the groupby. If by is a function, it’s called
 ; on each value of the object’s index. If a dict or Series is passed, the Series
@@ -323,7 +344,7 @@ Options to pass to matplotlib plotting method |#
 ; in self. Notice that a tuple is interpreted a (single) key.
 (: get-discrete-hist-data ((U (Vectorof Any) (Vectorof Boolean) (Vectorof Datetime) (Vectorof Fixnum) (Vectorof Symbol) FlVector) -> HistBin))
 (define (get-discrete-hist-data data-vec)
-  (define: hist-bin-index : HistBin (make-hist-bins))
+  (define: hist-bin-index : HistBin (make-hist-bin))
   (define len
     (if (flvector? data-vec)
         (flvector-length data-vec)
@@ -344,6 +365,34 @@ Options to pass to matplotlib plotting method |#
 			      (λ () 0)))
 	      (loop (add1 i))))))
 
+(: get-discrete-hist-data-vec ((U (Vectorof Any) (Vectorof Boolean) (Vectorof Datetime) (Vectorof Fixnum) (Vectorof Symbol) FlVector) (U (Vectorof Fixnum) FlVector) -> HistBinStacked))
+(define (get-discrete-hist-data-vec data-vec-one data-vec-two)
+  (define: hist-bin-index : HistBinStacked (make-hist-bin-stacked))
+  (define vec-one-len
+    (if (flvector? data-vec-one)
+        (flvector-length data-vec-one)
+        (vector-length data-vec-one)))
+
+  (define vec-two-len
+    (get-flvector/vector-length data-vec-two))
+
+  (when (not (= vec-one-len vec-two-len))
+    (error "Vectors must be of the same length."))
+
+  (let loop ([i 0])
+    (if (>= i vec-one-len)
+	hist-bin-index
+	(let: ((i : Index (assert i index?)))
+	      (let ((key
+                     (if (flvector? data-vec-one)
+                         (flvector-ref data-vec-one i)
+                         (vector-ref data-vec-one i))))
+		(hash-update! hist-bin-index key
+			      (λ: ((val-list : (Listof Real)))
+				  (append val-list (list (get-flvector/vector-ref data-vec-two i))))
+			      (λ () (list (get-flvector/vector-ref data-vec-two i)))))
+          (loop (add1 i))))))
+
 (: list-of-vec-from-hist-bin (HistBin -> (Listof (Vector Any Real))))
 (define (list-of-vec-from-hist-bin hist-bin)
   (hash-map hist-bin (lambda ([key : Any] [value : Real]) : (Vector Any Real) (vector key value))))
@@ -357,6 +406,33 @@ Options to pass to matplotlib plotting method |#
 ;ann
 (: make-discrete-histogram ((U Series (Listof Series) DataFrame Column Columns) -> Any))
 (define (make-discrete-histogram data)
+  (let: ((plot-points : (U renderer2d (Listof renderer2d))
+         (cond
+           [(and (Series? data) (is-plottable-series data))
+            (discrete-histogram-from-vector (series-data data))]
+           [(and (SeriesList? data) (andmap is-plottable-series data))
+            (map (lambda ([d : Series]) : renderer2d
+                  (discrete-histogram-from-vector (series-data d))) data)]
+           [(and (Column? data) (is-plottable-series (column-series data)))
+            (discrete-histogram-from-vector (series-data (column-series data)))]
+           [(and (Columns? data) (andmap is-plottable-series (map (lambda ([d : Column]) (column-series d)) data)))
+            (map (lambda ([d : Column])
+             (discrete-histogram-from-vector (series-data (column-series d)))) data)]
+           ; A histogram is a representation of the distribution of data. This function calls matplotlib.pyplot.hist(),
+           ;on each series in the DataFrame, resulting in one histogram per column.
+           [(and (DataFrame? data) (andmap is-plottable-series (map (lambda ([d : Column]) (column-series d)) (data-frame-explode data))))
+            (map (lambda ([d : Column])
+             (discrete-histogram-from-vector (series-data (column-series d)))) (data-frame-explode data))]
+           [else (error 'make-scatter-plot "Invalid data to plot")])))
+    (if (list? plot-points)
+        (map (lambda ([p-p : renderer2d]) (plot p-p)) plot-points)
+        (plot
+         plot-points))))
+
+; In the case of multiple data vectors, the first vector is plotted against all other vectors. Else in the singular case,
+; the index is plotted against the vector. The DataFrame can be projected to only use a subset of columns.
+(: make-discrete-histogram-stacked ((U Series (Listof Series) DataFrame Column Columns) -> Any))
+(define (make-discrete-histogram-stacked data)
   (let: ((plot-points : (U renderer2d (Listof renderer2d))
          (cond
            [(and (Series? data) (is-plottable-series data))

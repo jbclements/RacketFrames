@@ -270,8 +270,7 @@
           (display key-delimiter outp)))
       (get-output-string outp))))
 
-; This function consumes a Listof Listof Label and creates
-; a MultiIndex.
+
 (: build-multi-index-from-list ((Listof (Listof GenericType)) -> SIndex))
 (define (build-multi-index-from-list nested-label-lst)
 

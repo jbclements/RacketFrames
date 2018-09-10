@@ -142,7 +142,9 @@ Options to pass to matplotlib plotting method |#
  racket/pretty
  racket/unsafe/ops
  racket/flonum
+ racket/fixnum
  racket/set
+ racket/vector
  (only-in racket/set
 	  set set-member?
 	  list->set set->list
@@ -150,7 +152,10 @@ Options to pass to matplotlib plotting method |#
  (only-in "../util/symbol.rkt"
 	  symbol-prefix)
  (only-in "../data-frame/indexed-series.rkt"
-	  Label Labeling LabelProjection)
+	  build-index-from-labels
+	  Label SIndex LabelIndex LabelIndex-index
+          label-index label->lst-idx
+          idx->label is-labeled?)
  (only-in "../data-frame/series.rkt"
 	  series-complete)
  (only-in "../data-frame/series-description.rkt"
@@ -219,6 +224,14 @@ Options to pass to matplotlib plotting method |#
 (: is-plottable-series (Series -> Boolean))
 (define (is-plottable-series series)
   (or (GenSeries? series) (ISeries? series) (NSeries? series)))
+
+(define-type PlottableSeries (U NSeries ISeries))
+
+(define-predicate PlottableSeries? (U NSeries ISeries))
+
+(define-predicate RealList? (Listof Real))
+
+(define-predicate NestedRenderer2dList? (Listof (Listof renderer2d)))
 
 (: get-series-point-sequence (Series -> (Listof (Listof Real))))
 (define (get-series-point-sequence series)
@@ -324,16 +337,16 @@ Options to pass to matplotlib plotting method |#
   (make-hash))
 
 (: get-flvector/vector-length ((U FlVector (Vectorof Fixnum)) -> Index))
-(define (get-flvector/vector-length flvector/vector)
-  (if (flvector? flvector/vector)
-        (flvector-length flvector/vector)
-        (vector-length flvector/vector)))
+(define (get-flvector/vector-length flvector/fxvector)
+  (if (flvector? flvector/fxvector)
+        (flvector-length flvector/fxvector)
+        (vector-length flvector/fxvector)))
 
 (: get-flvector/vector-ref ((U FlVector (Vectorof Fixnum)) Index -> (U Float Fixnum)))
-(define (get-flvector/vector-ref flvector/vector i)
-  (if (flvector? flvector/vector)
-        (flvector-ref flvector/vector i)
-        (vector-ref flvector/vector i)))
+(define (get-flvector/vector-ref flvector/fxvector i)
+  (if (flvector? flvector/fxvector)
+        (flvector-ref flvector/fxvector i)
+        (vector-ref flvector/fxvector i)))
   
 
 ; Used to determine the groups for the groupby. If by is a function, it’s called
@@ -365,18 +378,19 @@ Options to pass to matplotlib plotting method |#
 			      (λ () 0)))
 	      (loop (add1 i))))))
 
-(: get-discrete-hist-data-vec ((U (Vectorof Any) (Vectorof Boolean) (Vectorof Datetime) (Vectorof Fixnum) (Vectorof Symbol) FlVector) (U (Vectorof Fixnum) FlVector) -> HistBinStacked))
-(define (get-discrete-hist-data-vec data-vec-one data-vec-two)
+(: get-discrete-hist-data-vec ((U (Vectorof Any) (Vectorof Boolean) (Vectorof Datetime) (Vectorof Fixnum) (Vectorof Symbol) FlVector)
+                               PlottableSeries -> HistBinStacked))
+(define (get-discrete-hist-data-vec data-vec-one data-series-two)
   (define: hist-bin-index : HistBinStacked (make-hist-bin-stacked))
   (define vec-one-len
     (if (flvector? data-vec-one)
         (flvector-length data-vec-one)
         (vector-length data-vec-one)))
 
-  (define vec-two-len
-    (get-flvector/vector-length data-vec-two))
+  (define series-two-len
+    (series-length data-series-two))
 
-  (when (not (= vec-one-len vec-two-len))
+  (when (not (= vec-one-len series-two-len))
     (error "Vectors must be of the same length."))
 
   (let loop ([i 0])
@@ -389,9 +403,9 @@ Options to pass to matplotlib plotting method |#
                          (vector-ref data-vec-one i))))
 		(hash-update! hist-bin-index key
 			      (λ: ((val-list : (Listof Real)))
-				  (append val-list (list (get-flvector/vector-ref data-vec-two i))))
-			      (λ () (list (get-flvector/vector-ref data-vec-two i)))))
-          (loop (add1 i))))))
+				  (append val-list (assert (series-iref data-series-two i) RealList?)))
+			      (λ () (list)))
+          (loop (add1 i)))))))
 
 (: list-of-vec-from-hist-bin (HistBin -> (Listof (Vector Any Real))))
 (define (list-of-vec-from-hist-bin hist-bin)
@@ -401,15 +415,15 @@ Options to pass to matplotlib plotting method |#
 (define (list-of-vec-from-hist-bin-stacked hist-bin-stacked)
   (hash-map hist-bin-stacked (lambda ([key : Any] [value : (Listof Real)]) : (Vector Any (Listof Real)) (vector key value))))
 
-(: discrete-histogram-from-vector ((U (Vectorof Any) (Vectorof Boolean) (Vectorof Datetime) (Vectorof Fixnum) (Vectorof Symbol) FlVector) -> renderer2d))
+(: discrete-histogram-from-vector ((U (Vectorof Any) (Vectorof Boolean) (Vectorof Datetime) (Vectorof Fixnum) (Vectorof Label) FlVector) -> renderer2d))
 (define (discrete-histogram-from-vector vec)
   (discrete-histogram (cast (list-of-vec-from-hist-bin (get-discrete-hist-data vec))
                             (Sequenceof (U (List Any (U False Real ivl)) (Vector Any (U False Real ivl)))))))
 
-(: discrete-histogram-stacked-from-vector ((U (Vectorof Any) (Vectorof Boolean) (Vectorof Datetime) (Vectorof Fixnum) (Vectorof Symbol) FlVector)
-                                           (U (Vectorof Fixnum) FlVector) -> (Listof renderer2d)))
-(define (discrete-histogram-stacked-from-vector data-vec-one data-vec-two)
-  (stacked-histogram (cast (list-of-vec-from-hist-bin-stacked (get-discrete-hist-data-vec data-vec-one data-vec-two)) 	
+(: discrete-histogram-stacked-from-vector ((U (Vectorof Any) (Vectorof Boolean) (Vectorof Datetime) (Vectorof Fixnum) (Vectorof Label) FlVector)
+                                           PlottableSeries -> (Listof renderer2d)))
+(define (discrete-histogram-stacked-from-vector data-vec-one data-series-two)
+  (stacked-histogram (cast (list-of-vec-from-hist-bin-stacked (get-discrete-hist-data-vec data-vec-one (assert data-series-two PlottableSeries?))) 	
                             (Sequenceof (U (Vector Any (Sequenceof Real)) (List Any (Sequenceof Real)))))))
 
 ;ann
@@ -438,32 +452,58 @@ Options to pass to matplotlib plotting method |#
         (plot
          plot-points))))
 
+(: get-index-vector (Series -> (U (Vectorof Label) (Vectorof Fixnum))))
+(define (get-index-vector series)
+  (: series-len Index)
+  (define series-len (series-length series))
+  (define v (series-data series))
+  ; initialize vectors with default values
+  (: label-vector (Vectorof Label))
+  (define label-vector (make-vector (assert series-len index?) 'a))
+  (: index-vector (Vectorof Fixnum))
+  (define index-vector (make-vector (assert series-len index?) 0))
+  
+  (let ((len series-len))
+    (if (zero? len)
+        (vector)
+	(begin
+	  (do ((i 0 (add1 i)))
+	      ((>= i len)
+               (if (LabelIndex-index series)                  
+                  label-vector
+                  index-vector))
+              (if (LabelIndex-index series)
+                  (vector-set! label-vector (assert i index?) (idx->label series (assert i index?)))
+                  (vector-set! index-vector (assert i index?) (assert i index?))))))))
+
 ; In the case of multiple data vectors, the first vector is plotted against all other vectors. Else in the singular case,
 ; the index is plotted against the vector. The DataFrame can be projected to only use a subset of columns.
 (: make-discrete-histogram-stacked ((U Series (Listof Series) DataFrame Column Columns) -> Any))
 (define (make-discrete-histogram-stacked data)
-  (let: ((plot-points : (U renderer2d (Listof renderer2d))
+  (let: ((plot-points : (U (Listof (Listof renderer2d)) (Listof renderer2d))
          (cond
            [(and (Series? data) (is-plottable-series data))
-            (discrete-histogram-from-vector (series-data data))]
+            (discrete-histogram-stacked-from-vector (get-index-vector data) (assert data PlottableSeries?))]
            [(and (SeriesList? data) (andmap is-plottable-series data))
-            (map (lambda ([d : Series]) : renderer2d
-                  (discrete-histogram-from-vector (series-data d))) data)]
+            (map (lambda ([d : Series]) : (Listof renderer2d)
+                   (discrete-histogram-stacked-from-vector (series-data (car data)) (assert d PlottableSeries?))) (cdr data))]
            [(and (Column? data) (is-plottable-series (column-series data)))
-            (discrete-histogram-from-vector (series-data (column-series data)))]
+            (discrete-histogram-stacked-from-vector (get-index-vector (column-series data)) (assert (column-series data) PlottableSeries?))]
            [(and (Columns? data) (andmap is-plottable-series (map (lambda ([d : Column]) (column-series d)) data)))
             (map (lambda ([d : Column])
-             (discrete-histogram-from-vector (series-data (column-series d)))) data)]
+                   (discrete-histogram-stacked-from-vector (series-data (column-series (car data))) (assert (column-series d) PlottableSeries?))) (cdr data))]
            ; A histogram is a representation of the distribution of data. This function calls matplotlib.pyplot.hist(),
            ;on each series in the DataFrame, resulting in one histogram per column.
            [(and (DataFrame? data) (andmap is-plottable-series (map (lambda ([d : Column]) (column-series d)) (data-frame-explode data))))
-            (map (lambda ([d : Column])
-             (discrete-histogram-from-vector (series-data (column-series d)))) (data-frame-explode data))]
+            (let ((columns : Columns (data-frame-explode data)))
+              (map (lambda ([d : Column])
+                     (discrete-histogram-stacked-from-vector (series-data (column-series (car columns))) (assert (column-series d) PlottableSeries?))) (cdr columns)))]
            [else (error 'make-scatter-plot "Invalid data to plot")])))
-    (if (list? plot-points)
-        (map (lambda ([p-p : renderer2d]) (plot p-p)) plot-points)
-        (plot
-         plot-points))))
+    
+        (if (NestedRenderer2dList? plot-points)
+            (map (lambda ([p-p : (Listof renderer2d)]) (plot p-p)) plot-points)
+            (plot
+             plot-points))))
 
 ; ***********************************************************
 
@@ -488,14 +528,14 @@ Options to pass to matplotlib plotting method |#
 ;******************
 ;data-frame-integer
 ;******************
-(define columns-integer
+(define integer-columns
   (list 
    (cons 'col1 (new-ISeries (vector 1 2 3 4 4) #f))
    (cons 'col2 (new-ISeries (vector 5 6 7 8 24) #f))
    (cons 'col3 (new-ISeries (vector 9 10 11 12 24) #f))))
 
 ; create new data-frame-integer
-(define data-frame-integer (new-data-frame columns-integer))
+(define data-frame-integer (new-data-frame integer-columns))
 
 (displayln "plotting integer data-frame")
 
@@ -503,19 +543,19 @@ Options to pass to matplotlib plotting method |#
 
 (displayln "plotting integer columns")
 
-(make-scatter-plot columns-integer)
+(make-scatter-plot integer-columns)
 
 ;******************
 ;data-frame-float
 ;******************
-(define columns-float
+(define float-columns
   (list 
    (cons 'col1 (new-NSeries (flvector 1.5 2.5 3.5 4.5) #f))
    (cons 'col2 (new-NSeries (flvector 5.5 6.5 7.5 8.5) #f))
    (cons 'col3 (new-NSeries (flvector 9.5 10.5 11.5 12.5) #f))))
 
 ; create new data-frame-float
-(define data-frame-float (new-data-frame columns-float))
+(define data-frame-float (new-data-frame float-columns))
 
 (displayln "plotting float data-frame")
 
@@ -523,7 +563,7 @@ Options to pass to matplotlib plotting method |#
 
 (displayln "plotting float columns")
 
-(make-scatter-plot columns-float)
+(make-scatter-plot float-columns)
 
 (displayln "discrete histogram")
 
@@ -533,10 +573,38 @@ Options to pass to matplotlib plotting method |#
 
 (make-discrete-histogram float-column)
 
-(make-discrete-histogram columns-integer)
+(make-discrete-histogram integer-columns)
 
 (make-discrete-histogram data-frame-float)
 
+(get-index-vector (new-ISeries (vector 1 2 3 4 4) #f))
+
+(define series-integer-labeled
+  (new-ISeries (vector 1 2 3 4)
+               (build-index-from-labels (list 'a 'b 'c 'd))))
+
+(get-index-vector series-integer-labeled)
+
+(make-discrete-histogram-stacked float-column)
+
+(make-discrete-histogram-stacked float-columns)
+
+;******************
+;data-frame-integer
+;******************
+(define integer-columns-2
+  (list 
+   (cons 'col1 (new-ISeries (vector 1 2 3 4)
+                            (build-index-from-labels (list 'a 'b 'c 'd))))
+   (cons 'col2 (new-ISeries (vector 5 6 7 8)
+                            (build-index-from-labels (list 'e 'f 'g 'h))))
+   (cons 'col3 (new-ISeries (vector 9 10 11 12)
+                            (build-index-from-labels (list 'i 'j 'k 'l))))))
+
+; create new data-frame-integer
+(define data-frame-integer-2 (new-data-frame integer-columns-2))
+
+(make-discrete-histogram-stacked data-frame-integer-2)
 
 ; individual testing does not work due to Racket type checking
 ; (get-discrete-hist-data (vector 1 2 3 4 5))

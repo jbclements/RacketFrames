@@ -65,7 +65,9 @@
  racket/unsafe/ops
  (only-in "indexed-series.rkt"
 	  build-index-from-labels
+          RFIndex
 	  Label SIndex LabelIndex LabelIndex-index
+          FIndex FloatIndex
           label-index label->lst-idx
           idx->label is-labeled?)
  (only-in "boolean-series.rkt"

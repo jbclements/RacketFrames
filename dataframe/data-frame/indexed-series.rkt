@@ -32,7 +32,9 @@
 (provide
  SIndex Labeling ListofLabel?
  Label Label? LabelProjection
+ RFIndex
  LabelIndex LabelIndex-index
+ FIndex FloatIndex
  (struct-out GSeries)
  new-GSeries 
  series-ref gseries-iref
@@ -41,7 +43,8 @@
 ; ***********************************************************
 
 ; ***********************************************************
-(require 
+(require
+  "../util/datetime.rkt"
  (only-in racket/flonum
           make-flvector flvector? flvector
           flvector-ref flvector-set!
@@ -62,11 +65,26 @@
 
 (define-type SIndex (HashTable Label (Listof Index)))
 
+; Range Index
+(define-type RIndex (Listof Index))
+
+(define-type IIndex (HashTable Integer (Listof Index)))
+
+(define-type FIndex (HashTable Float (Listof Index)))
+
+(define-type DTIndex (HashTable Datetime (Listof Index)))
+
 (define-type LabelProjection (U (Listof Label) (Setof Label)))
 
 ; like in Pandas, it could be dictionary of labels to values or not
 ; that's what the LabelIndex is for
 (struct LabelIndex ([index : (Option SIndex)]) #:mutable)
+(struct RangeIndex ([index : (Option RIndex)]) #:mutable)
+(struct IntegerIndex ([index : (Option IIndex)]) #:mutable)
+(struct FloatIndex ([index : (Option FIndex)]) #:mutable)
+(struct DatetimeIndex ([index : (Option DTIndex)]) #:mutable)
+
+(define-type RFIndex (U LabelIndex RangeIndex IntegerIndex FloatIndex DatetimeIndex))
 ; ***********************************************************
 
 ; ***********************************************************
@@ -78,9 +96,7 @@
     (let loop : SIndex ((idx : Index 0) (labels : (Listof Label) labels))
       (if (null? labels)
           index
-          (begin
-            ;(hash-set! index (car labels) idx)
-
+          (begin          
             (hash-update! index (car labels)
 			      (λ: ((lst-index : (Listof Index)))
 				  (append lst-index (list idx)))
@@ -92,6 +108,75 @@
 (: label-index (SIndex Label -> (Listof Index)))
 (define (label-index index label)      
   (hash-ref index label))
+; ***********************************************************
+
+; ***********************************************************
+; This function consumes a list of Labels and produces a
+; SIndex which is a HashTable Label to Index.
+(: build-index-from-integers ((Listof Integer) -> IIndex))
+(define (build-index-from-integers integers)
+  (let ((index : IIndex (make-hash '())))
+    (let loop : IIndex ((idx : Index 0) (integers : (Listof Integer) integers))
+      (if (null? integers)
+          index
+          (begin
+            (hash-update! index (car integers)
+			      (λ: ((lst-index : (Listof Index)))
+				  (append lst-index (list idx)))
+			      (λ () (list)))
+
+            
+            (loop (assert (+ idx 1) index?) (cdr integers)))))))
+
+(: integer-index (IIndex Integer -> (Listof Index)))
+(define (integer-index index integer)      
+  (hash-ref index integer))
+; ***********************************************************
+
+; ***********************************************************
+; This function consumes a list of Floats and produces a
+; FIndex which is a HashTable Label to Index.
+(: build-index-from-floats ((Listof Float) -> FIndex))
+(define (build-index-from-floats floats)
+  (let ((index : FIndex (make-hash '())))
+    (let loop : FIndex ((idx : Index 0) (floats : (Listof Float) floats))
+      (if (null? floats)
+          index
+          (begin
+            (hash-update! index (car floats)
+			      (λ: ((lst-index : (Listof Index)))
+				  (append lst-index (list idx)))
+			      (λ () (list)))
+
+            
+            (loop (assert (+ idx 1) index?) (cdr floats)))))))
+
+(: float-index (FIndex Float -> (Listof Index)))
+(define (float-index index float)      
+  (hash-ref index float))
+; ***********************************************************
+
+; ***********************************************************
+; This function consumes a list of Datetimes and produces a
+; DTIndex which is a HashTable Label to Index.
+(: build-index-from-datetimes ((Listof Datetime) -> DTIndex))
+(define (build-index-from-datetimes datetimes)
+  (let ((index : DTIndex (make-hash '())))
+    (let loop : DTIndex ((idx : Index 0) (datetimes : (Listof Datetime) datetimes))
+      (if (null? datetimes)
+          index
+          (begin
+            (hash-update! index (car datetimes)
+			      (λ: ((lst-index : (Listof Index)))
+				  (append lst-index (list idx)))
+			      (λ () (list)))
+
+            
+            (loop (assert (+ idx 1) index?) (cdr datetimes)))))))
+
+(: datetime-index (DTIndex Datetime -> (Listof Index)))
+(define (datetime-index index datetime)      
+  (hash-ref index datetime))
 ; ***********************************************************
 
 ; ***********************************************************
@@ -291,7 +376,7 @@
                             (λ () (list))))
             (loop (add1 i)))))))
 
-(build-multi-index-from-list (list (list 'a 'b 'c) (list 1 2 3)))
+;(build-multi-index-from-list (list (list 'a 'b 'c) (list 1 2 3)))
 
-(build-multi-index-from-list (list (list 'a 'b 'c 'a 'c) (list 1 2 3 4 3)))
+;(build-multi-index-from-list (list (list 'a 'b 'c 'a 'c) (list 1 2 3 4 3)))
 ; ***********************************************************

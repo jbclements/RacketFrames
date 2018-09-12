@@ -21,7 +21,7 @@
  (struct-out ISeries))
 
 (provide:
- [new-ISeries ((Vectorof Fixnum) (Option (U (Listof Label) SIndex)) -> ISeries)]
+ [new-ISeries ((Vectorof Fixnum) (Option (U (Listof IndexDataType) RFIndex)) -> ISeries)]
  [set-ISeries-index (ISeries (U (Listof Label) SIndex) -> ISeries)]
  [iseries-iref (ISeries (Listof Index) -> (Listof Fixnum))]
  [iseries-loc-boolean (ISeries (Listof Boolean) -> (U Fixnum ISeries))]
@@ -64,12 +64,13 @@
 (require
  racket/unsafe/ops
  (only-in "indexed-series.rkt"
-	  build-index-from-labels
-          RFIndex
+	  build-index-from-list          
+          RFIndex IndexDataType
+          extract-index
 	  Label SIndex LabelIndex LabelIndex-index
           FIndex FloatIndex
           label-index label->lst-idx
-          idx->label is-labeled?)
+          idx->label is-labeled? ListofIndexDataType?)
  (only-in "boolean-series.rkt"
           BSeries))
 ; ***********************************************************
@@ -85,34 +86,35 @@
 ; speed improvement.
 
 ;; Integer series optimized with use of Fixnum.
-(struct ISeries LabelIndex ([data : (Vectorof Fixnum)]))
+(struct ISeries ([index : RFIndex] [data : (Vectorof Fixnum)]))
 
 ; Consumes a Vector of Fixnum and a list of Labels which
 ; can come in list form or SIndex form and produces a ISeries
 ; struct object.
-(: new-ISeries ((Vectorof Fixnum) (Option (U (Listof Label) SIndex)) -> ISeries))
+(: new-ISeries ((Vectorof Fixnum) (Option (U (Listof IndexDataType) RFIndex)) -> ISeries))
 (define (new-ISeries data labels)
 
-  (: check-mismatch (SIndex -> Void))
+  (: check-mismatch (RFIndex -> Void))
   (define (check-mismatch index)
-    (unless (eq? (vector-length data) (hash-count index))
+    ; bug spotted, needs to count sum of the number of elements in each hashed list
+    (unless (eq? (vector-length data) (hash-count (extract-index index)))
       (let ((k (current-continuation-marks)))
 	(raise (make-exn:fail:contract "Cardinality of a Series' data and labels must be equal" k))))
     (void))
 
   (if (hash? labels)
       (begin
-	(check-mismatch labels)
+	(check-mismatch (extract-index labels))
 	(ISeries labels data))
       (if labels
-	  (let ((index (build-index-from-labels labels)))
+	  (let ((index (build-index-from-list (assert labels ListofIndexDataType?))))
 	    (check-mismatch index)
 	    (ISeries index data))
 	  (ISeries #f data))))
 ; ***********************************************************
 
 ; ***********************************************************
-(: set-ISeries-index (ISeries (U (Listof Label) SIndex) -> ISeries))
+(: set-ISeries-index (ISeries (U (Listof IndexDataType) SIndex) -> ISeries))
 (define (set-ISeries-index iseries labels)
 
   (define data (ISeries-data iseries))
@@ -128,7 +130,7 @@
       (begin
 	(check-mismatch labels)
 	(ISeries labels data))
-      (let ((index (build-index-from-labels labels)))
+      (let ((index (build-index-from-list labels)))
         (check-mismatch index)
         (ISeries index data))))
 ; ***********************************************************
@@ -572,7 +574,7 @@
 
         (if (= (vector-length vals) 1)
             (vector-ref vals 0)
-            (new-ISeries vals (build-index-from-labels (build-labels-by-count (convert-to-label-lst label) associated-indices-length)))))))
+            (new-ISeries vals (build-index-from-list (build-labels-by-count (convert-to-label-lst label) associated-indices-length)))))))
 
 ; index based
 (: iseries-iloc (ISeries (U Index (Listof Index)) -> (U Fixnum ISeries)))
@@ -585,7 +587,7 @@
       (new-ISeries
        (for/vector: : (Vectorof Fixnum) ([i idx])
          (vector-ref (iseries-data iseries) i))
-       (build-index-from-labels (map (lambda ([i : Index]) (idx->label iseries i)) idx)))
+       (build-index-from-list (map (lambda ([i : Index]) (idx->label (ISeries-index iseries i))) idx)))
       (referencer idx))))
 
 ; ***********************************************************

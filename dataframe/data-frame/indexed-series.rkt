@@ -27,12 +27,14 @@
  [gseries-length (GSeries -> Index)]
  [gseries-data (All (A) (GSeries A) -> (Vectorof A))]
  [build-multi-index-from-list ((Listof (Listof GenericType)) -> SIndex)]
- [labeling (LabelIndex -> (Listof (Pair Label (Listof Index))))])
+ [build-index-from-list ((Listof IndexDataType) -> RFIndex)]
+ [labeling (LabelIndex -> (Listof (Pair Label (Listof Index))))]
+ [extract-index (RFIndex -> IndexType)])
 
 (provide
- SIndex Labeling ListofLabel?
+ SIndex Labeling ListofLabel? ListofIndexDataType?
  Label Label? LabelProjection
- RFIndex
+ RFIndex IndexDataType
  LabelIndex LabelIndex-index
  FIndex FloatIndex
  (struct-out GSeries)
@@ -59,32 +61,76 @@
 
 (define-predicate Label? Label)
 
+(define-predicate Datetime? Datetime)
+
 (define-predicate ListofLabel? (Listof Label))
+
+(define-predicate ListofInteger? (Listof Integer))
+
+(define-predicate ListofFloat? (Listof Float))
+
+(define-predicate ListofDatetime? (Listof Datetime))
 
 (define-type Labeling (Listof (Pair Label (Listof Index))))
 
 (define-type SIndex (HashTable Label (Listof Index)))
 
 ; Range Index
-(define-type RIndex (Listof Index))
-
 (define-type IIndex (HashTable Integer (Listof Index)))
 
 (define-type FIndex (HashTable Float (Listof Index)))
 
 (define-type DTIndex (HashTable Datetime (Listof Index)))
 
+(define-type IndexDataType (U Label Integer Float Datetime))
+
+(define-predicate ListofIndexDataType? (Listof IndexDataType))
+
 (define-type LabelProjection (U (Listof Label) (Setof Label)))
 
 ; like in Pandas, it could be dictionary of labels to values or not
 ; that's what the LabelIndex is for
 (struct LabelIndex ([index : (Option SIndex)]) #:mutable)
-(struct RangeIndex ([index : (Option RIndex)]) #:mutable)
 (struct IntegerIndex ([index : (Option IIndex)]) #:mutable)
 (struct FloatIndex ([index : (Option FIndex)]) #:mutable)
 (struct DatetimeIndex ([index : (Option DTIndex)]) #:mutable)
 
-(define-type RFIndex (U LabelIndex RangeIndex IntegerIndex FloatIndex DatetimeIndex))
+(define-type IndexType (U SIndex IIndex FIndex DTIndex))
+
+; add RangeIndex later
+(define-type RFIndex (U LabelIndex IntegerIndex FloatIndex DatetimeIndex))
+; ***********************************************************
+
+; ***********************************************************
+; This function consumes a list of Labels and produces a
+; SIndex which is a HashTable Label to Index.
+(: build-index-from-list ((Listof IndexDataType) -> RFIndex))
+(define (build-index-from-list lst)
+  (cond
+    [(ListofLabel? lst) (LabelIndex (build-index-from-labels lst))]
+    [(ListofInteger? lst) (IntegerIndex (build-index-from-integers lst))]
+    [(ListofFloat? lst) (FloatIndex (build-index-from-floats lst))]
+    [(ListofDatetime? lst) (DatetimeIndex (build-index-from-datetimes lst))]
+    [else (error "Unsupported index datatype.")]))
+
+(: get-index (RFIndex IndexDataType -> (Listof Index)))
+(define (get-index index item)
+  (cond
+    [(and (LabelIndex? index) (Label? item)) (label-index (assert (LabelIndex-index index)) item)]
+    [(and (IntegerIndex? index) (exact-integer? item)) (integer-index (assert (IntegerIndex-index index)) item)]
+    [(and (FloatIndex? index) (flonum? item)) (float-index (assert (FloatIndex-index index)) item)]
+    [(and (DatetimeIndex? index) (Datetime? item)) (datetime-index (assert (DatetimeIndex-index index)) item)]
+    [else (error "Unsupported index datatype.")]))
+
+(: extract-index (RFIndex -> IndexType))
+(define (extract-index index)
+  (cond
+    [(LabelIndex? index) (assert (LabelIndex-index index))]
+    [(IntegerIndex? index) (assert (IntegerIndex-index index))]
+    [(FloatIndex? index) (assert (FloatIndex-index index))]
+    [(DatetimeIndex? index) (assert (DatetimeIndex-index index))]
+    [else (error "Unsupported index datatype.")]))
+
 ; ***********************************************************
 
 ; ***********************************************************

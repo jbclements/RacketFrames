@@ -19,12 +19,12 @@
 ; Provide functions in this file to other files.
 
 (provide:
- [set-NSeries-index (NSeries (U (Listof Label) SIndex) -> NSeries)]
+ [set-NSeries-index (NSeries (U (Listof Label) RFIndex) -> NSeries)]
  [nseries-iref (NSeries (Listof Index) -> (Listof Float))]
  [nseries-loc-boolean (NSeries (Listof Boolean) -> (U Float NSeries))]
  [nseries-loc (NSeries (U Label (Listof Label) (Listof Boolean)) -> (U Float NSeries))]
  [nseries-iloc (NSeries (U Index (Listof Index)) -> (U Float NSeries))]
- [nseries-label-ref (NSeries Label -> (Listof Float))]
+ [nseries-index-ref (NSeries IndexDataType -> (Listof Float))]
  [nseries-range (NSeries Index -> FlVector)]
  [nseries-referencer (NSeries -> (Index -> Float))]
  [nseries-length (NSeries -> Index)]
@@ -89,10 +89,12 @@
 	  settings)
  (only-in "indexed-series.rkt"
 	  label-index label->lst-idx
-	  build-index-from-labels
-	  Label SIndex
+	  build-index-from-list IndexDataType
+	  Label RFIndex extract-index
 	  LabelIndex LabelIndex-index
-          idx->label is-labeled?)
+          idx->key is-indexed? 
+          key->lst-idx
+          is-labeled? ListofIndexDataType?)
  (only-in "boolean-series.rkt"
           BSeries BSeries-data)
  (only-in "integer-series.rkt"
@@ -117,8 +119,8 @@
 	  (do ((i 0 (add1 i)))
 	      ((>= i len) (void))
 	    (let ((num (flvector-ref flv i)))
-              (if (LabelIndex-index nseries)
-                  (display (idx->label nseries (assert i index?)) port)
+              (if (NSeries-index nseries)
+                  (display (idx->key (assert (NSeries-index nseries)) (assert i index?)) port)
                   (display (assert i index?) port))
               (display " " port)
 	      (if (eqv? num +nan.0)
@@ -147,16 +149,14 @@
 
 ;; An NSeries is an optimized Series for computation over vectors of Float
 ;; i.e., NSeries should be faster then (Series Float)
-(struct: NSeries LabelIndex ([data : FlVector])
-	 ;;  #:methods gen:custom-write [(define write-proc writer-NSeries)]
-	 )
+(struct: NSeries ([index : (Option RFIndex)] [data : FlVector]))
 
-(: new-NSeries (FlVector (Option (U (Listof Label) SIndex)) -> NSeries))
+(: new-NSeries (FlVector (Option (U (Listof IndexDataType) RFIndex)) -> NSeries))
 (define (new-NSeries data labels)
 
-  (: check-mismatch (SIndex -> Void))
+  (: check-mismatch (RFIndex -> Void))
   (define (check-mismatch index)
-    (unless (eq? (flvector-length data) (hash-count index))
+    (unless (eq? (flvector-length data) (hash-count (extract-index index)))
 	    (let ((k (current-continuation-marks)))
 	      (raise (make-exn:fail:contract "Cardinality of a Series' data and labels must be equal" k))))
     (void))
@@ -166,7 +166,7 @@
 	(check-mismatch labels)
 	(NSeries labels data))
       (if labels
-	  (let ((index (build-index-from-labels labels)))
+	  (let ((index (build-index-from-list (assert labels ListofIndexDataType?))))
 	    (check-mismatch index)
 	    (NSeries index data))
 	  (NSeries #f data))))
@@ -174,14 +174,14 @@
 ; ***********************************************************
 
 ; ***********************************************************
-(: set-NSeries-index (NSeries (U (Listof Label) SIndex) -> NSeries))
+(: set-NSeries-index (NSeries (U (Listof Label) RFIndex) -> NSeries))
 (define (set-NSeries-index nseries labels)
 
   (define data (NSeries-data nseries))
   
-  (: check-mismatch (SIndex -> Void))
+  (: check-mismatch (RFIndex -> Void))
   (define (check-mismatch index)
-    (unless (eq? (flvector-length data) (hash-count index))
+    (unless (eq? (flvector-length data) (hash-count (extract-index index)))
       (let ((k (current-continuation-marks)))
 	(raise (make-exn:fail:contract "Cardinality of a Series' data and labels must be equal" k))))
     (void))
@@ -190,7 +190,7 @@
       (begin
 	(check-mismatch labels)
 	(NSeries labels data))
-      (let ((index (build-index-from-labels labels)))
+      (let ((index (build-index-from-list (assert labels ListofIndexDataType?))))
         (check-mismatch index)
         (NSeries index data))))
 ; ***********************************************************
@@ -226,9 +226,9 @@
   
   flvector-ranged)
 
-(: nseries-label-ref (NSeries Label -> (Listof Float)))
-(define (nseries-label-ref series label)
-  (nseries-iref series (label->lst-idx series label)))
+(: nseries-index-ref (NSeries IndexDataType -> (Listof Float)))
+(define (nseries-index-ref series key)
+  (nseries-iref series (key->lst-idx (assert (NSeries-index series)) key)))
 
 ; This function consumes a numeric series and returns its
 ; data vector.
@@ -277,7 +277,7 @@
 	      (flvector-set! new-data idx (fn (flvector-ref old-data idx)))
 	      (loop (add1 idx)))
 	    (void))))
-    (NSeries (LabelIndex-index series) new-data)))
+    (NSeries (NSeries-index series) new-data)))
 
 ; ***********************************************************
 
@@ -713,35 +713,35 @@
     
 (: nseries-loc (NSeries (U Label (Listof Label) (Listof Boolean)) -> (U Float NSeries)))
 (define (nseries-loc nseries label)
-  (unless (is-labeled? nseries)
+  (unless (is-indexed? (assert (NSeries-index nseries)))
     (let ((k (current-continuation-marks)))
       (raise (make-exn:fail:contract "nseries must have a label index." k))))
 
   (if (ListofBoolean? label)
       (nseries-loc-boolean nseries label)
       (let ((associated-indices-length : (Listof Integer)
-                                       (map (lambda ([l : Label]) (length (nseries-label-ref nseries l))) (convert-to-label-lst label)))
+                                       (map (lambda ([l : Label]) (length (nseries-index-ref nseries l))) (convert-to-label-lst label)))
             (vals : FlVector
              (if (list? label)
-                 (list->flvector (assert (flatten (map (lambda ([l : Label]) (nseries-label-ref nseries l)) label)) ListofFloat?))
-                 (list->flvector (assert (nseries-label-ref nseries label) ListofFloat?)))))
+                 (list->flvector (assert (flatten (map (lambda ([l : Label]) (nseries-index-ref nseries l)) label)) ListofFloat?))
+                 (list->flvector (assert (nseries-index-ref nseries label) ListofFloat?)))))
 
         (if (= (flvector-length vals) 1)
             (flvector-ref vals 0)
-            (new-NSeries vals (build-index-from-labels (build-labels-by-count (convert-to-label-lst label) associated-indices-length)))))))
+            (new-NSeries vals (build-index-from-list (build-labels-by-count (convert-to-label-lst label) associated-indices-length)))))))
 
 ; index based
 (: nseries-iloc (NSeries (U Index (Listof Index)) -> (U Float NSeries)))
 (define (nseries-iloc nseries idx)
   (let ((referencer (nseries-referencer nseries)))
     (if (list? idx)
-        ; get labels from SIndex that refer to given indicies
+        ; get labels from RFIndex that refer to given indicies
         ; make a new index from these labels using build-index-from-labels
         ; sub-vector the data vector to get the data and create a new-BSeries
         (new-NSeries
          (list->flvector (for/list: : (Listof Float) ([i idx])
                            (flvector-ref (nseries-data nseries) i)))
-         (build-index-from-labels (map (lambda ([i : Index]) (idx->label nseries i)) idx)))
+         (build-index-from-list (map (lambda ([i : Index]) (idx->key (assert (NSeries-index nseries)) i)) idx)))
         (referencer idx))))
 
 ; ***********************************************************

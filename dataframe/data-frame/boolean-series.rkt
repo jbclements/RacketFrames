@@ -19,10 +19,10 @@
  (struct-out BSeries))
 
 (provide:
- [new-BSeries ((Vectorof Boolean) (Option (U (Listof Label) SIndex)) -> BSeries)]
- [set-BSeries-index (BSeries (U (Listof Label) SIndex) -> BSeries)]
+ [new-BSeries ((Vectorof Boolean) (Option (U (Listof Label) RFIndex)) -> BSeries)]
+ [set-BSeries-index (BSeries (U (Listof Label) RFIndex) -> BSeries)]
  [bseries-iref (BSeries (Listof Index) -> (Listof Boolean))]
- [bseries-label-ref (BSeries Label -> (Listof Boolean))]
+ [bseries-index-ref (BSeries IndexDataType -> (Listof Boolean))]
  [bseries-range (BSeries Index -> (Vectorof Boolean))]
  [bseries-length (BSeries -> Index)]
  [bseries-referencer (BSeries -> (Index -> Boolean))]
@@ -40,10 +40,11 @@
 (require
  racket/unsafe/ops
  (only-in "indexed-series.rkt"
-	  build-index-from-labels
-	  Label LabelIndex-index SIndex
-          LabelIndex label-index label->lst-idx
-          idx->label is-labeled?))
+	  RFIndex build-index-from-list
+          IndexDataType extract-index
+          Label LabelIndex-index
+          LabelIndex label-index label->lst-idx key->lst-idx
+          idx->key is-indexed? ListofIndexDataType?))
 ; ***********************************************************
 
 ; ***********************************************************
@@ -57,17 +58,17 @@
 ; speed improvement.
 
 ;; Boolean series.
-(struct BSeries LabelIndex ([data : (Vectorof Boolean)]))
+(struct BSeries ([index : (Option RFIndex)] [data : (Vectorof Boolean)]))
 
 ; Consumes a Vector of Fixnum and a list of Labels which
 ; can come in list form or SIndex form and produces a ISeries
 ; struct object.
-(: new-BSeries ((Vectorof Boolean) (Option (U (Listof Label) SIndex)) -> BSeries))
+(: new-BSeries ((Vectorof Boolean) (Option (U (Listof IndexDataType) RFIndex)) -> BSeries))
 (define (new-BSeries data labels)
 
-  (: check-mismatch (SIndex -> Void))
+  (: check-mismatch (RFIndex -> Void))
   (define (check-mismatch index)
-    (unless (eq? (vector-length data) (hash-count index))
+    (unless (eq? (vector-length data) (hash-count (extract-index index)))
       (let ((k (current-continuation-marks)))
 	(raise (make-exn:fail:contract "Cardinality of a Series' data and labels must be equal" k))))
     (void))
@@ -77,21 +78,21 @@
 	(check-mismatch labels)
 	(BSeries labels data))
       (if labels
-	  (let ((index (build-index-from-labels labels)))
+	  (let ((index (build-index-from-list (assert labels ListofIndexDataType?))))
 	    (check-mismatch index)
 	    (BSeries index data))
 	  (BSeries #f data))))
 ; ***********************************************************
 
 ; ***********************************************************
-(: set-BSeries-index (BSeries (U (Listof Label) SIndex) -> BSeries))
+(: set-BSeries-index (BSeries (U (Listof IndexDataType) RFIndex) -> BSeries))
 (define (set-BSeries-index bseries labels)
 
   (define data (BSeries-data bseries))
   
-  (: check-mismatch (SIndex -> Void))
+  (: check-mismatch (RFIndex -> Void))
   (define (check-mismatch index)
-    (unless (eq? (vector-length data) (hash-count index))
+    (unless (eq? (vector-length data) (hash-count (assert index hash?)))
       (let ((k (current-continuation-marks)))
 	(raise (make-exn:fail:contract "Cardinality of a Series' data and labels must be equal" k))))
     (void))
@@ -100,7 +101,7 @@
       (begin
 	(check-mismatch labels)
 	(BSeries labels data))
-      (let ((index (build-index-from-labels labels)))
+      (let ((index (build-index-from-list (assert labels ListofIndexDataType?))))
         (check-mismatch index)
         (BSeries index data))))
 ; ***********************************************************
@@ -137,9 +138,9 @@
 
 ; This function consumes a series and a Label and returns
 ; the value at that Label in the series.
-(: bseries-label-ref (BSeries Label -> (Listof Boolean)))
-(define (bseries-label-ref series label)
-  (bseries-iref series (label->lst-idx series label)))
+(: bseries-index-ref (BSeries IndexDataType -> (Listof Boolean)))
+(define (bseries-index-ref series item)
+  (bseries-iref series (key->lst-idx (assert (BSeries-index series)) item)))
 
 ; This function consumes an integer series and returns the
 ; length of that series.
@@ -225,22 +226,22 @@
     
 (: bseries-loc (BSeries (U Label (Listof Label) (Listof Boolean)) -> (U Boolean BSeries)))
 (define (bseries-loc bseries label)
-  (unless (is-labeled? bseries)
+  (unless (BSeries-index bseries)
     (let ((k (current-continuation-marks)))
       (raise (make-exn:fail:contract "BSeries must have a label index." k))))
 
   (if (ListofBoolean? label)
       (bseries-loc-boolean bseries label)
       (let ((associated-indices-length : (Listof Integer)
-                                       (map (lambda ([l : Label]) (length (bseries-label-ref bseries l))) (convert-to-label-lst label)))
+                                       (map (lambda ([l : Label]) (length (bseries-index-ref bseries l))) (convert-to-label-lst label)))
             (vals : (Vectorof Boolean)
              (if (list? label)
-                 (list->vector (assert (flatten (map (lambda ([l : Label]) (bseries-label-ref bseries l)) label)) ListofBoolean?))
-                 (list->vector (assert (bseries-label-ref bseries label) ListofBoolean?)))))
+                 (list->vector (assert (flatten (map (lambda ([l : Label]) (bseries-index-ref bseries l)) label)) ListofBoolean?))
+                 (list->vector (assert (bseries-index-ref bseries label) ListofBoolean?)))))
 
         (if (= (vector-length vals) 1)
             (vector-ref vals 0)
-            (new-BSeries vals (build-index-from-labels (build-labels-by-count (convert-to-label-lst label) associated-indices-length)))))))
+            (new-BSeries vals (build-index-from-list (build-labels-by-count (convert-to-label-lst label) associated-indices-length)))))))
 
 
 ; index based
@@ -248,13 +249,13 @@
 (define (bseries-iloc bseries idx)
   (let ((referencer (bseries-referencer bseries)))
   (if (list? idx)
-      ; get labels from SIndex that refer to given indicies
+      ; get labels from RFIndex that refer to given indicies
       ; make a new index from these labels using build-index-from-labels
       ; sub-vector the data vector to get the data and create a new-BSeries
       (new-BSeries
        (for/vector: : (Vectorof Boolean) ([i idx])
          (vector-ref (bseries-data bseries) i))
-       (build-index-from-labels (map (lambda ([i : Index]) (idx->label bseries i)) idx)))
+       (build-index-from-list (map (lambda ([i : Index]) (idx->key (assert (BSeries-index bseries)) i)) idx)))
       (referencer idx))))
 
 ; ***********************************************************
@@ -274,8 +275,8 @@
 	  (do ((i 0 (add1 i)))
 	      ((>= i len) (void))
 	    (let ((val (vector-ref v i)))
-              (if (LabelIndex-index bseries)
-                  (display (idx->label bseries (assert i index?)) port)
+              (if (BSeries-index bseries)
+                  (display (idx->key (BSeries-index bseries) (assert i index?)) port)
                   (display (assert i index?) port))
               (display " " port)
               (displayln val port)))))))

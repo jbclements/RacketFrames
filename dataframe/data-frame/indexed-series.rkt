@@ -24,36 +24,37 @@
  [is-labeled? (LabelIndex -> Boolean)]
  [label-sort-positional (LabelIndex [#:project LabelProjection] -> Labeling)]
  [label-sort-lexical (LabelIndex -> Labeling)]
- [gseries-length (GSeries -> Index)]
- [gseries-data (All (A) (GSeries A) -> (Vectorof A))]
+ ;[gseries-length (GSeries -> Index)]
+ ;[gseries-data (All (A) (GSeries A) -> (Vectorof A))]
  [build-multi-index-from-list ((Listof (Listof GenericType)) -> SIndex)]
  [build-index-from-list ((Listof IndexDataType) -> RFIndex)]
  [labeling (LabelIndex -> (Listof (Pair Label (Listof Index))))]
- [extract-index (RFIndex -> IndexType)])
+ [extract-index (RFIndex -> IndexType)]
+ [is-indexed? (RFIndex -> Boolean)])
 
 (provide
- SIndex Labeling ListofLabel? ListofIndexDataType?
+ SIndex IIndex FIndex DTIndex Labeling ListofLabel? ListofIndexDataType?
  Label Label? LabelProjection
  RFIndex IndexDataType
  LabelIndex LabelIndex-index
  FIndex FloatIndex
- (struct-out GSeries)
- new-GSeries 
- series-ref gseries-iref
- map/GSeries 
- build-index-from-labels label-index label->lst-idx idx->label)
+ ;(struct-out GSeries)
+ ;new-GSeries 
+ ;gseries-iref
+ ;map/GSeries 
+ build-index-from-labels label-index key->lst-idx label->lst-idx idx->key)
 ; ***********************************************************
 
 ; ***********************************************************
 (require
   "../util/datetime.rkt"
- (only-in racket/flonum
-          make-flvector flvector? flvector
-          flvector-ref flvector-set!
-          flvector-length)
- (only-in racket/set
-	  set-empty? set-member?
-	  list->set))
+  (only-in racket/flonum
+           make-flvector flvector? flvector
+           flvector-ref flvector-set!
+           flvector-length)
+  (only-in racket/set
+           set-empty? set-member?
+           list->set))
 ; ***********************************************************
 
 ; ***********************************************************
@@ -90,10 +91,10 @@
 
 ; like in Pandas, it could be dictionary of labels to values or not
 ; that's what the LabelIndex is for
-(struct LabelIndex ([index : (Option SIndex)]) #:mutable)
-(struct IntegerIndex ([index : (Option IIndex)]) #:mutable)
-(struct FloatIndex ([index : (Option FIndex)]) #:mutable)
-(struct DatetimeIndex ([index : (Option DTIndex)]) #:mutable)
+(struct LabelIndex ([index : SIndex]) #:mutable)
+(struct IntegerIndex ([index : IIndex]) #:mutable)
+(struct FloatIndex ([index : FIndex]) #:mutable)
+(struct DatetimeIndex ([index : DTIndex]) #:mutable)
 
 (define-type IndexType (U SIndex IIndex FIndex DTIndex))
 
@@ -116,19 +117,52 @@
 (: get-index (RFIndex IndexDataType -> (Listof Index)))
 (define (get-index index item)
   (cond
-    [(and (LabelIndex? index) (Label? item)) (label-index (assert (LabelIndex-index index)) item)]
-    [(and (IntegerIndex? index) (exact-integer? item)) (integer-index (assert (IntegerIndex-index index)) item)]
-    [(and (FloatIndex? index) (flonum? item)) (float-index (assert (FloatIndex-index index)) item)]
-    [(and (DatetimeIndex? index) (Datetime? item)) (datetime-index (assert (DatetimeIndex-index index)) item)]
+    [(and (LabelIndex? index) (Label? item)) (label-index (LabelIndex-index index) item)]
+    [(and (IntegerIndex? index) (exact-integer? item)) (integer-index (IntegerIndex-index index) item)]
+    [(and (FloatIndex? index) (flonum? item)) (float-index (FloatIndex-index index) item)]
+    [(and (DatetimeIndex? index) (Datetime? item)) (datetime-index (DatetimeIndex-index index) item)]
     [else (error "Unsupported index datatype.")]))
 
 (: extract-index (RFIndex -> IndexType))
 (define (extract-index index)
   (cond
-    [(LabelIndex? index) (assert (LabelIndex-index index))]
-    [(IntegerIndex? index) (assert (IntegerIndex-index index))]
-    [(FloatIndex? index) (assert (FloatIndex-index index))]
-    [(DatetimeIndex? index) (assert (DatetimeIndex-index index))]
+    [(LabelIndex? index) (LabelIndex-index index)]
+    [(IntegerIndex? index) (IntegerIndex-index index)]
+    [(FloatIndex? index) (FloatIndex-index index)]
+    [(DatetimeIndex? index) (DatetimeIndex-index index)]
+    [else (error "Unsupported index datatype.")]))
+
+; This function consumes LabelIndex and Label and returns the
+; numerical Index of the Label in the LabelIndex. The index
+; must be a SIndex else an exception is raised.
+(: is-indexed? (RFIndex -> Boolean))
+(define (is-indexed? index)
+  (cond
+    [(LabelIndex? index) (is-labeled? index)]
+    [(IntegerIndex? index) (has-integer-index? index)]
+    [(FloatIndex? index) (has-float-index? index)]
+    [(DatetimeIndex? index) (has-datetime-index? index)]
+    [else (error "Unsupported index datatype.")]))
+
+(: key->lst-idx (RFIndex IndexDataType -> (Listof Index)))
+(define (key->lst-idx index item)
+  (cond
+    [(LabelIndex? index) (label->lst-idx index (assert item Label?))]
+    [(IntegerIndex? index) (integer->lst-idx index (assert item exact-integer?))]
+    [(FloatIndex? index) (float->lst-idx index (assert item flonum?))]
+    [(DatetimeIndex? index) (datetime->lst-idx index (assert item Datetime?))]
+    [else (error "Unsupported index datatype.")]))
+
+; This function consumes LabelIndex and Label and returns the
+; numerical Index of the Label in the LabelIndex. The index
+; must be a SIndex else an exception is raised.
+(: idx->key (RFIndex Index -> IndexDataType))
+(define (idx->key index idx)
+  (cond
+    [(LabelIndex? index) (idx->label index idx)]
+    [(IntegerIndex? index) (idx->integer index idx)]
+    [(FloatIndex? index) (idx->float index idx)]
+    [(DatetimeIndex? index) (idx->datetime index idx)]
     [else (error "Unsupported index datatype.")]))
 
 ; ***********************************************************
@@ -144,9 +178,9 @@
           index
           (begin          
             (hash-update! index (car labels)
-			      (λ: ((lst-index : (Listof Index)))
-				  (append lst-index (list idx)))
-			      (λ () (list)))
+                          (λ: ((lst-index : (Listof Index)))
+                            (append lst-index (list idx)))
+                          (λ () (list)))
 
             
             (loop (assert (+ idx 1) index?) (cdr labels)))))))
@@ -167,9 +201,9 @@
           index
           (begin
             (hash-update! index (car integers)
-			      (λ: ((lst-index : (Listof Index)))
-				  (append lst-index (list idx)))
-			      (λ () (list)))
+                          (λ: ((lst-index : (Listof Index)))
+                            (append lst-index (list idx)))
+                          (λ () (list)))
 
             
             (loop (assert (+ idx 1) index?) (cdr integers)))))))
@@ -190,9 +224,9 @@
           index
           (begin
             (hash-update! index (car floats)
-			      (λ: ((lst-index : (Listof Index)))
-				  (append lst-index (list idx)))
-			      (λ () (list)))
+                          (λ: ((lst-index : (Listof Index)))
+                            (append lst-index (list idx)))
+                          (λ () (list)))
 
             
             (loop (assert (+ idx 1) index?) (cdr floats)))))))
@@ -213,9 +247,9 @@
           index
           (begin
             (hash-update! index (car datetimes)
-			      (λ: ((lst-index : (Listof Index)))
-				  (append lst-index (list idx)))
-			      (λ () (list)))
+                          (λ: ((lst-index : (Listof Index)))
+                            (append lst-index (list idx)))
+                          (λ () (list)))
 
             
             (loop (assert (+ idx 1) index?) (cdr datetimes)))))))
@@ -226,6 +260,7 @@
 ; ***********************************************************
 
 ; ***********************************************************
+#|
 ; General Series parameterized by A, allows for generic types.
 ; Numeric and categorical series will be further optimized.
 (struct (A) GSeries LabelIndex ([data : (Vectorof A)]))
@@ -264,7 +299,7 @@
          (let ((index (build-index-from-labels labels)))
            (check-mismatch index)
            (GSeries index data))
-         (GSeries #f data))))
+         (GSeries #f data)))) |#
 ; ***********************************************************
 
 ; ***********************************************************
@@ -298,6 +333,97 @@
 ; ***********************************************************
 
 ; ***********************************************************
+; This function consumes a series and returns a boolean
+; indicating whether series is a SIndex or not.
+(: has-integer-index? (IntegerIndex -> Boolean))
+(define (has-integer-index? index)
+  (if (extract-index index) #t #f))
+
+; This function consumes LabelIndex and Label and returns the
+; numerical Index of the Label in the LabelIndex. The index
+; must be a SIndex else an exception is raised.
+(: integer->lst-idx (IntegerIndex Integer -> (Listof Index)))
+(define (integer->lst-idx index integer)
+  (let ((index : IIndex (IntegerIndex-index index)))
+    (if index
+        (hash-ref index integer)
+        (let ((k (current-continuation-marks)))
+          (raise (make-exn:fail:contract "Cannot obtain the index of a label for a series which is unlabeled" k))))))
+
+; This function consumes LabelIndex and Label and returns the
+; numerical Index of the Label in the LabelIndex. The index
+; must be a SIndex else an exception is raised.
+(: idx->integer (IntegerIndex Index -> Integer))
+(define (idx->integer index idx)
+  (let ((index : IIndex (IntegerIndex-index index)))
+    (if index
+        (car (car (filter (lambda ([pair : (Pair Integer (Listof Index))]) (member idx (cdr pair))) (hash->list index))))
+        (let ((k (current-continuation-marks)))
+          (raise (make-exn:fail:contract "Cannot obtain the index of a label for a series which is unlabeled" k))))))
+; ***********************************************************
+
+; ***********************************************************
+; This function consumes a series and returns a boolean
+; indicating whether series is a SIndex or not.
+(: has-float-index? (FloatIndex -> Boolean))
+(define (has-float-index? index)
+  (if (extract-index index) #t #f))
+
+; This function consumes LabelIndex and Label and returns the
+; numerical Index of the Label in the LabelIndex. The index
+; must be a SIndex else an exception is raised.
+(: float->lst-idx (FloatIndex Float -> (Listof Index)))
+(define (float->lst-idx index float)
+  (let ((index : FIndex (FloatIndex-index index)))
+    (if index
+        (hash-ref index float)
+        (let ((k (current-continuation-marks)))
+          (raise (make-exn:fail:contract "Cannot obtain the index of a label for a series which is unlabeled" k))))))
+
+; This function consumes LabelIndex and Label and returns the
+; numerical Index of the Label in the LabelIndex. The index
+; must be a SIndex else an exception is raised.
+(: idx->float (FloatIndex Index -> Float))
+(define (idx->float index idx)
+  (let ((index : FIndex (FloatIndex-index index)))
+    (if index
+        (car (car (filter (lambda ([pair : (Pair Float (Listof Index))]) (member idx (cdr pair))) (hash->list index))))
+        (let ((k (current-continuation-marks)))
+          (raise (make-exn:fail:contract "Cannot obtain the index of a label for a series which is unlabeled" k))))))
+; ***********************************************************
+
+; ***********************************************************
+; This function consumes a series and returns a boolean
+; indicating whether series is a SIndex or not.
+(: has-datetime-index? (DatetimeIndex -> Boolean))
+(define (has-datetime-index? index)
+  (if (extract-index index) #t #f))
+
+; This function consumes LabelIndex and Label and returns the
+; numerical Index of the Label in the LabelIndex. The index
+; must be a SIndex else an exception is raised.
+(: datetime->lst-idx (DatetimeIndex Datetime -> (Listof Index)))
+(define (datetime->lst-idx index datetime)
+  (let ((index : DTIndex (DatetimeIndex-index index)))
+    (if index
+        (hash-ref index datetime)
+        (let ((k (current-continuation-marks)))
+          (raise (make-exn:fail:contract "Cannot obtain the index of a label for a series which is unlabeled" k))))))
+
+; This function consumes LabelIndex and Label and returns the
+; numerical Index of the Label in the LabelIndex. The index
+; must be a SIndex else an exception is raised.
+(: idx->datetime (DatetimeIndex Index -> Datetime))
+(define (idx->datetime index idx)
+  (let ((index : DTIndex (DatetimeIndex-index index)))
+    (if index
+        (car (car (filter (lambda ([pair : (Pair Datetime (Listof Index))]) (member idx (cdr pair))) (hash->list index))))
+        (let ((k (current-continuation-marks)))
+          (raise (make-exn:fail:contract "Cannot obtain the index of a label for a series which is unlabeled" k))))))
+; ***********************************************************
+
+#|
+; ***********************************************************
 ; This function consumes a series and an Listof Index and returns
 ; the value at that index in the series.
 (: gseries-iref (All (A) (GSeries A) (Listof Index) -> (U (Listof Float) (Listof A))))
@@ -330,6 +456,7 @@
                                                    (fn (vector-ref old-data idx))))))
     (GSeries (LabelIndex-index series) new-data)))
 ; ***********************************************************
+|#
 
 ; ***********************************************************
 ; This function consumes a LabelIndex which as long as it is
@@ -337,7 +464,7 @@
 ; list of Label Index pairs.
 (: labeling (LabelIndex -> (Listof (Pair Label (Listof Index)))))
 (define (labeling lindex)
-  (hash->list (assert (LabelIndex-index lindex))))
+  (hash->list (LabelIndex-index lindex)))
 ; ***********************************************************
 
 ; ***********************************************************
@@ -349,9 +476,9 @@
   ((inst sort (Pair Label (Listof Index)) (Pair Label (Listof Index)))
    (labeling lindex)
    (λ: ((kv1 : (Pair Label (Listof Index)))
-	(kv2 : (Pair Label (Listof Index))))
-       (string<=? (symbol->string (car kv1))
-		  (symbol->string (car kv2))))))
+        (kv2 : (Pair Label (Listof Index))))
+     (string<=? (symbol->string (car kv1))
+                (symbol->string (car kv2))))))
 ; ***********************************************************
 
 ; ***********************************************************
@@ -373,8 +500,8 @@
     (if (set-empty? projection)
         labels
         (filter (λ: ((label : (Pair Symbol (Listof Index))))
-		    (set-member? projection (car label)))
-		labels))))
+                  (set-member? projection (car label)))
+                labels))))
 ; ***********************************************************
 
 ; ***********************************************************

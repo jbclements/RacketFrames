@@ -26,7 +26,8 @@
  [series-loc-boolean (Series (Listof Boolean) -> (U Any Series))]
  [series-loc (Series (U Label (Listof Label) (Listof Boolean)) -> (U Any Series))]
  [series-iloc (Series (U Index (Listof Index)) -> (U Any Series))]
- [set-series-index (Series SIndex -> Series)])
+ [set-series-index (Series SIndex -> Series)]
+ [get-series-index (Series -> RFIndex)])
 
 ; ***********************************************************
 
@@ -111,7 +112,8 @@
 ; ***********************************************************
 ; Get series data
 
-(: series-data (Series -> (U (Vectorof GenericType) FlVector (Vectorof Symbol) (Vectorof Fixnum) (Vectorof Boolean) (Vectorof Datetime))))
+(: series-data (Series -> (U (Vectorof GenericType) FlVector (Vectorof Symbol)
+                             (Vectorof Fixnum) (Vectorof Boolean) (Vectorof Datetime))))
 (define (series-data series)
   (cond
     [(GenSeries? series) (gen-series-data series)]
@@ -170,7 +172,7 @@
 
 ; ***********************************************************
 
-(: set-series-index (Series SIndex -> Series))
+(: set-series-index (Series RFIndex -> Series))
 (define (set-series-index series index)
   (cond
     [(GenSeries? series) (set-GenSeries-index (assert series GenSeries?) index)]
@@ -179,6 +181,17 @@
     [(ISeries? series) (set-ISeries-index (assert series ISeries?) index)]
     [(BSeries? series) (set-BSeries-index (assert series BSeries?) index)]
     [(DatetimeSeries? series) (set-DatetimeSeries-index (assert series DatetimeSeries?) index)]
+    [else (error "Unknown or not supported series type in DataFrame")]))
+
+(: get-series-index (Series -> RFIndex))
+(define (set-series-index series)
+  (cond
+    [(GenSeries? series) (GenSeries-index (assert series GenSeries?))]
+    [(NSeries? series) (NSeries-index (assert series NSeries?))]
+    ;[(CSeries? series) (cseries-data series)]    
+    [(ISeries? series) (ISeries-index (assert series ISeries?))]
+    [(BSeries? series) (BSeries-index (assert series BSeries?))]
+    [(DatetimeSeries? series) (DatetimeSeries-index (assert series DatetimeSeries?))]
     [else (error "Unknown or not supported series type in DataFrame")]))
 
 ; ***********************************************************

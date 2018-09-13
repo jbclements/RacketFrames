@@ -22,12 +22,12 @@
 
 (provide:
  [new-ISeries ((Vectorof Fixnum) (Option (U (Listof IndexDataType) RFIndex)) -> ISeries)]
- [set-ISeries-index (ISeries (U (Listof Label) SIndex) -> ISeries)]
+ [set-ISeries-index (ISeries (U (Listof Label) RFIndex) -> ISeries)]
  [iseries-iref (ISeries (Listof Index) -> (Listof Fixnum))]
  [iseries-loc-boolean (ISeries (Listof Boolean) -> (U Fixnum ISeries))]
  [iseries-loc (ISeries (U Label (Listof Label) (Listof Boolean)) -> (U Fixnum ISeries))]
  [iseries-iloc (ISeries (U Index (Listof Index)) -> (U Fixnum ISeries))]
- [iseries-label-ref (ISeries Label -> (Listof Integer))]
+ [iseries-index-ref (ISeries IndexDataType -> (Listof Integer))]
  [iseries-range (ISeries Index -> (Vectorof Fixnum))]
  [iseries-length (ISeries -> Index)]
  [iseries-referencer (ISeries -> (Index -> Fixnum))]
@@ -69,8 +69,9 @@
           extract-index
 	  Label SIndex LabelIndex LabelIndex-index
           FIndex FloatIndex
-          label-index label->lst-idx
-          idx->label is-labeled? ListofIndexDataType?)
+          label-index key->lst-idx
+          idx->key is-labeled? ListofIndexDataType?
+          is-indexed?)
  (only-in "boolean-series.rkt"
           BSeries))
 ; ***********************************************************
@@ -86,7 +87,7 @@
 ; speed improvement.
 
 ;; Integer series optimized with use of Fixnum.
-(struct ISeries ([index : RFIndex] [data : (Vectorof Fixnum)]))
+(struct ISeries ([index : (Option RFIndex)] [data : (Vectorof Fixnum)]))
 
 ; Consumes a Vector of Fixnum and a list of Labels which
 ; can come in list form or SIndex form and produces a ISeries
@@ -114,14 +115,14 @@
 ; ***********************************************************
 
 ; ***********************************************************
-(: set-ISeries-index (ISeries (U (Listof IndexDataType) SIndex) -> ISeries))
+(: set-ISeries-index (ISeries (U (Listof IndexDataType) RFIndex) -> ISeries))
 (define (set-ISeries-index iseries labels)
 
   (define data (ISeries-data iseries))
   
-  (: check-mismatch (SIndex -> Void))
+  (: check-mismatch (RFIndex -> Void))
   (define (check-mismatch index)
-    (unless (eq? (vector-length data) (hash-count index))
+    (unless (eq? (vector-length data) (hash-count (assert index hash?)))
       (let ((k (current-continuation-marks)))
 	(raise (make-exn:fail:contract "Cardinality of a Series' data and labels must be equal" k))))
     (void))
@@ -130,7 +131,7 @@
       (begin
 	(check-mismatch labels)
 	(ISeries labels data))
-      (let ((index (build-index-from-list labels)))
+      (let ((index (build-index-from-list (assert labels ListofIndexDataType?))))
         (check-mismatch index)
         (ISeries index data))))
 ; ***********************************************************
@@ -150,8 +151,8 @@
 	  (do ((i 0 (add1 i)))
 	      ((>= i len) (void))
 	    (let ((num (vector-ref v i)))
-              (if (LabelIndex-index iseries)                  
-                  (display (idx->label iseries (assert i index?)) port)
+              (if (ISeries-index iseries)
+                  (display (idx->key (ISeries-index iseries) (assert i index?)) port)
                   (display (assert i index?) port))
               (display " " port)
               (displayln num port)))))))
@@ -189,9 +190,9 @@
 
 ; This function consumes a series and a Label and returns
 ; the list of values at that Label in the series.
-(: iseries-label-ref (ISeries Label -> (Listof Integer)))
-(define (iseries-label-ref series label)
-  (iseries-iref series (label->lst-idx series label)))
+(: iseries-index-ref (ISeries IndexDataType -> (Listof Integer)))
+(define (iseries-index-ref series item)
+  (iseries-iref series (key->lst-idx (assert (ISeries-index series)) item)))
 
 ; This function consumes an integer series and returns the
 ; length of that series.
@@ -559,18 +560,18 @@
     
 (: iseries-loc (ISeries (U Label (Listof Label) (Listof Boolean)) -> (U Fixnum ISeries)))
 (define (iseries-loc iseries label)
-  (unless (is-labeled? iseries)
+  (unless (ISeries-index iseries)
     (let ((k (current-continuation-marks)))
-      (raise (make-exn:fail:contract "iseries must have a label index." k))))
+      (raise (make-exn:fail:contract "iseries must have an index." k))))
 
   (if (ListofBoolean? label)
       (iseries-loc-boolean iseries label)
       (let ((associated-indices-length : (Listof Integer)
-                                       (map (lambda ([l : Label]) (length (iseries-label-ref iseries l))) (convert-to-label-lst label)))
+                                       (map (lambda ([l : Label]) (length (iseries-index-ref iseries l))) (convert-to-label-lst label)))
             (vals : (Vectorof Fixnum)
              (if (list? label)
-                 (list->vector (assert (flatten (map (lambda ([l : Label]) (iseries-label-ref iseries l)) label)) ListofFixnum?))
-                 (list->vector (assert (iseries-label-ref iseries label) ListofFixnum?)))))
+                 (list->vector (assert (flatten (map (lambda ([l : Label]) (iseries-index-ref iseries l)) label)) ListofFixnum?))
+                 (list->vector (assert (iseries-index-ref iseries label) ListofFixnum?)))))
 
         (if (= (vector-length vals) 1)
             (vector-ref vals 0)
@@ -587,7 +588,7 @@
       (new-ISeries
        (for/vector: : (Vectorof Fixnum) ([i idx])
          (vector-ref (iseries-data iseries) i))
-       (build-index-from-list (map (lambda ([i : Index]) (idx->label (ISeries-index iseries i))) idx)))
+       (build-index-from-list (map (lambda ([i : Index]) (idx->key (assert (ISeries-index iseries)) i)) idx)))
       (referencer idx))))
 
 ; ***********************************************************

@@ -44,7 +44,7 @@
           IndexDataType extract-index
           Label LabelIndex-index
           LabelIndex label-index label->lst-idx key->lst-idx
-          idx->key is-indexed? ListofIndexDataType?))
+          idx->key ListofIndexDataType?))
 ; ***********************************************************
 
 ; ***********************************************************

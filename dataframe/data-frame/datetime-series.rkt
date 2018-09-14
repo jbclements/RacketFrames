@@ -10,10 +10,11 @@
   "../util/datetime.rkt"
  racket/unsafe/ops
  (only-in "indexed-series.rkt"
-	  build-index-from-labels
-	  Label SIndex LabelIndex LabelIndex-index
-          label-index label->lst-idx
-          idx->label is-labeled?)
+	  RFIndex build-index-from-list
+          IndexDataType extract-index
+          Label LabelIndex-index
+          LabelIndex label-index label->lst-idx key->lst-idx
+          idx->key is-indexed? ListofIndexDataType?)
  (only-in "boolean-series.rkt"
           BSeries))
 
@@ -23,8 +24,8 @@
  (struct-out DatetimeSeries))
 
 (provide:
- [new-DatetimeSeries ((Vectorof Datetime) (Option (U (Listof Label) SIndex)) -> DatetimeSeries)]
- [set-DatetimeSeries-index (DatetimeSeries (U (Listof Label) SIndex) -> DatetimeSeries)]
+ [new-DatetimeSeries ((Vectorof Datetime) (Option (U (Listof IndexDataType) RFIndex)) -> DatetimeSeries)]
+ [set-DatetimeSeries-index (DatetimeSeries (U (Listof IndexDataType) RFIndex) -> DatetimeSeries)]
  [datetime-series-iref (DatetimeSeries (Listof Index) -> (Listof Datetime))]
  [datetime-series-loc-boolean (DatetimeSeries (Listof Boolean) -> (U Datetime DatetimeSeries))]
  [datetime-series-loc (DatetimeSeries (U Label (Listof Label) (Listof Boolean)) -> (U Datetime DatetimeSeries))]
@@ -38,40 +39,40 @@
  [datetime-series-print (DatetimeSeries Output-Port -> Void)])
 ; ***********************************************************
 
-(struct DatetimeSeries LabelIndex ([data : (Vectorof Datetime)]))
+(struct DatetimeSeries ([index : (Option RFIndex)] [data : (Vectorof Datetime)]))
 
 ; Consumes a Vector of Fixnum and a list of Labels which
 ; can come in list form or SIndex form and produces a DatetimeSeries
 ; struct object.
-(: new-DatetimeSeries ((Vectorof Datetime) (Option (U (Listof Label) SIndex)) -> DatetimeSeries))
+(: new-DatetimeSeries ((Vectorof Datetime) (Option (U (Listof IndexDataType) RFIndex)) -> DatetimeSeries))
 (define (new-DatetimeSeries data labels)
 
-  (: check-mismatch (SIndex -> Void))
+  (: check-mismatch (RFIndex -> Void))
   (define (check-mismatch index)
-    (unless (eq? (vector-length data) (hash-count index))
+    (unless (eq? (vector-length data) (hash-count (extract-index index)))
       (let ((k (current-continuation-marks)))
 	(raise (make-exn:fail:contract "Cardinality of a Series' data and labels must be equal" k))))
     (void))
 
-  (if (hash? labels)
+  (if (not (ListofIndexDataType? labels))
       (begin
-	(check-mismatch labels)
+	(check-mismatch (assert labels))
 	(DatetimeSeries labels data))
       (if labels
-	  (let ((index (build-index-from-labels labels)))
+	  (let ((index (build-index-from-list (assert labels ListofIndexDataType?))))
 	    (check-mismatch index)
 	    (DatetimeSeries index data))
 	  (DatetimeSeries #f data))))
 ; ***********************************************************
 
 ; ***********************************************************
-(: set-DatetimeSeries-index (DatetimeSeries (U (Listof Label) SIndex) -> DatetimeSeries))
+(: set-DatetimeSeries-index (DatetimeSeries (U (Listof IndexDataType) RFIndex) -> DatetimeSeries))
 (define (set-DatetimeSeries-index datetime-series labels)
   (define data (DatetimeSeries-data datetime-series))
   
-  (: check-mismatch (SIndex -> Void))
+  (: check-mismatch (RFIndex -> Void))
   (define (check-mismatch index)
-    (unless (eq? (vector-length data) (hash-count index))
+    (unless (eq? (vector-length data) (hash-count (extract-index index)))
       (let ((k (current-continuation-marks)))
 	(raise (make-exn:fail:contract "Cardinality of a Series' data and labels must be equal" k))))
     (void))
@@ -80,7 +81,7 @@
       (begin
 	(check-mismatch labels)
 	(DatetimeSeries labels data))
-      (let ((index (build-index-from-labels labels)))
+      (let ((index (build-index-from-list (assert labels ListofIndexDataType?))))
         (check-mismatch index)
         (DatetimeSeries index data))))
 ; ***********************************************************
@@ -102,8 +103,8 @@
 	      ((>= i len) (void))
 	    (let ((date (vector-ref date-v i))
                   (num (vector-ref v i)))
-              (if (LabelIndex-index datetime-series)                  
-                  (display (idx->label datetime-series (assert i index?)) port)
+              (if (DatetimeSeries-index datetime-series)                  
+                  (display (idx->key (assert (DatetimeSeries-index datetime-series)) (assert i index?)) port)
                   (display (assert i index?) port))
               (display " " port)
               (displayln date port)
@@ -144,7 +145,7 @@
 ; the list of values at that Label in the series.
 (: datetime-series-label-ref (DatetimeSeries Label -> (Listof Datetime)))
 (define (datetime-series-label-ref series label)
-  (datetime-series-iref series (label->lst-idx series label)))
+  (datetime-series-iref series (key->lst-idx (assert (DatetimeSeries-index series)) label)))
 
 ; This function consumes an integer series and returns the
 ; length of that series.
@@ -178,7 +179,7 @@
 
 (: datetime-series-loc (DatetimeSeries (U Label (Listof Label) (Listof Boolean)) -> (U Datetime DatetimeSeries)))
 (define (datetime-series-loc datetime-series label)
-  (unless (is-labeled? datetime-series)
+  (unless (DatetimeSeries-index datetime-series)
     (let ((k (current-continuation-marks)))
       (raise (make-exn:fail:contract "datetime-series must have a label index." k))))
 
@@ -193,7 +194,7 @@
 
         (if (= (vector-length vals) 1)
             (vector-ref vals 0)
-            (new-DatetimeSeries vals (build-index-from-labels (build-labels-by-count (convert-to-label-lst label) associated-indices-length)))))))
+            (new-DatetimeSeries vals (build-index-from-list (build-labels-by-count (convert-to-label-lst label) associated-indices-length)))))))
 
 ; index based
 (: datetime-series-iloc (DatetimeSeries (U Index (Listof Index)) -> (U Datetime DatetimeSeries)))
@@ -206,7 +207,7 @@
       (new-DatetimeSeries
        (for/vector: : (Vectorof Datetime) ([i idx])
          (vector-ref (datetime-series-data datetime-series) i))
-       (build-index-from-labels (map (lambda ([i : Index]) (idx->label datetime-series i)) idx)))
+       (build-index-from-list (map (lambda ([i : Index]) (idx->key (assert (DatetimeSeries-index datetime-series)) i)) idx)))
       (referencer idx))))
 
 

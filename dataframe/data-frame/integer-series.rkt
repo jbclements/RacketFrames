@@ -18,7 +18,8 @@
 ; ***********************************************************
 ; Provide functions in this file to other files.
 (provide
- (struct-out ISeries))
+ (struct-out ISeries)
+ ISeries-index)
 
 (provide:
  [new-ISeries ((Vectorof Fixnum) (Option (U (Listof IndexDataType) RFIndex)) -> ISeries)]

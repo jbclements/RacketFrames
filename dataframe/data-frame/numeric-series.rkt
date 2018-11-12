@@ -74,6 +74,7 @@
 (provide
  ;flvector-print
  (struct-out NSeries)
+ NSeries-index
  new-NSeries)
 
 ; ***********************************************************

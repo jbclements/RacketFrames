@@ -10,4 +10,5 @@
                              "dataframe/slides/"
                              "dataframe/validation/"
                              "dataframe/jupyter-notebooks/"
-                             "dataframe/sample-csv/"))
+                             "dataframe/sample-csv/"
+                             "dataframe/data-frame/categorical-series.rkt"))

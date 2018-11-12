@@ -9,4 +9,5 @@
                              "slides/"
                              "validation/"
                              "jupyter-notebooks/"
-                             "sample-csv/"))
+                             "sample-csv/"
+                             "data-frame/categorical-series.rkt"))

@@ -34,7 +34,7 @@
 
 (provide
  SIndex IIndex FIndex DTIndex Labeling ListofLabel? ListofIndexDataType?
- Label Label? LabelProjection
+ Label Label? LabelProjection LabelIndex?
  RFIndex IndexDataType
  LabelIndex LabelIndex-index
  FIndex FloatIndex
@@ -42,7 +42,7 @@
  ;new-GSeries 
  ;gseries-iref
  ;map/GSeries 
- build-index-from-labels label-index key->lst-idx label->lst-idx idx->key)
+ build-index-from-labels label-index key->lst-idx label->lst-idx idx->key idx->label)
 ; ***********************************************************
 
 ; ***********************************************************

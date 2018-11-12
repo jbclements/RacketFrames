@@ -13,6 +13,7 @@
 ; Provide functions in this file to other files.
 (provide
  (struct-out GenSeries)
+ GenSeries-index
  GenericType)
 
 (define-type GenericType Any)
@@ -34,7 +35,6 @@
 
 ; ***********************************************************
 
-;; Integer series optimized with use of Fixnum.
 (struct GenSeries ([index : (Option RFIndex)] [data : (Vectorof GenericType)]))
 
 ; Consumes a Vector of Fixnum and a list of Labels which

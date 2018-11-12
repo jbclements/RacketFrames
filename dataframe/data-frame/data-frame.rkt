@@ -26,7 +26,7 @@
  [data-frame-extend  (DataFrame (U Column Columns DataFrame) -> DataFrame)]
  [data-frame-description (DataFrame [#:project LabelProjection] -> DataFrameDescription)]
  [show-data-frame-description (DataFrameDescription -> Void)]
- [data-frame-set-index (DataFrame (U (Listof Label) SIndex) -> DataFrame)]
+ [data-frame-set-index (DataFrame (U (Listof Label) (Listof Integer) (Listof Float) (Listof Datetime) RFIndex) -> DataFrame)]
  [data-frame-loc (DataFrame (U Label (Listof Label) (Listof Boolean)) LabelProjection -> (U Series DataFrame))]
  [data-frame-iloc (DataFrame (U Index (Listof Index)) (U Index (Listof Index)) -> (U Series DataFrame))]
  [data-frame-iloc-label (DataFrame (U Index (Listof Index)) LabelProjection -> (U Series DataFrame))])
@@ -54,10 +54,10 @@
  (only-in "types.rkt"
           Dim Dim-rows Dim-cols)
  (only-in "indexed-series.rkt"
-	  label-sort-positional ListofLabel?
+	  RFIndex label-sort-positional ListofLabel? LabelIndex?
           Label LabelProjection LabelIndex LabelIndex-index
-          GSeries SIndex
-          build-index-from-labels label-index idx->label)
+          build-index-from-labels build-index-from-list label-index idx->key
+          idx->label)
  (only-in "series-description.rkt"
 	  series-description series-length series-type series-data
           Series Series?
@@ -83,7 +83,9 @@
  (only-in "boolean-series.rkt"
 	  BSeries BSeries?
 	  BSeries-data
-	  new-BSeries))
+	  new-BSeries)
+ (only-in  "../util/datetime.rkt"
+           Datetime))
 
 ; ***********************************************************
 
@@ -444,24 +446,24 @@
 ; ***********************************************************
 
 ; ***********************************************************
-(: data-frame-set-index (DataFrame (U (Listof Label) SIndex) -> DataFrame))
+(: data-frame-set-index (DataFrame (U (Listof Label) (Listof Integer) (Listof Float) (Listof Datetime) RFIndex) -> DataFrame))
 (define (data-frame-set-index data-frame new-index)
   (define src-series (DataFrame-series data-frame))
   (define src-column-names (map column-heading (data-frame-explode data-frame)))
 
-  (: new-SIndex SIndex)
-  (define new-SIndex (hash))
+  (: new-RFIndex RFIndex)
+  (define new-RFIndex (LabelIndex (hash)))
 
   ; convert new-index to SIndex
-  (if (ListofLabel? new-index)
-    (set! new-SIndex (build-index-from-labels (assert new-index ListofLabel?)))
-    (set! new-SIndex new-index))
+  (if (list? new-index)
+    (set! new-RFIndex (build-index-from-list (assert new-index list?)))
+    (set! new-RFIndex new-index))
 
   (: new-columns Columns)
   (define new-columns
     (for/list ([pos (in-range (vector-length src-series))])
       ; define new column
-      (cons (list-ref src-column-names pos) (set-series-index (vector-ref src-series pos) new-SIndex))))
+      (cons (list-ref src-column-names pos) (set-series-index (vector-ref src-series pos) new-RFIndex))))
 
   (new-data-frame new-columns))
 ; ***********************************************************
@@ -507,8 +509,8 @@
 
   (let* ((project : LabelProjection
           (if (list? idx-col)
-              (map (lambda ([idx : Index]) (idx->label data-frame idx)) idx-col)
-              (list (idx->label data-frame idx-col))))
+              (assert (map (lambda ([idx : Index]) (idx->key data-frame idx)) idx-col) LabelIndex?)
+              (assert (list (idx->key data-frame idx-col)) LabelIndex?)))
          (cols (data-frame-cols data-frame project)))
 
      (if (list? idx-row)

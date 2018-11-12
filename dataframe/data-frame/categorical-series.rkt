@@ -6,18 +6,18 @@
 ;;writer-CSeries)
 
 (provide:
- [CSeries->SIndex    (CSeries -> SIndex)]
+ ;[CSeries->RIndex    (CSeries -> RIndex)]
  [cseries-length      (CSeries -> Index)]
  [cseries-iref        (CSeries (Listof Index) -> (Listof Label))]
  [cseries-range (CSeries Index -> (Vectorof Label))]
  [cseries-data        (CSeries -> (Vectorof Symbol))]
  [cseries-referencer (CSeries -> (Fixnum -> Label))]
- [cseries-iloc (CSeries (U Index (Listof Index)) -> (U Label CSeries))]
- [cseries-print (CSeries Output-Port -> Void)])
+ [cseries-iloc (CSeries (U Index (Listof Index)) -> (U Label CSeries))])
+ ;[cseries-print (CSeries Output-Port -> Void)])
 
 (require
  (only-in "indexed-series.rkt"
-	  SIndex Label idx->label
+	  RFIndex Label idx->key
 	  LabelIndex LabelIndex-index is-labeled?))
 
 (define-type CSeriesFn (Label -> Label))
@@ -32,14 +32,15 @@
 	 [len (vector-length data)])
     (do ([i 0 (add1 i)])
 	((>= i len) (void))
-      (if (LabelIndex-index cseries)                  
-          (display (idx->label cseries (assert i index?)) port)
+      (if (CSeries-index cseries)                  
+          (display (idx->key (CSeries-index cseries) (assert i index?)) port)
           (display (assert i index?) port))
       (display " " port)
       (displayln  (vector-ref nominals (vector-ref data i))))))
 
-(struct: CSeries LabelIndex ([data     : (Vectorof Index)]
-			     [nominals : (Vectorof Label)]))
+(struct: CSeries ([index : (Option RFIndex)]
+                  [data : (Vectorof Index)]
+                  [nominals : (Vectorof Label)]))
 
 ;; #:methods gen:custom-write [(define write-proc writer-CSeries)])
 
@@ -75,18 +76,19 @@
 		    (vector-set! data idx code)
 		    (loop (add1 idx) (assert (add1 code) index?))))))))
 
-(: CSeries->SIndex (CSeries -> SIndex))
-(define (CSeries->SIndex cs)
+#|
+(: CSeries->RIndex (CSeries -> RFIndex))
+(define (CSeries->RIndex cs)
 
-  (: sindex SIndex)
-  (define sindex (make-hash))
+  (: rfindex RFIndex)
+  (define rfindex (make-hash))
 
   (let* ((noms (CSeries-nominals cs))
 	 (len (vector-length noms)))
     (do ([i 0 (add1 i)])
-	([>= i len] sindex)
+	([>= i len] rfindex)
       (when (index? i)
-	    (hash-set! sindex (vector-ref noms i) (list i))))))
+	    (hash-set! rfindex (vector-ref noms i) (list i))))))|#
 
 (: cseries-referencer (CSeries -> (Fixnum -> Label)))
 (define (cseries-referencer cseries)

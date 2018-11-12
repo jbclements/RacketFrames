@@ -43,7 +43,7 @@
  (only-in "data-frame-join.rkt"
           dest-mapping-series-builders copy-column-row-error copy-column-row join-column-name)
  (only-in "numeric-series.rkt"
-	  NSeries NSeries? nseries-iref nseries-label-ref new-NSeries)
+	  NSeries NSeries? nseries-iref new-NSeries)
  (only-in "generic-series.rkt"
           GenSeries GenSeries? gen-series-iref new-GenSeries
           gen-series-referencer)

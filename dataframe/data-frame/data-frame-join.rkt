@@ -39,7 +39,7 @@
  (only-in "../util/symbol.rkt"
           symbol-prefix)
  (only-in "indexed-series.rkt"
-	  SIndex Label Labeling LabelProjection)
+	  LabelIndex SIndex Label Labeling LabelProjection)
  (only-in "series.rkt"
 	  series-complete)
  (only-in "series-description.rkt"
@@ -55,7 +55,7 @@
 	  GenSeries GenSeries? GenericType gen-series-iref new-GenSeries
 	  gen-series-referencer)
  (only-in "numeric-series.rkt"
-	  NSeries NSeries? nseries-iref nseries-label-ref new-NSeries
+	  NSeries NSeries? nseries-iref new-NSeries
           nseries-referencer)
  (only-in "integer-series.rkt"
 	  ISeries ISeries? iseries-iref new-ISeries
@@ -898,7 +898,7 @@
 
     (let ((index : SIndex (make-agg-value-hash-sindex sorted-agg-value-hash)))
       (new-GenSeries (for/vector: : (Vectorof GenericType) ([p sorted-agg-value-hash])
-                       (cdr p)) index))))
+                       (cdr p)) (LabelIndex index)))))
 
 ; **********************************************************
 

@@ -12,8 +12,8 @@
  [cseries-range (CSeries Index -> (Vectorof Label))]
  [cseries-data        (CSeries -> (Vectorof Symbol))]
  [cseries-referencer (CSeries -> (Fixnum -> Label))]
- [cseries-iloc (CSeries (U Index (Listof Index)) -> (U Label CSeries))])
- ;[cseries-print (CSeries Output-Port -> Void)])
+ [cseries-iloc (CSeries (U Index (Listof Index)) -> (U Label CSeries))]
+ [cseries-print (CSeries Output-Port -> Void)])
 
 (require
  (only-in "indexed-series.rkt"

@@ -27,7 +27,8 @@
  [series-loc (Series (U Label (Listof Label) (Listof Boolean)) -> (U Any Series))]
  [series-iloc (Series (U Index (Listof Index)) -> (U Any Series))]
  [set-series-index (Series RFIndex -> Series)]
- [get-series-index (Series -> RFIndex)])
+ [get-series-index (Series -> RFIndex)]
+ [has-series-index? (Series -> Boolean)])
 
 ; ***********************************************************
 
@@ -192,6 +193,17 @@
     [(ISeries? series) (assert (ISeries-index (assert series ISeries?)))]
     [(BSeries? series) (assert (BSeries-index (assert series BSeries?)))]
     [(DatetimeSeries? series) (assert (DatetimeSeries-index (assert series DatetimeSeries?)))]
+    [else (error "Unknown or not supported series type in DataFrame")]))
+
+(: has-series-index? (Series -> Boolean))
+(define (has-series-index? series)
+  (cond
+    [(GenSeries? series) (if (GenSeries-index (assert series GenSeries?)) #t #f)]
+    [(NSeries? series) (if (NSeries-index (assert series NSeries?)) #t #f)]
+    ;[(CSeries? series) (cseries-data series)]    
+    [(ISeries? series) (if (ISeries-index (assert series ISeries?)) #t #f)]
+    [(BSeries? series) (if (BSeries-index (assert series BSeries?)) #t #f)]
+    [(DatetimeSeries? series) (if (DatetimeSeries-index (assert series DatetimeSeries?)) #t #f)]
     [else (error "Unknown or not supported series type in DataFrame")]))
 
 ; ***********************************************************

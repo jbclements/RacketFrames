@@ -29,7 +29,10 @@
  [data-frame-set-index (DataFrame (U (Listof Label) (Listof Integer) (Listof Float) (Listof Datetime) RFIndex) -> DataFrame)]
  [data-frame-loc (DataFrame (U Label (Listof Label) (Listof Boolean)) LabelProjection -> (U Series DataFrame))]
  [data-frame-iloc (DataFrame (U Index (Listof Index)) (U Index (Listof Index)) -> (U Series DataFrame))]
- [data-frame-iloc-label (DataFrame (U Index (Listof Index)) LabelProjection -> (U Series DataFrame))])
+ [data-frame-iloc-label (DataFrame (U Index (Listof Index)) LabelProjection -> (U Series DataFrame))]
+ [data-frame-labels (DataFrame -> (Listof (Pair Symbol (Listof Index))))]
+ [projection-set (LabelProjection -> (Setof Label))]
+ [data-frame-all-labels-projection-set (DataFrame -> (Setof Label))])
 
 (provide
  DataFrame DataFrame? Column Column? Columns Columns?

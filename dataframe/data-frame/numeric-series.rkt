@@ -89,7 +89,7 @@
 	  Settings-max-output
 	  settings)
  (only-in "indexed-series.rkt"
-	  label-index label->lst-idx
+	  RFIndex? label-index label->lst-idx
 	  build-index-from-list IndexDataType
 	  Label RFIndex extract-index
 	  LabelIndex LabelIndex-index
@@ -162,7 +162,7 @@
 	      (raise (make-exn:fail:contract "Cardinality of a Series' data and labels must be equal" k))))
     (void))
 
-  (if (hash? labels)
+  (if (RFIndex? labels)
       (begin
 	(check-mismatch labels)
 	(NSeries labels data))

@@ -152,17 +152,17 @@ Options to pass to matplotlib plotting method |#
  (only-in "../util/symbol.rkt"
 	  symbol-prefix)
  (only-in "../data-frame/indexed-series.rkt"
-	  build-index-from-labels
+	  IndexDataType build-index-from-list
 	  Label SIndex LabelIndex LabelIndex-index
           label-index label->lst-idx
-          idx->label is-labeled?)
+          idx->key is-labeled?)
  (only-in "../data-frame/series.rkt"
 	  series-complete)
  (only-in "../data-frame/series-description.rkt"
 	  SeriesType Series Series? SeriesList SeriesList?
 	  SeriesDescription-type
 	  series-iref series-type series-length
-          series-data)
+          series-data get-series-index has-series-index?)
  (only-in "../data-frame/data-frame.rkt"
 	  DataFrame DataFrame? Column Columns Columns? Column? new-data-frame data-frame-names
 	  data-frame-cseries data-frame-explode column-series
@@ -171,7 +171,7 @@ Options to pass to matplotlib plotting method |#
 	  GenSeries GenSeries? GenericType gen-series-iref new-GenSeries
 	  gen-series-referencer)
  (only-in "../data-frame/numeric-series.rkt"
-	  NSeries NSeries? nseries-iref nseries-label-ref new-NSeries)
+	  NSeries NSeries? nseries-iref nseries-index-ref new-NSeries)
  (only-in "../data-frame/integer-series.rkt"
 	  ISeries ISeries? iseries-iref new-ISeries
 	  iseries-referencer)
@@ -378,7 +378,7 @@ Options to pass to matplotlib plotting method |#
 			      (λ () 0)))
 	      (loop (add1 i))))))
 
-(: get-discrete-hist-data-vec ((U (Vectorof Any) (Vectorof Boolean) (Vectorof Datetime) (Vectorof Fixnum) (Vectorof Symbol) FlVector)
+(: get-discrete-hist-data-vec ((U (Vectorof IndexDataType) (Vectorof Any) (Vectorof Boolean) (Vectorof Datetime) (Vectorof Fixnum) (Vectorof Symbol) FlVector)
                                PlottableSeries -> HistBinStacked))
 (define (get-discrete-hist-data-vec data-vec-one data-series-two)
   (define: hist-bin-index : HistBinStacked (make-hist-bin-stacked))
@@ -420,7 +420,7 @@ Options to pass to matplotlib plotting method |#
   (discrete-histogram (cast (list-of-vec-from-hist-bin (get-discrete-hist-data vec))
                             (Sequenceof (U (List Any (U False Real ivl)) (Vector Any (U False Real ivl)))))))
 
-(: discrete-histogram-stacked-from-vector ((U (Vectorof Any) (Vectorof Boolean) (Vectorof Datetime) (Vectorof Fixnum) (Vectorof Label) FlVector)
+(: discrete-histogram-stacked-from-vector ((U (Vectorof Any) (Vectorof IndexDataType) (Vectorof Boolean) (Vectorof Datetime) (Vectorof Fixnum) (Vectorof Label) FlVector)
                                            PlottableSeries -> (Listof renderer2d)))
 (define (discrete-histogram-stacked-from-vector data-vec-one data-series-two)
   (stacked-histogram (cast (list-of-vec-from-hist-bin-stacked (get-discrete-hist-data-vec data-vec-one (assert data-series-two PlottableSeries?))) 	
@@ -452,29 +452,29 @@ Options to pass to matplotlib plotting method |#
         (plot
          plot-points))))
 
-(: get-index-vector (Series -> (U (Vectorof Label) (Vectorof Fixnum))))
+(: get-index-vector (Series -> (U (Vectorof IndexDataType) (Vectorof Fixnum))))
 (define (get-index-vector series)
   (: series-len Index)
   (define series-len (series-length series))
   (define v (series-data series))
   ; initialize vectors with default values
-  (: label-vector (Vectorof Label))
-  (define label-vector (make-vector (assert series-len index?) 'a))
+  (: index-data-type-vector (Vectorof IndexDataType))
+  (define index-data-type-vector (make-vector (assert series-len index?) 0))
   (: index-vector (Vectorof Fixnum))
   (define index-vector (make-vector (assert series-len index?) 0))
   
   (let ((len series-len))
     (if (zero? len)
         (vector)
-	(begin
-	  (do ((i 0 (add1 i)))
-	      ((>= i len)
-               (if (LabelIndex-index series)                  
-                  label-vector
+        (begin
+          (do ((i 0 (add1 i)))
+            ((>= i len)
+             (if (has-series-index? series)                  
+                  index-data-type-vector
                   index-vector))
-              (if (LabelIndex-index series)
-                  (vector-set! label-vector (assert i index?) (idx->label series (assert i index?)))
-                  (vector-set! index-vector (assert i index?) (assert i index?))))))))
+            (if (has-series-index? series)
+                (vector-set! index-data-type-vector (assert i index?) (idx->key (get-series-index series) (assert i index?)))
+                (vector-set! index-vector (assert i index?) (assert i index?))))))))
 
 ; In the case of multiple data vectors, the first vector is plotted against all other vectors. Else in the singular case,
 ; the index is plotted against the vector. The DataFrame can be projected to only use a subset of columns.
@@ -581,7 +581,7 @@ Options to pass to matplotlib plotting method |#
 
 (define series-integer-labeled
   (new-ISeries (vector 1 2 3 4)
-               (build-index-from-labels (list 'a 'b 'c 'd))))
+               (list 'a 'b 'c 'd)))
 
 (get-index-vector series-integer-labeled)
 
@@ -595,11 +595,11 @@ Options to pass to matplotlib plotting method |#
 (define integer-columns-2
   (list 
    (cons 'col1 (new-ISeries (vector 1 2 3 4)
-                            (build-index-from-labels (list 'a 'b 'c 'd))))
+                            (build-index-from-list (list 'a 'b 'c 'd))))
    (cons 'col2 (new-ISeries (vector 5 6 7 8)
-                            (build-index-from-labels (list 'e 'f 'g 'h))))
+                            (build-index-from-list (list 'e 'f 'g 'h))))
    (cons 'col3 (new-ISeries (vector 9 10 11 12)
-                            (build-index-from-labels (list 'i 'j 'k 'l))))))
+                            (build-index-from-list (list 'i 'j 'k 'l))))))
 
 ; create new data-frame-integer
 (define data-frame-integer-2 (new-data-frame integer-columns-2))
@@ -607,6 +607,6 @@ Options to pass to matplotlib plotting method |#
 (make-discrete-histogram-stacked data-frame-integer-2)
 
 ; individual testing does not work due to Racket type checking
-; (get-discrete-hist-data (vector 1 2 3 4 5))
+;(get-discrete-hist-data (vector 1 2 3 4 5))
 
-; (list-of-vec-from-hist-bin (get-discrete-hist-data (vector 1 2 3 4 5)))
+;(list-of-vec-from-hist-bin (get-discrete-hist-data (vector 1 2 3 4 5)))

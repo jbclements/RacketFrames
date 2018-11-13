@@ -70,7 +70,7 @@
  (only-in "dataframe/load/schema-syntax.rkt"
 	  schema)
  "dataframe/stats/tabulate.rkt"
- ;; "plot/plot.rkt" coming soon
+ "dataframe/plot/plot.rkt"
  "dataframe/stats/tabulate.rkt"
  "dataframe/stats/statistics.rkt"
  (only-in "dataframe/load/schema.rkt"

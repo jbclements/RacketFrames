@@ -34,7 +34,7 @@
 
 (provide
  SIndex IIndex FIndex DTIndex Labeling ListofLabel? ListofIndexDataType?
- Label Label? LabelProjection LabelIndex?
+ Label Label? LabelProjection LabelIndex? RFIndex?
  RFIndex IndexDataType
  LabelIndex LabelIndex-index
  FIndex FloatIndex
@@ -100,6 +100,8 @@
 
 ; add RangeIndex later
 (define-type RFIndex (U LabelIndex IntegerIndex FloatIndex DatetimeIndex))
+
+(define-predicate RFIndex? RFIndex)
 ; ***********************************************************
 
 ; ***********************************************************

@@ -8,7 +8,7 @@
 
 (require racket/flonum)
 
-(require "../main.rkt")
+(require "../../main.rkt")
 
 ; ***********************************************************
 ; Test Cases
@@ -21,11 +21,11 @@
 (define columns-integer
   (list 
    (cons 'col1 (new-ISeries (vector 1 2 3 4)
-                            (build-index-from-labels (list 'a 'b 'c 'd))))
+                            (build-index-from-list (list 'a 'b 'c 'd))))
    (cons 'col2 (new-ISeries (vector 5 6 7 8)
-                            (build-index-from-labels (list 'e 'f 'g 'h))))
+                            (build-index-from-list (list 'e 'f 'g 'h))))
    (cons 'col3 (new-ISeries (vector 9 10 11 12)
-                            (build-index-from-labels (list 'i 'j 'k 'l))))))
+                            (build-index-from-list (list 'i 'j 'k 'l))))))
 
 ; create new data-frame-integer
 (define data-frame-integer (new-data-frame columns-integer))
@@ -36,11 +36,11 @@
 (define columns-float
   (list 
    (cons 'col1 (new-NSeries (flvector 1.5 2.5 3.5 4.5)
-                            (build-index-from-labels (list 'a 'b 'c 'd))))
+                            (build-index-from-list (list 'a 'b 'c 'd))))
    (cons 'col2 (new-NSeries (flvector 5.5 6.5 7.5 8.5)
-                            (build-index-from-labels (list 'e 'f 'g 'h))))
+                            (build-index-from-list (list 'e 'f 'g 'h))))
    (cons 'col3 (new-NSeries (flvector 9.5 10.5 11.5 12.5)
-                            (build-index-from-labels (list 'i 'j 'k 'l))))))
+                            (build-index-from-list (list 'i 'j 'k 'l))))))
 
 ; create new data-frame-float
 (define data-frame-float (new-data-frame columns-float))
@@ -64,9 +64,9 @@
 (define columns-mix
   (list
    (cons 'integer-col (new-ISeries (vector 1 2 3 4)
-                            (build-index-from-labels (list 'a 'b 'c 'd))))
+                            (build-index-from-list (list 'a 'b 'c 'd))))
    (cons 'float-col (new-NSeries (flvector 1.5 2.5 3.5 4.5)
-                            (build-index-from-labels (list 'a 'b 'c 'd))))
+                            (build-index-from-list (list 'a 'b 'c 'd))))
    (cons 'categorical-col (new-CSeries (vector 'hello 'world 'fizz 'buzz)))))
 
 ; create new data-frame-mix
@@ -95,8 +95,8 @@
 (check-equal? (projection-set (list 'col-one 'col2 'col3))
               (set 'col-one 'col2 'col3))
 
-(check-equal? (data-frame-all-labels-projection-set data-frame-integer)
-              (set 'col-one 'col2 'col3))
+;(check-equal? (data-frame-all-labels-projection-set data-frame-integer)
+;              (set 'col-one 'col2 'col3))
 
 ; check error
 ;(data-frame-series data-frame-integer 'col1)
@@ -191,4 +191,4 @@
 ;(show-data-frame-description (data-frame-description data-frame-integer))
 
 (data-frame-set-index data-frame-integer (list 'a 'b 'c 'd))
-(LabelIndex-index (cdr (list-ref (data-frame-explode data-frame-integer) 0)))
+;(LabelIndex-index (cdr (list-ref (data-frame-explode data-frame-integer) 0)))

@@ -66,7 +66,7 @@
  racket/unsafe/ops
  (only-in "indexed-series.rkt"
 	  build-index-from-list          
-          RFIndex IndexDataType
+          RFIndex RFIndex? IndexDataType
           extract-index
 	  Label SIndex LabelIndex LabelIndex-index
           FIndex FloatIndex
@@ -104,9 +104,9 @@
 	(raise (make-exn:fail:contract "Cardinality of a Series' data and labels must be equal" k))))
     (void))
 
-  (if (hash? labels)
+  (if (RFIndex? labels)
       (begin
-	(check-mismatch (extract-index labels))
+	(check-mismatch labels)
 	(ISeries labels data))
       (if labels
 	  (let ((index (build-index-from-list (assert labels ListofIndexDataType?))))
@@ -128,7 +128,7 @@
 	(raise (make-exn:fail:contract "Cardinality of a Series' data and labels must be equal" k))))
     (void))
 
-  (if (hash? labels)
+  (if (RFIndex? labels)
       (begin
 	(check-mismatch labels)
 	(ISeries labels data))

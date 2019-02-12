@@ -164,7 +164,7 @@
        (string<=? (symbol->string (car kc1))
 		  (symbol->string (car kc2))))))
 
-; This function consumes a Listof Column and filteres it for
+; This function consumes a Listof Column and filters it for
 ; only columns of CSeries or ISeries and returns those series
 ; in list form.
 (: key-cols-series (Columns -> (Listof IndexableSeries)))

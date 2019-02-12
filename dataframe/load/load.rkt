@@ -249,6 +249,6 @@
 
 ;(data-frame-head random-demographic-data-frame-delimited-no-schema)
 
-(define data-frame-from-sql-genres (data-frame-from-sql (sqlite3-connect #:database "/Users/skkahal/Downloads/chinook.db") #f "SELECT * FROM genres" empty))
+(define data-frame-from-sql-genres (data-frame-from-sql (sqlite3-connect #:database "/Users/shubhamkahal/Downloads/chinook.db") #f "SELECT * FROM genres" empty))
 
 (data-frame-head data-frame-from-sql-genres)

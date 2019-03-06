@@ -214,9 +214,9 @@
                                                    (ColumnInfo 'char 'GENERIC) (ColumnInfo 'float 'NUMERIC))))
 
 ; read csv
-;(define salary-data-frame-csv-schema (load-csv-file "../sample-csv/salary_date.csv" #:schema salary-date-schema))
+(define salary-data-frame-csv-schema (load-csv-file "../sample-csv/salary_date.csv" #:schema salary-date-schema))
 
-;(data-frame-head salary-data-frame-csv-schema)
+(data-frame-head salary-data-frame-csv-schema)
 
 (define salary-no-date-data-frame-csv-schema (load-csv-file "../sample-csv/salary_no_date.csv" #:schema salary-no-date-schema))
 
@@ -245,9 +245,9 @@
 ;(series-data (data-frame-series random-demographic-data-frame-delimited 'char))
 
 ; no schema
-;(define random-demographic-data-frame-delimited-no-schema (load-delimited-file "../sample-csv/random_demographic.csv" "|" #:schema #f))
+(define random-demographic-data-frame-delimited-no-schema (load-delimited-file "../sample-csv/random_demographic.csv" "|" #:schema #f))
 
-;(data-frame-head random-demographic-data-frame-delimited-no-schema)
+(data-frame-head random-demographic-data-frame-delimited-no-schema)
 
 (define data-frame-from-sql-genres (data-frame-from-sql (sqlite3-connect #:database "/Users/shubhamkahal/Downloads/chinook.db") #f "SELECT * FROM genres" empty))
 

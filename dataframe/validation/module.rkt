@@ -16,12 +16,12 @@
 
 (data-frame-write-tab data-frame-mix (current-output-port))
 
-(print "HELLO")
-
 ; no schema
-(define salary-data-frame-csv-no-schema (load-csv-file "sample-csv/salary.csv" #:schema #f))
+(define salary-data-frame-csv-no-schema (load-csv-file "../sample-csv/salary_date.csv" #:schema #f))
 
-(data-frame-head salary-data-frame-csv-no-schema)
+;(data-frame-head salary-data-frame-csv-no-schema)
+
+(print salary-data-frame-csv-no-schema)
 
 ;(displayln "DataFrame List of Column Names")
 ;(data-frame-names salary-data-frame-csv-no-schema)

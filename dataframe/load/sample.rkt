@@ -10,7 +10,9 @@
  (only-in "delimited.rkt"
 	 set-delimiter)
  (only-in "../util/datetime/parse.rkt"
-	 is-valid-date? is-valid-datetime? parse-date parse-datetime))
+	 is-valid-date? is-valid-datetime? parse-date parse-datetime)
+ (only-in "types.rkt"
+	  ListofString ListofString?))
 
 (: canonicalize-to-string-or-num ((Listof String) -> (Listof (U Number String))))
 (define (canonicalize-to-string-or-num strs)
@@ -35,8 +37,8 @@
     'NUMERIC)
    ((andmap string? (canonicalize-to-string-or-num col))
     (cond
-      [(andmap is-valid-datetime? (assert (canonicalize-to-string-or-num col) string?)) 'DATETIME]
-      [(andmap is-valid-date? (assert (canonicalize-to-string-or-num col) string?)) 'DATETIME]
+      [(andmap is-valid-datetime? col) 'DATETIME]
+      [(andmap is-valid-date? col) 'DATETIME]
       [else 'CATEGORICAL]))
    (else 'GENERIC)))
 
@@ -94,6 +96,8 @@
 		(deep-reverse cols)
 		(loop (cdr rows) (transpose-row-to-col (car rows) cols))))))
 
+; This function takes in a list of parsed lines with delimeter from a delimited file
+; and determines the Schema from that.
 (: determine-schema-from-sample ((Listof String) String -> Schema))
 (define (determine-schema-from-sample lines delim)
 
@@ -119,26 +123,39 @@
 			     (car samples)
 			     (generate-anon-series-names (length (car samples)))))
 		(cols (if headers?
-			  (transpose-rows-to-cols (cdr samples))
-			  (transpose-rows-to-cols samples))))
+                          (transpose-rows-to-cols (cdr samples))
+                          (transpose-rows-to-cols samples))))
 	    (Schema headers? (guess-series-meta headers cols)))))))
 
-;(define schema-1 (determine-schema-from-sample (list "categorical header" "world" "fizz" "buzz") ","))
+(define schema-1 (determine-schema-from-sample (list "header1, header2, header3, header4" "hello, world, fizz, buzz") ","))
+(Schema-headers schema-1)
 
-;(Schema-headers schema-1)
+(Schema-SeriesTypes schema-1)
 
-;(Schema-SeriesTypes schema-1)
+; this function gets the string split on the delimter (Listof (Listof String)) 
+;(transpose-rows-to-cols (list (list "header1" "header2" "header3" "header4") (list "hello" "world" "fizz" "buzz") (list "hello" "world" "fizz" "buzz") (list "hello, world, fizz, buzz") (list "hello, world, fizz, buzz") (list "hello" "world" "fizz" "buzz")))
 
 ;(transpose-rows-to-cols (list (list "hello" "world") (list "fizz" "buzz")))
 
-;(define schema-2 (determine-schema-from-sample (list "5.7" "generic header" "world" "fizz" "buzz" "1" "2.5") ","))
+; (list "first|last|gender|yn|char|float" "Louis|Lawson|Male|Y|z|-320102186614.784") needs to become
+; (list (list "first" "Louis") (list "last" "Lawson") etc.)
 
-;(Schema-headers schema-2)
+(determine-schema-from-sample (list "first|last|gender|yn|char|float" "Louis|Lawson|Male|Y|z|-320102186614.784") "|")
 
-;(Schema-SeriesTypes schema-2)
+(define schema-2 (determine-schema-from-sample (list "5.7" "generic header" "world" "fizz" "buzz" "1" "2.5") ","))
 
-;(define schema-3 (determine-schema-from-sample (list "generic header" "5.7" "world" "fizz" "buzz" "1" "2.5") ","))
+(Schema-headers schema-2)
 
-;(Schema-headers schema-3)
+(Schema-SeriesTypes schema-2)
 
-;(Schema-SeriesTypes schema-3)
+(define schema-3 (determine-schema-from-sample (list "generic header" "5.7" "world" "fizz" "buzz" "1" "2.5") ","))
+
+(Schema-headers schema-3)
+
+(Schema-SeriesTypes schema-3)
+
+(define schema-4 (determine-schema-from-sample (list "Numeric Header" "5.7" "2.5") ","))
+
+(Schema-headers schema-4)
+
+(Schema-SeriesTypes schema-4)

@@ -44,7 +44,7 @@
           set-GenSeries-index gen-series-loc-boolean gen-series-loc gen-series-iloc)
  (only-in "categorical-series.rkt"
           CSeries CSeries? CSeries-index CSeries-data cseries-length cseries-data cseries-index cseries-iref set-CSeries-index
-          cseries-loc-boolean cseries-iloc)
+          cseries-loc-boolean cseries-iloc cseries-loc)
  (only-in "numeric-series.rkt"
           NSeries NSeries? NSeries-index NSeries-data nseries-length nseries-data nseries-index nseries-iref
           set-NSeries-index nseries-loc-boolean nseries-loc nseries-iloc)
@@ -152,7 +152,7 @@
   (cond
     [(GenSeries? series) (gen-series-loc series label)]
     [(NSeries? series) (nseries-loc series label)]
-    [(CSeries? series) (cseries-loc series idx)]   
+    [(CSeries? series) (cseries-loc series label)]   
     [(ISeries? series) (iseries-loc series label)]
     [(BSeries? series) (bseries-loc series label)]
     [(DatetimeSeries? series) (datetime-series-loc series label)]

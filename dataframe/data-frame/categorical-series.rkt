@@ -15,7 +15,8 @@
  [cseries-referencer (CSeries -> (Fixnum -> Label))]
  [cseries-iloc (CSeries (U Index (Listof Index)) -> (U Label CSeries))]
  [cseries-print (CSeries Output-Port -> Void)]
- [cseries-loc-boolean (CSeries (Listof Boolean) -> (U Label CSeries))])
+ [cseries-loc-boolean (CSeries (Listof Boolean) -> (U Label CSeries))]
+ [cseries-loc (CSeries (U Label (Listof Label) (Listof Boolean)) -> (U Label CSeries))])
 
 (require
  (only-in "indexed-series.rkt"

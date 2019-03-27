@@ -74,6 +74,7 @@
  "dataframe/stats/tabulate.rkt"
  "dataframe/stats/statistics.rkt"
  (only-in "dataframe/load/schema.rkt"
+          Schema
 	  ColumnInfo
 	  alter-schema-columns
 	  alter-schema-no-headers)

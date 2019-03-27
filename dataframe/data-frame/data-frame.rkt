@@ -153,8 +153,9 @@
                       (map (λ: ((s : (Pair Symbol Series)))
                              (series-description (car s) (cdr s)))
                            cols))))))
-  
-  (define are-all-unique? 
+
+  (: are-all-unique? ((Listof Symbol) -> Boolean))
+  (define are-all-unique?
     (lambda (v)
       (if (pair? v)
           (and (not (member (car v) (cdr v)))

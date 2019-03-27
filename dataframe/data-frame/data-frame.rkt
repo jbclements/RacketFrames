@@ -58,7 +58,7 @@
           Dim Dim-rows Dim-cols)
  (only-in "indexed-series.rkt"
 	  RFIndex label-sort-positional ListofLabel? LabelIndex?
-          Label LabelProjection LabelIndex LabelIndex-index
+          Label LabelProjection LabelProjection? LabelIndex LabelIndex-index
           build-index-from-labels build-index-from-list label-index idx->key
           idx->label)
  (only-in "series-description.rkt"
@@ -525,8 +525,8 @@
 
   (let* ((project : LabelProjection
           (if (list? idx-col)
-              (assert (map (lambda ([idx : Index]) (idx->key data-frame idx)) idx-col) LabelIndex?)
-              (assert (list (idx->key data-frame idx-col)) LabelIndex?)))
+              (assert (map (lambda ([idx : Index]) (idx->key data-frame idx)) idx-col) LabelProjection?)
+              (assert (list (idx->key data-frame idx-col)) LabelProjection?)))
          (cols (data-frame-cols data-frame project)))
 
      (if (list? idx-row)

@@ -34,7 +34,7 @@
 
 (provide
  SIndex IIndex FIndex DTIndex Labeling ListofLabel? ListofIndexDataType?
- Label Label? LabelProjection LabelIndex? RFIndex?
+ Label Label? LabelProjection LabelProjection? LabelIndex? RFIndex?
  RFIndex IndexDataType
  LabelIndex LabelIndex-index
  FIndex FloatIndex
@@ -88,6 +88,8 @@
 (define-predicate ListofIndexDataType? (Listof IndexDataType))
 
 (define-type LabelProjection (U (Listof Label) (Setof Label)))
+
+(define-predicate LabelProjection? LabelProjection)
 
 ; like in Pandas, it could be dictionary of labels to values or not
 ; that's what the LabelIndex is for

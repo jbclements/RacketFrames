@@ -9,7 +9,8 @@
   (list
    (cons 'integer-col (new-ISeries (vector 1 2 3 4)
                             (build-index-from-list (list 'a 'b 'c 'd))))
-   (cons 'categorical-col (new-CSeries (vector 'hello 'world 'fizz 'buzz)))))
+   (cons 'categorical-col (new-CSeries (vector 'hello 'world 'fizz 'buzz)
+                                       (build-index-from-list (list 'a 'b 'c 'd))))))
 
 ; create new data-frame-mix
 (define data-frame-mix (new-data-frame columns-mix))
@@ -19,33 +20,33 @@
 ; no schema
 (define salary-data-frame-csv-no-schema (load-csv-file "../sample-csv/salary_date.csv" #:schema #f))
 
-;(data-frame-head salary-data-frame-csv-no-schema)
+(data-frame-head salary-data-frame-csv-no-schema)
 
 (print salary-data-frame-csv-no-schema)
 
-;(displayln "DataFrame List of Column Names")
-;(data-frame-names salary-data-frame-csv-no-schema)
+(displayln "DataFrame List of Column Names")
+(data-frame-names salary-data-frame-csv-no-schema)
 
-;(displayln "DataFrame Dimensions")
-;(data-frame-dim salary-data-frame-csv-no-schema)
+(displayln "DataFrame Dimensions")
+(data-frame-dim salary-data-frame-csv-no-schema)
 
-;(displayln "DataFrame Description")
-;(show-data-frame-description (data-frame-description salary-data-frame-csv-no-schema))
+(displayln "DataFrame Description")
+(show-data-frame-description (data-frame-description salary-data-frame-csv-no-schema))
 
-;(displayln "DataFrame Remove")
-;(data-frame-head (data-frame-remove salary-data-frame-csv-no-schema (list 'first 'age)))
+(displayln "DataFrame Remove")
+(data-frame-head (data-frame-remove salary-data-frame-csv-no-schema (list 'first 'age)))
 
-;(displayln "DataFrame Project")
-;(data-frame-head (data-frame-project salary-data-frame-csv-no-schema (list 'first 'last 'dollar)))
+(displayln "DataFrame Project")
+(data-frame-head (data-frame-project salary-data-frame-csv-no-schema (list 'first 'last 'dollar)))
 
-;(displayln "DataFrame Replace")
-;(data-frame-head (data-frame-replace salary-data-frame-csv-no-schema (cons 'salary (new-CSeries (make-vector 200 '$0.00)))))
+(displayln "DataFrame Replace")
+(data-frame-head (data-frame-replace salary-data-frame-csv-no-schema (cons 'salary (new-CSeries (make-vector 200 '$0.00) #f))))
 
-;(displayln "DataFrame Replace Non Existent Column")
-;(data-frame-head (data-frame-replace salary-data-frame-csv-no-schema (cons 'dollar (new-CSeries (make-vector 200 '$0.00)))))
+(displayln "DataFrame Replace Non Existent Column")
+(data-frame-head (data-frame-replace salary-data-frame-csv-no-schema (cons 'dollar (new-CSeries (make-vector 200 '$0.00) #f))))
 
-;(displayln "DataFrame Extend")
-;(data-frame-head (data-frame-extend salary-data-frame-csv-no-schema (cons 'state (new-CSeries (make-vector 200 'CA)))))
+(displayln "DataFrame Extend")
+(data-frame-head (data-frame-extend salary-data-frame-csv-no-schema (cons 'state (new-CSeries (make-vector 200 'CA) #f))))
 
 (displayln "DataFrame Operations")
 (define columns-integer-1
@@ -108,9 +109,9 @@
 
 (define columns-categorical
   (list 
-   (cons 'col1 (new-CSeries (vector 'a 'b 'c 'd 'e)))
-   (cons 'col2 (new-CSeries (vector 'e 'f 'g 'h 'i)))
-   (cons 'col3 (new-CSeries (vector 'j 'k 'l 'm 'n)))))
+   (cons 'col1 (new-CSeries (vector 'a 'b 'c 'd 'e) #f))
+   (cons 'col2 (new-CSeries (vector 'e 'f 'g 'h 'i) #f))
+   (cons 'col3 (new-CSeries (vector 'j 'k 'l 'm 'n) #f))))
 
 ; create new data-frame-integer
 (define data-frame-integer (new-data-frame columns-integer))
@@ -133,13 +134,13 @@
 (define columns-mixed-5
   (list 
    (cons 'col1 (new-ISeries (vector 1 2 3 4) #f))
-   (cons 'col2 (new-CSeries (vector 'a 'b 'c 'd)))
+   (cons 'col2 (new-CSeries (vector 'a 'b 'c 'd) #f))
    (cons 'col3 (new-ISeries (vector 21 22 23 24) #f))))
 
 (define columns-mixed-6
   (list 
    (cons 'col1 (new-ISeries (vector 11 21 31 41) #f))
-   (cons 'col2 (new-CSeries (vector 'a 'b 'g 'd)))
+   (cons 'col2 (new-CSeries (vector 'a 'b 'g 'd) #f))
    (cons 'col3 (new-ISeries (vector 22 22 23 24) #f))))
 
 ; create new data-frame-mixed-5

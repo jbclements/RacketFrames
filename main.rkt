@@ -34,8 +34,8 @@
  (all-from-out "dataframe/data-frame/data-frame-concat.rkt")
  (all-from-out "dataframe/data-frame/data-frame-print.rkt")
  (all-from-out "dataframe/data-frame/data-frame-join.rkt")
- (all-from-out "dataframe/stats/tabulate.rkt")
- (all-from-out "dataframe/stats/statistics.rkt")
+ ;(all-from-out "dataframe/stats/tabulate.rkt")
+ ;(all-from-out "dataframe/stats/statistics.rkt")
  (all-from-out "dataframe/data-frame/generic-series.rkt")
  (all-from-out "dataframe/data-frame/integer-series.rkt")
  (all-from-out "dataframe/data-frame/numeric-series.rkt")
@@ -72,10 +72,9 @@
  "dataframe/data-frame/series-print.rkt"
  (only-in "dataframe/load/schema-syntax.rkt"
 	  schema)
- "dataframe/stats/tabulate.rkt"
  "dataframe/plot/plot.rkt"
- "dataframe/stats/tabulate.rkt"
- "dataframe/stats/statistics.rkt"
+ ;"dataframe/stats/tabulate.rkt"
+ ;"dataframe/stats/statistics.rkt"
  (only-in "dataframe/load/schema.rkt"
           Schema
 	  ColumnInfo

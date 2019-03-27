@@ -230,12 +230,6 @@
 
 (data-frame-head salary-datetime-date-data-frame-csv-schema)
 
-;(displayln "NO SCHEMA");
-
-; no schema
-(define salary-data-frame-csv-no-schema (load-csv-file "/Users/shubhamkahal/Documents/RacketFrames/dataframe/sample-csv/salary.csv" #:schema #f))
-
-(data-frame-head salary-data-frame-csv-no-schema)
 
 ; read delimited
 (define random-demographic-data-frame-delimited (load-delimited-file "/Users/shubhamkahal/Documents/RacketFrames/dataframe/sample-csv/random_demographic.csv" "|" #:schema random-demographic-schema))

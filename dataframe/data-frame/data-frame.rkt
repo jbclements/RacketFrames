@@ -154,7 +154,19 @@
                              (series-description (car s) (cdr s)))
                            cols))))))
   
+  (define are-all-unique? 
+    (lambda (v)
+      (if (pair? v)
+          (and (not (member (car v) (cdr v)))
+               (are-all-unique? (cdr v)))
+          #t)))
+  
   (check-equal-length)
+
+  (when (not (are-all-unique? (map (λ: ((s : (Pair Symbol Series)))
+                                     (car s)) cols)))
+    (error 'new-data-frame "Frame must have equal length series: ~a" ))
+    
   
   (let ((index (build-index-from-labels ((inst map Label Column)
                                          (inst car Label Series) cols)))

@@ -17,7 +17,9 @@
            CSeriesBuilder
            new-CSeriesBuilder
            append-CSeriesBuilder
-           complete-CSeriesBuilder))
+           complete-CSeriesBuilder)
+  (only-in "indexed-series.rkt"
+           build-index-from-list))
 
 (: cseries-append (CSeries CSeries -> CSeries))
 (define (cseries-append csa csb)
@@ -57,8 +59,8 @@
 (define (cseries-head cseries #:rows [rows 10])
   (define cref (cseries-referencer cseries))
   (if (< (vector-length (cseries-data cseries)) rows)
-      (new-CSeries (for/vector: : (Vectorof Symbol) ([i (vector-length (cseries-data cseries))]) (cref i)))
-      (new-CSeries (for/vector: : (Vectorof Symbol) ([i rows]) (cref i)))))
+      (new-CSeries (for/vector: : (Vectorof Symbol) ([i (vector-length (cseries-data cseries))]) (cref i)) (build-index-from-list (vector->list (cseries-data cseries))))
+      (new-CSeries (for/vector: : (Vectorof Symbol) ([i rows]) (cref i)) (build-index-from-list (vector->list (cseries-data cseries))))))
 
 (: cseries-head-display (CSeries [#:rows Index] -> Void))
 (define (cseries-head-display cseries #:rows [rows default-cseries-rows])

@@ -152,7 +152,7 @@
   (cond
     [(GenSeries? series) (gen-series-loc series label)]
     [(NSeries? series) (nseries-loc series label)]
-    ;[(CSeries? series) (cseries-loc series idx)]   
+    [(CSeries? series) (cseries-loc series idx)]   
     [(ISeries? series) (iseries-loc series label)]
     [(BSeries? series) (bseries-loc series label)]
     [(DatetimeSeries? series) (datetime-series-loc series label)]

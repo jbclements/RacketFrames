@@ -45,7 +45,8 @@
  (all-from-out "dataframe/data-frame/datetime-series.rkt")
  (all-from-out "dataframe/data-frame/categorical-series-ops.rkt")
  (all-from-out "dataframe/data-frame/gen-nseries.rkt")
- (all-from-out "dataframe/data-frame/series-print.rkt"))
+ (all-from-out "dataframe/data-frame/series-print.rkt")
+ (all-from-out racket/flonum))
 
 (require
  (only-in "dataframe/load/load.rkt"

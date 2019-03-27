@@ -3,7 +3,8 @@
 (provide:
  [determine-schema (FilePath Integer String -> Schema)]
  [load-csv-file (String [#:schema (Option Schema)] -> DataFrame)]
- [load-delimited-file (String String [#:schema (Option Schema)] -> DataFrame)])
+ [load-delimited-file (String String [#:schema (Option Schema)] -> DataFrame)]
+ [data-frame-from-sql (Connection Boolean String (Listof Any) -> DataFrame)])
 
 (require
   typed/db

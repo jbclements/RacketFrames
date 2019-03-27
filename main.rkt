@@ -49,7 +49,8 @@
 (require
  (only-in "dataframe/load/load.rkt"
 	  load-csv-file
-	  load-delimited-file)
+	  load-delimited-file
+          data-frame-from-sql)
  "dataframe/data-frame/types.rkt"
  "dataframe/data-frame/data-frame.rkt"
  "dataframe/data-frame/data-frame-ops.rkt"

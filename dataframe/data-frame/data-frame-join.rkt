@@ -18,6 +18,8 @@
  [data-frame-join-right (DataFrame DataFrame [#:on (Listof Symbol)] -> DataFrame)]
  [data-frame-join-inner (DataFrame DataFrame [#:on (Listof Symbol)] -> DataFrame)]
  [data-frame-join-outer (DataFrame DataFrame [#:on (Listof Symbol)] -> DataFrame)]
+ [data-frame-groupby (DataFrame (Listof Label) -> GroupHash)]
+ [apply-agg-data-frame (Symbol GroupHash -> Series)]
  [copy-column-row-error (Series Integer -> Void)]
  [copy-column-row ((Vectorof Series) (Vectorof SeriesBuilder) Index -> Void)]
  [dest-mapping-series-builders (DataFrameDescription Index -> (Listof SeriesBuilder))]
@@ -25,7 +27,8 @@
  [build-multi-index-from-cols ((U (Listof IndexableSeries) Columns) -> SIndex)])
 
 (provide
- IndexableSeries)
+ IndexableSeries
+ GroupHash)
 
 (require
  racket/pretty

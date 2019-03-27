@@ -33,6 +33,7 @@
  [iseries-length (ISeries -> Index)]
  [iseries-referencer (ISeries -> (Index -> Fixnum))]
  [iseries-data (ISeries -> (Vectorof Fixnum))]
+ [iseries-index (ISeries -> (U False RFIndex))]
  [map/is (ISeries (Fixnum -> Fixnum) -> ISeries)]
  [bop/is (ISeries ISeries (Fixnum Fixnum -> Fixnum) -> ISeries)]
  [comp/is (ISeries ISeries (Fixnum Fixnum -> Boolean) -> BSeries)]
@@ -118,23 +119,7 @@
 ; ***********************************************************
 (: set-ISeries-index (ISeries (U (Listof IndexDataType) RFIndex) -> ISeries))
 (define (set-ISeries-index iseries labels)
-
-  (define data (ISeries-data iseries))
-  
-  (: check-mismatch (RFIndex -> Void))
-  (define (check-mismatch index)
-    (unless (eq? (vector-length data) (hash-count (assert index hash?)))
-      (let ((k (current-continuation-marks)))
-	(raise (make-exn:fail:contract "Cardinality of a Series' data and labels must be equal" k))))
-    (void))
-
-  (if (RFIndex? labels)
-      (begin
-	(check-mismatch labels)
-	(ISeries labels data))
-      (let ((index (build-index-from-list (assert labels ListofIndexDataType?))))
-        (check-mismatch index)
-        (ISeries index data))))
+  (new-ISeries (iseries-data iseries) labels))
 ; ***********************************************************
 
 ; ***********************************************************
@@ -188,6 +173,12 @@
 (: iseries-data (ISeries -> (Vectorof Fixnum)))
 (define (iseries-data series)
   (ISeries-data series))
+
+; This function consumes an integer series and returns its
+; data vector.
+(: iseries-index (ISeries -> (U False RFIndex)))
+(define (iseries-index series)
+  (ISeries-index series))
 
 ; This function consumes a series and a Label and returns
 ; the list of values at that Label in the series.

@@ -35,6 +35,7 @@
  [datetime-series-length (DatetimeSeries -> Index)]
  [datetime-series-referencer (DatetimeSeries -> (Index -> Datetime))]
  [datetime-series-data (DatetimeSeries -> (Vectorof Datetime))]
+ [datetime-series-index (DatetimeSeries -> (U False RFIndex))]
  [map/datetime-series-data (DatetimeSeries (Datetime -> Datetime) -> DatetimeSeries)]
  [datetime-series-print (DatetimeSeries Output-Port -> Void)])
 ; ***********************************************************
@@ -68,22 +69,7 @@
 ; ***********************************************************
 (: set-DatetimeSeries-index (DatetimeSeries (U (Listof IndexDataType) RFIndex) -> DatetimeSeries))
 (define (set-DatetimeSeries-index datetime-series labels)
-  (define data (DatetimeSeries-data datetime-series))
-  
-  (: check-mismatch (RFIndex -> Void))
-  (define (check-mismatch index)
-    (unless (eq? (vector-length data) (hash-count (extract-index index)))
-      (let ((k (current-continuation-marks)))
-	(raise (make-exn:fail:contract "Cardinality of a Series' data and labels must be equal" k))))
-    (void))
-
-  (if (hash? labels)
-      (begin
-	(check-mismatch labels)
-	(DatetimeSeries labels data))
-      (let ((index (build-index-from-list (assert labels ListofIndexDataType?))))
-        (check-mismatch index)
-        (DatetimeSeries index data))))
+  (new-DatetimeSeries (datetime-series-data datetime-series) labels))
 ; ***********************************************************
 
 ; ***********************************************************
@@ -134,6 +120,12 @@
 (: datetime-series-data (DatetimeSeries -> (Vectorof Datetime)))
 (define (datetime-series-data series)
   (DatetimeSeries-data series))
+
+; This function consumes a datetime series and returns its
+; index.
+(: datetime-series-index (DatetimeSeries -> (U False RFIndex)))
+(define (datetime-series-index series)
+  (DatetimeSeries-index series))
 
 ; This function consumes an integer series and an index and
 ; returns a vector of values in the range [0:index] in the series.

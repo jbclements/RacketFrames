@@ -40,5 +40,3 @@
               (displayln (date->julian-day-number (Datetime-date date)))
 	    (append-ISeriesBuilder ibuilder (assert (date->julian-day-number (Datetime-date date)) fixnum?)))
 	    (error 'as-julian-day-numbers "Invalid date: ~s" date))))))
-
-(iseries-data (as-julian-day-numbers (new-CSeries (vector '12-25-2015 '01-01-2016 '05-19-1995 '11-10-1996))))

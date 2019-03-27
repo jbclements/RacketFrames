@@ -6,19 +6,21 @@
 ;;writer-CSeries)
 
 (provide:
- ;[CSeries->RIndex    (CSeries -> RIndex)]
+ [set-CSeries-index (CSeries (U (Listof IndexDataType) RFIndex) -> CSeries)]
  [cseries-length      (CSeries -> Index)]
  [cseries-iref        (CSeries (Listof Index) -> (Listof Label))]
  [cseries-range (CSeries Index -> (Vectorof Label))]
  [cseries-data        (CSeries -> (Vectorof Symbol))]
+ [cseries-index (CSeries -> (U False RFIndex))]
  [cseries-referencer (CSeries -> (Fixnum -> Label))]
  [cseries-iloc (CSeries (U Index (Listof Index)) -> (U Label CSeries))]
- [cseries-print (CSeries Output-Port -> Void)])
+ [cseries-print (CSeries Output-Port -> Void)]
+ [cseries-loc-boolean (CSeries (Listof Boolean) -> (U Label CSeries))])
 
 (require
  (only-in "indexed-series.rkt"
-	  RFIndex Label idx->key
-	  LabelIndex LabelIndex-index is-labeled?))
+	  RFIndex RFIndex? Label idx->key extract-index build-index-from-list
+	  LabelIndex LabelIndex-index is-labeled? IndexDataType))
 
 (define-type CSeriesFn (Label -> Label))
 
@@ -44,8 +46,8 @@
 
 ;; #:methods gen:custom-write [(define write-proc writer-CSeries)])
 
-(: new-CSeries ((Vectorof Label) -> CSeries))
-(define (new-CSeries nominals)
+(: new-CSeries ((Vectorof Label) (Option (U (Listof IndexDataType) RFIndex)) -> CSeries))
+(define (new-CSeries nominals labels)
 
   (: nominal-code (HashTable Label Index))
   (define nominal-code (make-hash))
@@ -63,9 +65,22 @@
 		       (vector-set! nominals idx nom)))
     nominals)
 
+  (: check-mismatch (RFIndex -> Void))
+  (define (check-mismatch index)
+    ; bug spotted, needs to count sum of the number of elements in each hashed list
+    (unless (eq? (vector-length data) (hash-count (extract-index index)))
+      (let ((k (current-continuation-marks)))
+	(raise (make-exn:fail:contract "Cardinality of a Series' data and labels must be equal" k))))
+    (void))
+
+
   (let: loop : CSeries ((idx : Natural 0) (code : Index 0))
 	(if (>= idx len)
-	    (CSeries #f data (make-nominal-vector))
+            (if (RFIndex? labels)
+                (begin
+                  (check-mismatch labels)
+                  (CSeries labels data (make-nominal-vector)))
+                (CSeries #f data (make-nominal-vector)))
 	    (let ((nom (vector-ref nominals idx)))
 	      (if (hash-has-key? nominal-code nom)
 		  (begin
@@ -76,19 +91,11 @@
 		    (vector-set! data idx code)
 		    (loop (add1 idx) (assert (add1 code) index?))))))))
 
-#|
-(: CSeries->RIndex (CSeries -> RFIndex))
-(define (CSeries->RIndex cs)
-
-  (: rfindex RFIndex)
-  (define rfindex (make-hash))
-
-  (let* ((noms (CSeries-nominals cs))
-	 (len (vector-length noms)))
-    (do ([i 0 (add1 i)])
-	([>= i len] rfindex)
-      (when (index? i)
-	    (hash-set! rfindex (vector-ref noms i) (list i))))))|#
+; ***********************************************************
+(: set-CSeries-index (CSeries (U (Listof IndexDataType) RFIndex) -> CSeries))
+(define (set-CSeries-index cseries labels)
+  (new-CSeries (CSeries-nominals cseries) labels))
+; ***********************************************************
 
 (: cseries-referencer (CSeries -> (Fixnum -> Label)))
 (define (cseries-referencer cseries)
@@ -118,7 +125,11 @@
 
 (: cseries-data (CSeries -> (Vectorof Symbol)))
 (define (cseries-data series)
-  (CSeries-nominals series))
+  (vector-map (lambda ([i : Index]) (car (cseries-iref series (list i)))) (CSeries-data series)))
+
+(: cseries-index (CSeries -> (U False RFIndex)))
+(define (cseries-index series)
+  (CSeries-index series))
 
 ; label based
 
@@ -215,5 +226,39 @@
       ; sub-vector the data vector to get the data and create a new-BSeries
       (new-CSeries
        (for/vector: : (Vectorof Label) ([i idx])
-         (vector-ref (cseries-data cseries) i)))
+         (vector-ref (cseries-data cseries) i)) (cseries-index cseries))
       (referencer idx))))
+
+(: true? (Boolean -> Boolean))
+(define (true? boolean)
+  (not (false? boolean)))
+
+(: cseries-loc-boolean (CSeries (Listof Boolean) -> (U Label CSeries)))
+(define (cseries-loc-boolean cseries boolean-lst)
+  (: data (Vectorof Label))
+  (define data (cseries-data cseries))
+
+  (: new-data (Vectorof Label))
+  (define new-data (make-vector (length (filter true? boolean-lst)) 'label))
+  
+  (define data-idx 0)
+  (define new-data-idx 0)
+
+  (if (= (length boolean-lst) 1)
+      (if (list-ref boolean-lst 0)
+          (vector-ref data 0)
+          ; empty cseries
+          (new-CSeries (vector) #f))
+       
+      (for ([b boolean-lst]
+            [d data])
+        (begin
+          (when b
+            (begin              
+              (vector-set! new-data new-data-idx (vector-ref data data-idx))
+              (set! new-data-idx (add1 new-data-idx))))
+          (set! data-idx (add1 data-idx)))))
+
+  (if (= (vector-length new-data) 1)
+      (vector-ref new-data 0)
+      (new-CSeries new-data #f)))

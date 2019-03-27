@@ -6,7 +6,7 @@
 #lang typed/racket
 (require typed/rackunit)
 
-(require "../main.rkt")
+; only require bseries functions
 
 ; ***********************************************************
 ; Test Cases

@@ -41,6 +41,7 @@
  (all-from-out "dataframe/data-frame/numeric-series.rkt")
  (all-from-out "dataframe/data-frame/categorical-series.rkt")
  (all-from-out "dataframe/data-frame/boolean-series.rkt")
+ (all-from-out "dataframe/data-frame/date.rkt")
  (all-from-out "dataframe/data-frame/datetime-series.rkt")
  (all-from-out "dataframe/data-frame/categorical-series-ops.rkt")
  (all-from-out "dataframe/data-frame/gen-nseries.rkt")
@@ -64,6 +65,7 @@
  "dataframe/data-frame/numeric-series.rkt"
  "dataframe/data-frame/categorical-series.rkt"
  "dataframe/data-frame/boolean-series.rkt"
+ "dataframe/data-frame/date.rkt"
  "dataframe/data-frame/datetime-series.rkt"
  "dataframe/data-frame/categorical-series-ops.rkt"
  "dataframe/data-frame/series-iter.rkt"
@@ -82,4 +84,5 @@
  (only-in "dataframe/data-frame/gen-nseries.rkt"
 	  generate-NSeries)
  (only-in "dataframe/util/filepath.rkt"
-	  FilePath FilePath->string))
+	  FilePath FilePath->string)
+ racket/flonum)

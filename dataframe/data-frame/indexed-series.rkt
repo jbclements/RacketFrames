@@ -551,7 +551,5 @@
                             (λ () (list))))
             (loop (add1 i)))))))
 
-;(build-multi-index-from-list (list (list 'a 'b 'c) (list 1 2 3)))
-
-;(build-multi-index-from-list (list (list 'a 'b 'c 'a 'c) (list 1 2 3 4 3)))
 ; ***********************************************************
+

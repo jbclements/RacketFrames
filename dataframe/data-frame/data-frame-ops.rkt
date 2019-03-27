@@ -416,7 +416,7 @@
                        (data-frame-names df))))
 
 ; DataFrame.apply(func[, axis, broadcast, ...])	Applies function along input axis of DataFrame.
-; (: data-frame-apply func)
+; (: data-frame-apply axis func)
 
 ; DataFrame.applymap(func)	Apply a function to a DataFrame that is intended to operate elementwise, i.e.
 ; (: data-frame-applymap func)

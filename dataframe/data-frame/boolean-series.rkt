@@ -27,10 +27,12 @@
  [bseries-length (BSeries -> Index)]
  [bseries-referencer (BSeries -> (Index -> Boolean))]
  [bseries-data (BSeries -> (Vectorof Boolean))]
+ [bseries-index (BSeries -> (U False RFIndex))]
  [map/bs (BSeries (Boolean -> Boolean) -> BSeries)]
  [bseries-loc-boolean (BSeries (Listof Boolean) -> (U Boolean BSeries))]
  [bseries-loc (BSeries (U Label (Listof Label) (Listof Boolean)) -> (U Boolean BSeries))]
  [bseries-iloc (BSeries (U Index (Listof Index)) -> (U Boolean BSeries))]
+ [bseries-not (BSeries -> BSeries)]
  [bseries-print (BSeries Output-Port -> Void)])
 ; ***********************************************************
 
@@ -87,23 +89,7 @@
 ; ***********************************************************
 (: set-BSeries-index (BSeries (U (Listof IndexDataType) RFIndex) -> BSeries))
 (define (set-BSeries-index bseries labels)
-
-  (define data (BSeries-data bseries))
-  
-  (: check-mismatch (RFIndex -> Void))
-  (define (check-mismatch index)
-    (unless (eq? (vector-length data) (hash-count (assert index hash?)))
-      (let ((k (current-continuation-marks)))
-	(raise (make-exn:fail:contract "Cardinality of a Series' data and labels must be equal" k))))
-    (void))
-
-  (if (hash? labels)
-      (begin
-	(check-mismatch labels)
-	(BSeries labels data))
-      (let ((index (build-index-from-list (assert labels ListofIndexDataType?))))
-        (check-mismatch index)
-        (BSeries index data))))
+  (new-BSeries (bseries-data bseries) labels))
 ; ***********************************************************
 
 ; ***********************************************************
@@ -135,6 +121,12 @@
 (: bseries-data (BSeries -> (Vectorof Boolean)))
 (define (bseries-data series)
   (BSeries-data series))
+
+; This function consumes an integer series and returns its
+; data vector.
+(: bseries-index (BSeries -> (U False RFIndex)))
+(define (bseries-index series)
+  (BSeries-index series))
 
 ; This function consumes a series and a Label and returns
 ; the value at that Label in the series.
@@ -281,3 +273,9 @@
               (display " " port)
               (displayln val port)))))))
 ; ***********************************************************
+
+(: bseries-not (BSeries -> BSeries))
+(define (bseries-not bseries)
+  (: inverted-boolean-vector (Vectorof Boolean))
+  (define inverted-boolean-vector (vector-map (lambda ([b : Boolean]) (if b #f b)) (bseries-data bseries)))
+  (new-BSeries inverted-boolean-vector (bseries-index bseries)))

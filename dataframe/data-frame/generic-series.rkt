@@ -27,6 +27,7 @@
  [gen-series-length (GenSeries -> Index)]
  [gen-series-referencer (GenSeries -> (Index -> GenericType))]
  [gen-series-data (GenSeries -> (Vectorof GenericType))]
+ [gen-series-index (GenSeries -> (U False RFIndex))]
  [gen-series-loc-boolean (GenSeries (Listof Boolean) -> (U GenericType GenSeries))]
  [gen-series-loc (GenSeries (U Label (Listof Label) (Listof Boolean)) -> (U GenericType GenSeries))]
  [gen-series-iloc (GenSeries (U Index (Listof Index)) -> (U GenericType GenSeries))]
@@ -64,24 +65,8 @@
 
 ; ***********************************************************
 (: set-GenSeries-index (GenSeries (U (Listof IndexDataType) RFIndex) -> GenSeries))
-(define (set-GenSeries-index iseries labels)
-
-  (define data (GenSeries-data iseries))
-  
-  (: check-mismatch (RFIndex -> Void))
-  (define (check-mismatch index)
-    (unless (eq? (vector-length data) (hash-count (extract-index index)))
-      (let ((k (current-continuation-marks)))
-	(raise (make-exn:fail:contract "Cardinality of a Series' data and labels must be equal" k))))
-    (void))
-
-  (if (hash? labels)
-      (begin
-	(check-mismatch labels)
-	(GenSeries labels data))
-      (let ((index (build-index-from-list (assert labels ListofIndexDataType?))))
-        (check-mismatch index)
-        (GenSeries index data))))
+(define (set-GenSeries-index gen-series labels)
+  (new-GenSeries (gen-series-data gen-series) labels))
 ; ***********************************************************
 
 ; ***********************************************************
@@ -113,6 +98,12 @@
 (: gen-series-data (GenSeries -> (Vectorof GenericType)))
 (define (gen-series-data series)
   (GenSeries-data series))
+
+; This function consumes a generic series and returns its
+; data vector.
+(: gen-series-index (GenSeries -> (U False RFIndex)))
+(define (gen-series-index series)
+  (GenSeries-index series))
 
 ; This function consumes a generic series and a Label and returns
 ; the value at that Label in the series.

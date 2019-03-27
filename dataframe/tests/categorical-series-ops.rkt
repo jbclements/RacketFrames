@@ -6,8 +6,8 @@
  [cseries-unique (CSeries -> CSeries)] 
  [cseries-append (CSeries CSeries -> CSeries)])
 
-(require 
- (only-in grip/data/format
+(require
+  (only-in "../util/format.rkt"
 	  ~a)
  (only-in racket/vector
 	  vector-copy)
@@ -57,8 +57,8 @@
 (define (cseries-head cseries #:rows [rows 10])
   (define cref (cseries-referencer cseries))
   (if (< (vector-length (cseries-data cseries)) rows)
-      (new-CSeries (for/vector: : (Vectorof Symbol) ([i (vector-length (cseries-data cseries))]) (cref i)))
-      (new-CSeries (for/vector: : (Vectorof Symbol) ([i rows]) (cref i)))))
+      (new-CSeries (for/vector: : (Vectorof Symbol) ([i (vector-length (cseries-data cseries))]) (cref i)) #f)
+      (new-CSeries (for/vector: : (Vectorof Symbol) ([i rows]) (cref i)) #f)))
 
 (: cseries-head-display (CSeries [#:rows Index] -> Void))
 (define (cseries-head-display cseries #:rows [rows default-cseries-rows])

@@ -262,22 +262,3 @@
        (write-frame-row (assert row index?))
        (newline outp)))
 
-; Test Cases
-
-;******************
-;data-frame-integer
-;******************
-; will define parse to automatically build this columns structure
-(define columns-integer
-  (list 
-   (cons 'col1 (new-ISeries (vector 1 2 3 4)
-                            (list 'a 'b 'c 'd)))
-   (cons 'col2 (new-ISeries (vector 5 6 7 8)
-                            (list 'e 'f 'g 'h)))
-   (cons 'col3 (new-ISeries (vector 9 10 11 12)
-                            (list 'i 'j 'k 'l)))))
-
-; create new data-frame-integer
-(define data-frame-integer (new-data-frame columns-integer))
-
-(data-frame-write-tab data-frame-integer (current-output-port))

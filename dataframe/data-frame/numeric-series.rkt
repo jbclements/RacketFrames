@@ -29,6 +29,7 @@
  [nseries-referencer (NSeries -> (Index -> Float))]
  [nseries-length (NSeries -> Index)]
  [nseries-data (NSeries -> FlVector)]
+ [nseries-index (NSeries -> (U False RFIndex))]
  [map/ns (NSeries (Float -> Float) -> NSeries)]
  [bop/ns (NSeries NSeries (Float Float -> Float) -> NSeries)]
  [+/ns (NSeries NSeries -> NSeries)]
@@ -177,23 +178,7 @@
 ; ***********************************************************
 (: set-NSeries-index (NSeries (U (Listof Label) RFIndex) -> NSeries))
 (define (set-NSeries-index nseries labels)
-
-  (define data (NSeries-data nseries))
-  
-  (: check-mismatch (RFIndex -> Void))
-  (define (check-mismatch index)
-    (unless (eq? (flvector-length data) (hash-count (extract-index index)))
-      (let ((k (current-continuation-marks)))
-	(raise (make-exn:fail:contract "Cardinality of a Series' data and labels must be equal" k))))
-    (void))
-
-  (if (hash? labels)
-      (begin
-	(check-mismatch labels)
-	(NSeries labels data))
-      (let ((index (build-index-from-list (assert labels ListofIndexDataType?))))
-        (check-mismatch index)
-        (NSeries index data))))
+  (new-NSeries (nseries-data nseries) labels))
 ; ***********************************************************
 
 ; ***********************************************************
@@ -236,6 +221,12 @@
 (: nseries-data (NSeries -> FlVector))
 (define (nseries-data series)
   (NSeries-data series))
+
+; This function consumes a numeric series and returns its
+; index.
+(: nseries-index (NSeries -> (U False RFIndex)))
+(define (nseries-index series)
+  (NSeries-index series))
 
 (: nseries-length (NSeries -> Index))
 (define (nseries-length nseries)

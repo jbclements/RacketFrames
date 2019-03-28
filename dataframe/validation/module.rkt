@@ -2,6 +2,8 @@
 
 (require RacketFrames)
 
+(require typed/db)
+
 ;******************
 ;data-frame-mix
 ;******************
@@ -221,3 +223,56 @@
  (current-output-port))
 
 (gen-series-data (assert (data-frame-iloc-label data-frame-integer-labeled 1 (list 'col1 'col2)) GenSeries?))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Dataframe Load Test Cases;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(define salary-date-schema (Schema #t (list (ColumnInfo 'first 'CATEGORICAL) (ColumnInfo 'last 'CATEGORICAL)
+                                       (ColumnInfo 'age 'INTEGER) (ColumnInfo 'dollar 'CATEGORICAL)
+                                       (ColumnInfo 'phone 'CATEGORICAL) (ColumnInfo 'join_date 'DATETIME))))
+
+(define salary-no-date-schema (Schema #t (list (ColumnInfo 'first 'CATEGORICAL) (ColumnInfo 'last 'CATEGORICAL)
+                                       (ColumnInfo 'age 'INTEGER) (ColumnInfo 'dollar 'CATEGORICAL)
+                                       (ColumnInfo 'phone 'CATEGORICAL))))
+
+(define salary-datetime-schema (Schema #t (list (ColumnInfo 'first 'CATEGORICAL) (ColumnInfo 'last 'CATEGORICAL)
+                                       (ColumnInfo 'age 'INTEGER) (ColumnInfo 'dollar 'CATEGORICAL)
+                                       (ColumnInfo 'phone 'CATEGORICAL) (ColumnInfo 'join_datetime 'DATETIME))))
+
+(define random-demographic-schema (Schema #t (list (ColumnInfo 'first 'CATEGORICAL) (ColumnInfo 'last 'CATEGORICAL)
+                                                   (ColumnInfo 'gender 'CATEGORICAL) (ColumnInfo 'yn 'CATEGORICAL)
+                                                   (ColumnInfo 'char 'GENERIC) (ColumnInfo 'float 'NUMERIC))))
+
+; read csv
+(define salary-data-frame-csv-schema (load-csv-file "/Users/shubhamkahal/Documents/RacketFrames/dataframe/sample-csv/salary_date.csv" #:schema salary-date-schema))
+
+(data-frame-head salary-data-frame-csv-schema)
+
+(define salary-no-date-data-frame-csv-schema (load-csv-file "/Users/shubhamkahal/Documents/RacketFrames/dataframe/sample-csv/salary_no_date.csv" #:schema salary-no-date-schema))
+
+(data-frame-head salary-no-date-data-frame-csv-schema)
+
+(define salary-datetime-data-frame-csv-schema (load-csv-file "/Users/shubhamkahal/Documents/RacketFrames/dataframe/sample-csv/salary_datetime.csv" #:schema salary-datetime-schema))
+
+(data-frame-head salary-datetime-data-frame-csv-schema)
+
+(define salary-datetime-date-data-frame-csv-schema (load-csv-file "/Users/shubhamkahal/Documents/RacketFrames/dataframe/sample-csv/salary_datetime_date.csv" #:schema salary-datetime-schema))
+
+(data-frame-head salary-datetime-date-data-frame-csv-schema)
+
+
+; read delimited
+(define random-demographic-data-frame-delimited (load-delimited-file "/Users/shubhamkahal/Documents/RacketFrames/dataframe/sample-csv/random_demographic.csv" "|" #:schema random-demographic-schema))
+
+(data-frame-head random-demographic-data-frame-delimited)
+
+(series-data (data-frame-series random-demographic-data-frame-delimited 'char))
+
+; no schema
+(define random-demographic-data-frame-delimited-no-schema (load-delimited-file "/Users/shubhamkahal/Documents/RacketFrames/dataframe/sample-csv/random_demographic.csv" "|" #:schema #f))
+
+(data-frame-head random-demographic-data-frame-delimited-no-schema)
+
+(define data-frame-from-sql-genres (data-frame-from-sql (sqlite3-connect #:database "/Users/shubhamkahal/Downloads/chinook.db") #f "SELECT * FROM genres" empty))
+
+(data-frame-head data-frame-from-sql-genres)

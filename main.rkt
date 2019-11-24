@@ -21,32 +21,6 @@
 
 #lang typed/racket
 
-(provide
- (all-from-out "dataframe/data-frame/types.rkt")
- (all-from-out "dataframe/load/load.rkt")
- (all-from-out "dataframe/load/schema-syntax.rkt")
- (all-from-out "dataframe/load/schema.rkt")
- (all-from-out "dataframe/data-frame/indexed-series.rkt")
- (all-from-out "dataframe/data-frame/series-description.rkt")
- (all-from-out "dataframe/data-frame/series-iter.rkt")
- (all-from-out "dataframe/data-frame/data-frame.rkt")
- (all-from-out "dataframe/data-frame/data-frame-ops.rkt")
- (all-from-out "dataframe/data-frame/data-frame-concat.rkt")
- (all-from-out "dataframe/data-frame/data-frame-print.rkt")
- (all-from-out "dataframe/data-frame/data-frame-join.rkt")
- ;(all-from-out "dataframe/stats/tabulate.rkt")
- ;(all-from-out "dataframe/stats/statistics.rkt")
- (all-from-out "dataframe/data-frame/generic-series.rkt")
- (all-from-out "dataframe/data-frame/integer-series.rkt")
- (all-from-out "dataframe/data-frame/numeric-series.rkt")
- (all-from-out "dataframe/data-frame/categorical-series.rkt")
- (all-from-out "dataframe/data-frame/boolean-series.rkt")
- (all-from-out "dataframe/data-frame/date.rkt")
- (all-from-out "dataframe/data-frame/datetime-series.rkt")
- (all-from-out "dataframe/data-frame/categorical-series-ops.rkt")
- (all-from-out "dataframe/data-frame/gen-nseries.rkt")
- (all-from-out "dataframe/data-frame/series-print.rkt")
- (all-from-out racket/flonum))
 
 (require
  (only-in "dataframe/load/load.rkt"
@@ -86,3 +60,31 @@
  (only-in "dataframe/util/filepath.rkt"
 	  FilePath FilePath->string)
  racket/flonum)
+
+
+(provide
+ (all-from-out "dataframe/data-frame/types.rkt")
+ (all-from-out "dataframe/load/load.rkt")
+ (all-from-out "dataframe/load/schema-syntax.rkt")
+ (all-from-out "dataframe/load/schema.rkt")
+ (all-from-out "dataframe/data-frame/indexed-series.rkt")
+ (all-from-out "dataframe/data-frame/series-description.rkt")
+ (all-from-out "dataframe/data-frame/series-iter.rkt")
+ (all-from-out "dataframe/data-frame/data-frame.rkt")
+ (all-from-out "dataframe/data-frame/data-frame-ops.rkt")
+ (all-from-out "dataframe/data-frame/data-frame-concat.rkt")
+ (all-from-out "dataframe/data-frame/data-frame-print.rkt")
+ (all-from-out "dataframe/data-frame/data-frame-join.rkt")
+ ;(all-from-out "dataframe/stats/tabulate.rkt")
+ ;(all-from-out "dataframe/stats/statistics.rkt")
+ (all-from-out "dataframe/data-frame/generic-series.rkt")
+ (all-from-out "dataframe/data-frame/integer-series.rkt")
+ (all-from-out "dataframe/data-frame/numeric-series.rkt")
+ (all-from-out "dataframe/data-frame/categorical-series.rkt")
+ (all-from-out "dataframe/data-frame/boolean-series.rkt")
+ (all-from-out "dataframe/data-frame/date.rkt")
+ (all-from-out "dataframe/data-frame/datetime-series.rkt")
+ (all-from-out "dataframe/data-frame/categorical-series-ops.rkt")
+ (all-from-out "dataframe/data-frame/gen-nseries.rkt")
+ (all-from-out "dataframe/data-frame/series-print.rkt")
+ (all-from-out racket/flonum))

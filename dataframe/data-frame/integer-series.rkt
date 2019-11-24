@@ -57,7 +57,9 @@
  [!=/is (ISeries ISeries -> BSeries)]
  [apply-agg-is (Symbol ISeries -> Real)]
  [apply-stat-is (Symbol ISeries -> Real)]
- [iseries-print (ISeries Output-Port -> Void)])
+ [iseries-print (ISeries Output-Port -> Void)]
+ [iseries-filter (ISeries (Fixnum -> Boolean) -> ISeries)]
+ [iseries-filter-not (ISeries (Fixnum -> Boolean) -> ISeries)])
 ; ***********************************************************
 
 ; ***********************************************************

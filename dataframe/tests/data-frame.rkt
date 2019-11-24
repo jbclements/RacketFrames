@@ -51,9 +51,9 @@
 ; will define parse to automatically build this columns structure
 (define columns-categorical
   (list 
-   (cons 'col1 (new-CSeries (vector 'hello 'world)))
-   (cons 'col2 (new-CSeries (vector 'fizz 'buzz)))
-   (cons 'col3 (new-CSeries (vector 'foo 'bar)))))
+   (cons 'col1 (new-CSeries (vector 'hello 'world) #f))
+   (cons 'col2 (new-CSeries (vector 'fizz 'buzz) #f))
+   (cons 'col3 (new-CSeries (vector 'foo 'bar) #f))))
 
 ; create new data-frame-categorical
 (define data-frame-categorical (new-data-frame columns-categorical))
@@ -67,7 +67,7 @@
                             (build-index-from-list (list 'a 'b 'c 'd))))
    (cons 'float-col (new-NSeries (flvector 1.5 2.5 3.5 4.5)
                             (build-index-from-list (list 'a 'b 'c 'd))))
-   (cons 'categorical-col (new-CSeries (vector 'hello 'world 'fizz 'buzz)))))
+   (cons 'categorical-col (new-CSeries (vector 'hello 'world 'fizz 'buzz) #f))))
 
 ; create new data-frame-mix
 (define data-frame-mix (new-data-frame columns-mix))

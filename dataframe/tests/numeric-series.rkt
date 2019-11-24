@@ -6,7 +6,11 @@
 #lang typed/racket
 (require typed/rackunit)
 
-(require "../main.rkt")
+(require "../data-frame/indexed-series.rkt")
+(require "../data-frame/numeric-series.rkt")
+(require "../data-frame/integer-series.rkt")
+(require "../data-frame/boolean-series.rkt")
+(require racket/flonum racket/unsafe/ops)
 
 ; ***********************************************************
 ; Test Cases
@@ -61,10 +65,10 @@
 
 ; create float series
 (define series-float (new-NSeries (flvector 1.5 2.4 3.6 4.1)
-                                      (build-index-from-labels (list 'a 'b 'c 'd))))
+                                      (build-index-from-list (list 'a 'b 'c 'd))))
 
 (define series-float-2 (new-NSeries (flvector 5.0 6.0 7.0 8.0)
-                                      (build-index-from-labels (list 'a 'b 'c 'd))))
+                                      (build-index-from-list (list 'a 'b 'c 'd))))
 
 ; nseries reference tests
 (check-equal? ((nseries-referencer series-float) 0) 1.5)
@@ -75,9 +79,9 @@
 
 (check-equal? (nseries-iref series-float (list 1)) (list 2.4))
 
-(check-equal? (nseries-label-ref series-float 'd) (list 4.1))
+(check-equal? (nseries-loc series-float 'd) 4.1)
 
-(check-equal? (nseries-label-ref series-float 'c) (list 3.6))
+(check-equal? (nseries-loc series-float 'c) 3.6)
 
 ; series length
 (check-equal? (nseries-length series-float) 4)

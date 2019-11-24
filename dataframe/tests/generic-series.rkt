@@ -6,14 +6,15 @@
 #lang typed/racket
 (require typed/rackunit)
 
-(require "../main.rkt")
+(require "../data-frame/indexed-series.rkt")
+(require "../data-frame/generic-series.rkt")
 
 ; create generic series
 (define series-generic (new-GenSeries (vector 1 2.5 'categorical #t)
-                                      (build-index-from-labels (list 'a 'b 'c 'd))))
+                                      (build-index-from-list (list 'a 'b 'c 'd))))
 
 (define series-generic-2 (new-GenSeries (vector 5 6 7 8)
-                                      (build-index-from-labels (list 'a 'b 'c 'd))))
+                                      (build-index-from-list (list 'a 'b 'c 'd))))
 
 ; gen-series reference tests
 (check-equal? ((gen-series-referencer series-generic) 0) 1)
@@ -35,12 +36,12 @@
 (struct point ([x : Integer] [y : Integer]) #:transparent)
 
 ; create point struct series
-(define gen-series-point (new-GenSeries (vector (point 1 2) (point 3 4) (point 5 6) (point 7 8) (point 9 10)) (build-index-from-labels (list 'a 'b 'c 'd 'e))))
+(define gen-series-point (new-GenSeries (vector (point 1 2) (point 3 4) (point 5 6) (point 7 8) (point 9 10)) (build-index-from-list (list 'a 'b 'c 'd 'e))))
 
-(gen-series-data gen-series-point)
+(check-equal? (gen-series-data gen-series-point) (vector (point 1 2) (point 3 4) (point 5 6) (point 7 8) (point 9 10)))
 
 ; point series ref by index
-(gen-series-iref gen-series-point (list 2))
+(check-equal? (gen-series-iref gen-series-point (list 2)) (list (point 5 6)))
 
 ; point series ref by label
-(gen-series-label-ref gen-series-point 'd)
+(check-equal? (gen-series-label-ref gen-series-point 'd) (list (point 7 8)))

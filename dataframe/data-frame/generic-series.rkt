@@ -2,7 +2,7 @@
 
 (require
  (only-in "indexed-series.rkt"
-	  RFIndex build-index-from-list
+	  RFIndex RFIndex? build-index-from-list
           IndexDataType extract-index
           Label LabelIndex-index
           LabelIndex label-index label->lst-idx key->lst-idx
@@ -17,6 +17,8 @@
  GenericType)
 
 (define-type GenericType Any)
+
+(define-predicate ListofGenericType? (Listof GenericType))
 
 (provide:
  [new-GenSeries ((Vectorof GenericType) (Option (U (Listof IndexDataType) RFIndex)) -> GenSeries)]
@@ -51,7 +53,7 @@
 	(raise (make-exn:fail:contract "Cardinality of a Series' data and labels must be equal" k))))
     (void))
 
-  (if (hash? labels)
+  (if (RFIndex? labels)
       (begin
 	(check-mismatch labels)
 	(GenSeries labels data))
@@ -206,7 +208,7 @@
             (vals : (Vectorof GenericType)
              (if (list? label)
                  (list->vector (assert (flatten (map (lambda ([l : Label]) (gen-series-label-ref gen-series l)) label)) ListofBoolean?))
-                 (list->vector (assert (gen-series-label-ref gen-series label) ListofBoolean?)))))
+                 (list->vector (assert (gen-series-label-ref gen-series label) ListofGenericType?)))))
 
         (if (= (vector-length vals) 1)
             (vector-ref vals 0)

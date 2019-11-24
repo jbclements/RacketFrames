@@ -6,7 +6,9 @@
 #lang typed/racket
 (require typed/rackunit)
 
-(require "../main.rkt")
+(require "../data-frame/indexed-series.rkt")
+(require "../data-frame/integer-series.rkt")
+(require racket/unsafe/ops)
 
 ; ***********************************************************
 ; Test Cases
@@ -16,10 +18,10 @@
 
 ; create integer series
 (define series-integer (new-ISeries (vector 1 2 3 4)
-                                      (build-index-from-labels (list 'a 'b 'c 'd))))
+                                      (build-index-from-list (list 'a 'b 'c 'd))))
 
 (define series-integer-2 (new-ISeries (vector 5 6 7 8)
-                                      (build-index-from-labels (list 'a 'b 'c 'd))))
+                                      (build-index-from-list (list 'a 'b 'c 'd))))
 
 ; iseries reference tests
 (check-equal? ((iseries-referencer series-integer) 0) 1)
@@ -30,9 +32,9 @@
 
 (check-equal? (iseries-iref series-integer (list 1)) (list 2))
 
-(check-equal? (iseries-label-ref series-integer 'd) (list 4))
+(check-equal? (iseries-loc series-integer 'd) 4)
 
-(check-equal? (iseries-label-ref series-integer 'c) (list 3))
+(check-equal? (iseries-loc series-integer 'c) 3)
 
 ; series length
 (check-equal? (iseries-length series-integer) 4)

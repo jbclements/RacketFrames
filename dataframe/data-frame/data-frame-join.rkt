@@ -24,7 +24,10 @@
  [copy-column-row ((Vectorof Series) (Vectorof SeriesBuilder) Index -> Void)]
  [dest-mapping-series-builders (DataFrameDescription Index -> (Listof SeriesBuilder))]
  [join-column-name (Column (Setof Label) String -> Symbol)]
- [build-multi-index-from-cols ((U (Listof IndexableSeries) Columns) -> SIndex)])
+ [build-multi-index-from-cols ((U (Listof IndexableSeries) Columns) -> SIndex)]
+ [key-cols-sort-lexical (Columns -> Columns)]
+ [key-cols-series (Columns -> (Listof IndexableSeries))]
+ [key-fn ((Listof IndexableSeries) -> (Index -> Key))])
 
 (provide
  IndexableSeries

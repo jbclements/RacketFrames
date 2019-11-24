@@ -6,8 +6,19 @@
 #lang typed/racket
 (require typed/rackunit)
 (require math/statistics)
+(require racket/flonum)
 
-(require "../main.rkt")
+(require "../data-frame/indexed-series.rkt")
+(require "../data-frame/integer-series.rkt")
+(require "../data-frame/integer-series-builder.rkt")
+(require "../data-frame/numeric-series.rkt")
+(require "../data-frame/numeric-series-builder.rkt")
+(require "../data-frame/categorical-series.rkt")
+(require "../data-frame/categorical-series-builder.rkt")
+(require "../data-frame/generic-series.rkt")
+(require "../data-frame/data-frame.rkt")
+(require "../data-frame/data-frame-join.rkt")
+(require "../data-frame/data-frame-print.rkt")
 
 ; ***********
 ; Test Cases
@@ -19,7 +30,7 @@
 
 (define float-col-1 (cons 'float-col-1 (new-NSeries (flvector 1.5 2.5 3.5 4.5 5.5) #f)))
 
-(define categorical-col-1 (cons' categorical-col-1 (new-CSeries (vector 'a 'b 'c 'd 'e))))
+(define categorical-col-1 (cons' categorical-col-1 (new-CSeries (vector 'a 'b 'c 'd 'e) #f)))
 
 ; opaque
 ;(check-equal? (column-series integer-col-1)
@@ -39,9 +50,9 @@
 
 (define columns-categorical
   (list 
-   (cons 'col1 (new-CSeries (vector 'a 'b 'c 'd 'e)))
-   (cons 'col2 (new-CSeries (vector 'e 'f 'g 'h 'i)))
-   (cons 'col3 (new-CSeries (vector 'j 'k 'l 'm 'n)))))
+   (cons 'col1 (new-CSeries (vector 'a 'b 'c 'd 'e) #f))
+   (cons 'col2 (new-CSeries (vector 'e 'f 'g 'h 'i) #f))
+   (cons 'col3 (new-CSeries (vector 'j 'k 'l 'm 'n) #f))))
 
 ; create new data-frame-integer
 (define data-frame-integer (new-data-frame columns-integer))
@@ -91,15 +102,15 @@
 ;       "10\t5\t3\t" (list 4)
 ;       "9\t4\td\t" (list 3)))
 
-(index (key-cols-series (list integer-col-2 integer-col-1 float-col-1 categorical-col-1)))
+(key-cols-series (list integer-col-2 integer-col-1 float-col-1 categorical-col-1))
 
-(define cseries-1 (new-CSeries (vector 'a 'b 'c 'd 'e)))
+(define cseries-1 (new-CSeries (vector 'a 'b 'c 'd 'e) #f))
 
 (define iseries-1 (new-ISeries (vector 1 2 3 4 5) #f))
 
 (define nseries-1 (new-NSeries (flvector 1.5 2.5 3.5 4.5 5.5) #f))
 
-(define cseries-2 (new-CSeries (vector 'a 'b 'c 'd 'l)))
+(define cseries-2 (new-CSeries (vector 'a 'b 'c 'd 'l) #f))
 
 (define iseries-2 (new-ISeries (vector 1 2 3 4 5) #f))
 
@@ -107,13 +118,15 @@
 
 (define cseries-builder-1 (new-CSeriesBuilder))
 
-(define cseries-copy-fn-1 (cseries-copy-fn cseries-1 cseries-builder-1))
+; internal function test
+;(define cseries-copy-fn-1 (cseries-copy-fn cseries-1 cseries-builder-1))
 
-(cseries-copy-fn-1 1)
+;(cseries-copy-fn-1 1)
 
 (define cseries-builder-1-complete (complete-CSeriesBuilder cseries-builder-1))
 
-(check-equal? (cseries-iref cseries-builder-1-complete (list 0)) (list 'b))
+; expect vector-ref expection
+; (check-equal? (cseries-iref cseries-builder-1-complete (list 0)) (list 'b))
 
 ;(copy-column-row-error cseries-1 3)
 
@@ -176,13 +189,13 @@
 ; create new data-frame-integer-3
 (define data-frame-integer-3 (new-data-frame columns-integer-3))
 
-;(data-frame-write-tab (data-frame-join-left data-frame-integer-2 data-frame-integer-3 #:on (list 'col1)) (current-output-port))
+(data-frame-write-tab (data-frame-join-left data-frame-integer-2 data-frame-integer-3 #:on (list 'col1)) (current-output-port))
 
-;(data-frame-write-tab (data-frame-join-left data-frame-integer-2 data-frame-integer-3 #:on (list 'col2)) (current-output-port))
+(data-frame-write-tab (data-frame-join-left data-frame-integer-2 data-frame-integer-3 #:on (list 'col2)) (current-output-port))
 
-;(data-frame-write-tab (data-frame-join-right data-frame-integer-2 data-frame-integer-3 #:on (list 'col1)) (current-output-port))
+(data-frame-write-tab (data-frame-join-right data-frame-integer-2 data-frame-integer-3 #:on (list 'col1)) (current-output-port))
 
-;(data-frame-write-tab (data-frame-join-right data-frame-integer-2 data-frame-integer-3 #:on (list 'col2)) (current-output-port))
+(data-frame-write-tab (data-frame-join-right data-frame-integer-2 data-frame-integer-3 #:on (list 'col2)) (current-output-port))
 
 (define columns-integer-4
   (list 
@@ -204,26 +217,26 @@
 ; create new data-frame-integer-5
 (define data-frame-integer-5 (new-data-frame columns-integer-5))
 
-;(data-frame-write-tab (data-frame-join-left data-frame-integer-4 data-frame-integer-5 #:on (list 'co3)) (current-output-port))
+(data-frame-write-tab (data-frame-join-left data-frame-integer-4 data-frame-integer-5 #:on (list 'co3)) (current-output-port))
 
-;(data-frame-write-tab (data-frame-join-inner data-frame-integer-2 data-frame-integer-3 #:on (list 'col1)) (current-output-port))
+(data-frame-write-tab (data-frame-join-inner data-frame-integer-2 data-frame-integer-3 #:on (list 'col1)) (current-output-port))
 
-;(data-frame-write-tab (data-frame-join-inner data-frame-integer-4 data-frame-integer-5 #:on (list 'col2)) (current-output-port))
+(data-frame-write-tab (data-frame-join-inner data-frame-integer-4 data-frame-integer-5 #:on (list 'col2)) (current-output-port))
 
-;(data-frame-write-tab (data-frame-join-outer data-frame-integer-4 data-frame-integer-5 #:on (list 'col2)) (current-output-port))
+(data-frame-write-tab (data-frame-join-outer data-frame-integer-4 data-frame-integer-5 #:on (list 'col2)) (current-output-port))
 
-;(data-frame-write-tab (data-frame-join-outer data-frame-integer-4 data-frame-integer-5 #:on (list 'col3)) (current-output-port))
+(data-frame-write-tab (data-frame-join-outer data-frame-integer-4 data-frame-integer-5 #:on (list 'col3)) (current-output-port))
 
 (define columns-mixed-1
   (list 
    (cons 'col1 (new-ISeries (vector 1 2 3 4) #f))
-   (cons 'col2 (new-CSeries (vector 'a 'b 'c 'd)))
+   (cons 'col2 (new-CSeries (vector 'a 'b 'c 'd) #f))
    (cons 'col3 (new-ISeries (vector 21 22 23 24) #f))))
 
 (define columns-mixed-2
   (list 
    (cons 'col1 (new-ISeries (vector 1 2 3 4) #f))
-   (cons 'col2 (new-CSeries (vector 'a 'b 'c 'd)))
+   (cons 'col2 (new-CSeries (vector 'a 'b 'c 'd) #f))
    (cons 'col3 (new-ISeries (vector 1 2 3 4) #f))))
 
 ; create new data-frame-mixed-1
@@ -239,13 +252,13 @@
 (define columns-mixed-3
   (list 
    (cons 'col1 (new-ISeries (vector 1 2 3 4) #f))
-   (cons 'col2 (new-CSeries (vector 'a 'b 'c 'd)))
+   (cons 'col2 (new-CSeries (vector 'a 'b 'c 'd) #f))
    (cons 'col3 (new-ISeries (vector 21 22 23 24) #f))))
 
 (define columns-mixed-4
   (list 
    (cons 'col1 (new-ISeries (vector 1 2 3 4) #f))
-   (cons 'col2 (new-CSeries (vector 'a 'b 'g 'd)))
+   (cons 'col2 (new-CSeries (vector 'a 'b 'g 'd) #f))
    (cons 'col3 (new-ISeries (vector 1 2 3 4) #f))))
 
 ; create new data-frame-mixed-3
@@ -259,13 +272,13 @@
 (define columns-mixed-5
   (list 
    (cons 'col1 (new-ISeries (vector 1 2 3 4) #f))
-   (cons 'col2 (new-CSeries (vector 'a 'b 'c 'd)))
+   (cons 'col2 (new-CSeries (vector 'a 'b 'c 'd) #f))
    (cons 'col3 (new-ISeries (vector 21 22 23 24) #f))))
 
 (define columns-mixed-6
   (list 
    (cons 'col1 (new-ISeries (vector 11 21 31 41) #f))
-   (cons 'col2 (new-CSeries (vector 'a 'b 'g 'd)))
+   (cons 'col2 (new-CSeries (vector 'a 'b 'g 'd) #f))
    (cons 'col3 (new-ISeries (vector 22 22 23 24) #f))))
 
 ; create new data-frame-mixed-5
@@ -289,14 +302,14 @@
 (define columns-mixed-7
   (list 
    (cons 'col1 (new-ISeries (vector 1 2 3 4) #f))
-   (cons 'col2 (new-CSeries (vector 'a 'b 'c 'd)))
+   (cons 'col2 (new-CSeries (vector 'a 'b 'c 'd) #f))
    (cons 'col3 (new-GenSeries (vector 'a 1.5 20 10) #f))
    (cons 'col4 (new-ISeries (vector 21 22 23 24) #f))))
 
 (define columns-mixed-8
   (list 
    (cons 'col1 (new-ISeries (vector 11 21 31 41) #f))
-   (cons 'col2 (new-CSeries (vector 'a 'b 'g 'd)))
+   (cons 'col2 (new-CSeries (vector 'a 'b 'g 'd) #f))
    (cons 'col3 (new-GenSeries (vector 'a 'b 'c 'd) #f))
    (cons 'col4 (new-ISeries (vector 22 22 23 24) #f))))
 
@@ -321,14 +334,14 @@
 (define columns-mixed-9
   (list 
    (cons 'col1 (new-ISeries (vector 1 2 3 4) #f))
-   (cons 'col2 (new-CSeries (vector 'a 'b 'c 'd)))
+   (cons 'col2 (new-CSeries (vector 'a 'b 'c 'd) #f))
    (cons 'col3 (new-GenSeries (vector 'a 1.5 20 10) #f))
    (cons 'col4 (new-ISeries (vector 21 22 23 24) #f))))
 
 (define columns-mixed-10
   (list 
    (cons 'col1 (new-ISeries (vector 1 2 3 4) #f))
-   (cons 'col2 (new-CSeries (vector 'a 'b 'c 'd)))
+   (cons 'col2 (new-CSeries (vector 'a 'b 'c 'd) #f))
    (cons 'col3 (new-GenSeries (vector 'a 1.5 20 10) #f))
    (cons 'col4 (new-ISeries (vector 21 22 23 24) #f))))
 
@@ -345,7 +358,7 @@
 
 (displayln "multi-index-from-cols test")
 (build-multi-index-from-cols (list (new-ISeries (vector 1 2 3 4) #f)
-                                   (new-CSeries (vector 'a 'b 'c 'd))
+                                   (new-CSeries (vector 'a 'b 'c 'd) #f)
                                    (new-GenSeries (vector 'a 1.5 20 10) #f)
                                    (new-ISeries (vector 21 22 23 24) #f)))
 

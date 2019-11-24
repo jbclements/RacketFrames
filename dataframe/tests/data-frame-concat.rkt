@@ -5,8 +5,14 @@
 
 #lang typed/racket
 (require typed/rackunit)
+(require racket/flonum)
 
-(require "../main.rkt")
+(require "../data-frame/integer-series.rkt")
+(require "../data-frame/numeric-series.rkt")
+(require "../data-frame/categorical-series.rkt")
+(require "../data-frame/data-frame.rkt")
+(require "../data-frame/data-frame-concat.rkt")
+(require "../data-frame/data-frame-print.rkt")
 
 ; ***********
 ; Test Cases
@@ -44,14 +50,14 @@
   (list 
    (cons 'col1 (new-ISeries (vector 1 2 3 4) #f))
    (cons 'col2 (new-NSeries (flvector 5.2 6.2 7.2 8.2) #f))
-   (cons 'col3 (new-CSeries (vector 'a 'b 'c 'd)))
+   (cons 'col3 (new-CSeries (vector 'a 'b 'c 'd) #f))
    (cons 'col4 (new-ISeries (vector 21 22 23 24) #f))))
 
 (define columns-mixed-2
   (list 
    (cons 'col1 (new-ISeries (vector 1 2 3 4) #f))
    (cons 'col2 (new-NSeries (flvector 25.3 26.3 27.3 28.3) #f))
-   (cons 'col3 (new-CSeries (vector 'e 'f 'g 'h)))
+   (cons 'col3 (new-CSeries (vector 'e 'f 'g 'h) #f))
    (cons 'col4 (new-ISeries (vector 1 2 3 4) #f))))
 
 ; create new data-frame-mixed-1
@@ -78,7 +84,7 @@
   (list 
    (cons 'col1 (new-ISeries (vector 1 2 3 4 5) #f))
    (cons 'col2 (new-NSeries (flvector 25.3 26.3 27.3 28.3 32.1) #f))
-   (cons 'col3 (new-CSeries (vector 'e 'f 'g 'h 'i)))
+   (cons 'col3 (new-CSeries (vector 'e 'f 'g 'h 'i) #f))
    (cons 'col4 (new-ISeries (vector 1 2 3 4 7) #f))))
 
 ; create new data-frame-mixed-3

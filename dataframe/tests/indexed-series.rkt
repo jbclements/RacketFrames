@@ -19,20 +19,20 @@
 ;              (hash 'b 1 'c' 2 'd 3 'a 0))
 
 ; checks numerical index of label
-(check-equal? (label-index (build-index-from-labels (list 'a 'b 'c 'd)) 'a) (list 0))
-(check-equal? (label-index (build-index-from-labels (list 'a 'b 'c 'd)) 'c) (list 2))
+(check-equal? (get-index (build-index-from-list (list 'a 'b 'c 'd)) 'a) (list 0))
+(check-equal? (get-index (build-index-from-list (list 'a 'b 'c 'd)) 'c) (list 2))
+
+; indexing returns a list because we can have the same index values
+; checks numerical idx of LabelIndex
+(check-equal? (label->lst-idx (assert (build-index-from-list (list 'a 'b 'c 'd)) LabelIndex?) 'd)  (list 3))
+(check-equal? (label->lst-idx (assert (build-index-from-list (list 'a 'b 'c 'd)) LabelIndex?) 'c) (list 2))
 
 ; checks numerical idx of LabelIndex
-(check-equal? (label->lst-idx (LabelIndex (build-index-from-labels (list 'a 'b 'c 'd))) 'd) (list 3))
-(check-equal? (label->lst-idx (LabelIndex (build-index-from-labels (list 'a 'b 'c 'd))) 'c) (list 2))
-
-; checks numerical idx of LabelIndex
-(check-equal? (idx->label (LabelIndex (build-index-from-labels (list 'a 'b 'c 'd))) 3) 'd)
-(check-equal? (idx->label (LabelIndex (build-index-from-labels (list 'a 'b 'c 'd))) 2) 'c)
+(check-equal? (idx->label (assert (build-index-from-list (list 'a 'b 'c 'd)) LabelIndex?) 3) 'd)
+(check-equal? (idx->label (assert (build-index-from-list (list 'a 'b 'c 'd)) LabelIndex?) 2) 'c)
 
 ; checks to see if we have a labelled index
-
-(check-equal? (is-labeled? (LabelIndex (build-index-from-labels (list 'a 'b 'c 'd)))) #t)
+(check-equal? (is-labeled? (assert (build-index-from-list (list 'a 'b 'c 'd)) LabelIndex?)) #t)
 
 (define g-series-integer-not-labeled (new-GenSeries (vector 1 2 3 4) #f))
 
@@ -108,7 +108,7 @@
               '((a 2) (b 0) (c 3) (d 1)))
 
 ; check label sorting by position
-; (check-equal? (label-sort-positional (LabelIndex (build-index-from-labels (list 'b 'd 'a 'c))))
+; (check-equal? (label-sort-positional (LabelIndex (build-index-from-list (list 'b 'd 'a 'c))))
 ;              '((b . 0) (d . 1) (a . 2) (c . 3)))
 
 (build-multi-index-from-list (list (list 'a 'b 'c) (list 1 2 3)))

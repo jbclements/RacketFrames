@@ -29,6 +29,7 @@
  [build-multi-index-from-list ((Listof (Listof GenericType)) -> SIndex)]
  [build-index-from-list ((Listof IndexDataType) -> RFIndex)]
  [labeling (LabelIndex -> (Listof (Pair Label (Listof Index))))]
+ [get-index (RFIndex IndexDataType -> (Listof Index))]
  [extract-index (RFIndex -> IndexType)]
  [is-indexed? (RFIndex -> Boolean)])
 

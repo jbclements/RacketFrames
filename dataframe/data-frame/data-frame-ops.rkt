@@ -16,7 +16,8 @@
  [data-frame<= (DataFrame DataFrame -> DataFrame)]
  [data-frame> (DataFrame DataFrame -> DataFrame)]
  [data-frame< (DataFrame DataFrame -> DataFrame)]
- [data-frame-abs (DataFrame -> DataFrame)])
+ [data-frame-abs (DataFrame -> DataFrame)]
+ [data-frame-filter (DataFrame BSeries -> DataFrame)])
 ; ***********************************************************
 
 (require

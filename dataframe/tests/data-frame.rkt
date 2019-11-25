@@ -8,7 +8,14 @@
 
 (require racket/flonum)
 
-(require "../../main.rkt")
+(require "../data-frame/series-description.rkt")
+(require "../data-frame/indexed-series.rkt")
+(require "../data-frame/integer-series.rkt")
+(require "../data-frame/numeric-series.rkt")
+(require "../data-frame/categorical-series.rkt")
+(require "../data-frame/generic-series.rkt")
+(require "../data-frame/data-frame.rkt")
+(require "../data-frame/data-frame-print.rkt")
 
 ; ***********************************************************
 ; Test Cases
@@ -30,6 +37,8 @@
 ; create new data-frame-integer
 (define data-frame-integer (new-data-frame columns-integer))
 
+(data-frame-write-tab data-frame-integer (current-output-port))
+
 ;******************
 ;data-frame-float
 ;******************
@@ -45,6 +54,8 @@
 ; create new data-frame-float
 (define data-frame-float (new-data-frame columns-float))
 
+(data-frame-write-tab data-frame-float (current-output-port))
+
 ;******************
 ;data-frame-categorical
 ;******************
@@ -57,6 +68,8 @@
 
 ; create new data-frame-categorical
 (define data-frame-categorical (new-data-frame columns-categorical))
+
+(data-frame-write-tab data-frame-categorical (current-output-port))
 
 ;******************
 ;data-frame-mix
@@ -71,6 +84,8 @@
 
 ; create new data-frame-mix
 (define data-frame-mix (new-data-frame columns-mix))
+
+(data-frame-write-tab data-frame-mix (current-output-port))
 
 ; ************************
 ; data-frame-integer tests
@@ -95,8 +110,8 @@
 (check-equal? (projection-set (list 'col-one 'col2 'col3))
               (set 'col-one 'col2 'col3))
 
-;(check-equal? (data-frame-all-labels-projection-set data-frame-integer)
-;              (set 'col-one 'col2 'col3))
+(check-equal? (data-frame-all-labels-projection-set data-frame-integer)
+              (set 'col-one 'col2 'col3))
 
 ; check error
 ;(data-frame-series data-frame-integer 'col1)
@@ -128,6 +143,8 @@
 (set! data-frame-float (data-frame-drop data-frame-float 'col-one))
 
 ; check col-one is gone
+
+(data-frame-write-tab data-frame-float (current-output-port))
 
 ; ************************
 ; data-frame-categorical tests
@@ -184,11 +201,21 @@
 (check-equal? (data-frame-names data-frame-mix) (list 'integer-col 'categorical-col))
 
 ; data-frame-explode tests
-;(data-frame-explode data-frame-integer)
+(data-frame-explode data-frame-integer)
 
-;(data-frame-description data-frame-integer)
+(data-frame-description data-frame-integer)
 
-;(show-data-frame-description (data-frame-description data-frame-integer))
+(show-data-frame-description (data-frame-description data-frame-integer))
 
-(data-frame-set-index data-frame-integer (list 'a 'b 'c 'd))
+(set! data-frame-integer (data-frame-set-index data-frame-integer (list 'a 'b 'c 'd)))
 ;(LabelIndex-index (cdr (list-ref (data-frame-explode data-frame-integer) 0)))
+
+(data-frame-write-tab data-frame-integer (current-output-port))
+
+(series-data (data-frame-series data-frame-integer 'col3))
+
+(check-equal? (series-loc (data-frame-series data-frame-integer 'col3) 'c) 11)
+
+(set! data-frame-integer (data-frame-set-index data-frame-integer (list 'ind1 'ind2 'ind3 'ind4)))
+
+(check-equal? (series-loc (data-frame-series data-frame-integer 'col2) 'ind2) 6)

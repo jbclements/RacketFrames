@@ -5,7 +5,6 @@
 
 #lang typed/racket
 (require typed/rackunit)
-(require math/statistics)
 (require racket/flonum)
 
 (require "../data-frame/indexed-series.rkt")

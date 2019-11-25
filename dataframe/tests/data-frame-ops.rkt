@@ -6,7 +6,17 @@
 #lang typed/racket
 (require typed/rackunit)
 
-(require "../main.rkt")
+(require racket/flonum)
+
+(require "../data-frame/indexed-series.rkt")
+(require "../data-frame/integer-series.rkt")
+(require "../data-frame/boolean-series.rkt")
+(require "../data-frame/numeric-series.rkt")
+(require "../data-frame/categorical-series.rkt")
+(require "../data-frame/generic-series.rkt")
+(require "../data-frame/data-frame.rkt")
+(require "../data-frame/data-frame-ops.rkt")
+(require "../data-frame/data-frame-print.rkt")
 
 ; ***********
 ; Test Cases

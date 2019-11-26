@@ -12,6 +12,18 @@
  (struct-out Time)
  (struct-out Datetime))
 
+(provide:
+ [date-year (Date -> Integer)]
+ [date-month (Date -> Integer)]
+ [date-day (Date -> Integer)]
+ [time-offset (Time -> Integer)]
+ [time-hour (Time -> Integer)]
+ [time-minute (Time -> Integer)]
+ [time-second (Time -> Integer)]
+ [time-milli (Time -> Integer)]
+ [datetime-date (Datetime -> Date)]
+ [datetime-time (Datetime -> Time)])
+
 ;; 1 Tic == 1 millisecond.
 ;; Instant in time in millis along with a Chronometry.
 ;; Assumes a 64 bit build of Racket for the long haul.
@@ -43,6 +55,50 @@
 (struct: Datetime ([date : Date]
 		   [time : Time]) #:transparent)
 
+
+(: date-year (Date -> Integer))
+(define (date-year date)
+  (Date-year date))
+
+(: date-month (Date -> Integer))
+(define (date-month date)
+  (Date-month date))
+
+(: date-day (Date -> Integer))
+(define (date-day date)
+  (Date-day date))
+
+(: time-offset (Time -> Integer))
+(define (time-offset time)
+  (Time-offset time))
+
+(: time-hour (Time -> Integer))
+(define (time-hour time)
+  (Time-hour time))
+
+(: time-minute (Time -> Integer))
+(define (time-minute time)
+  (Time-minute time))
+
+(: time-second (Time -> Integer))
+(define (time-second time)
+  (Time-second time))
+
+(: time-milli (Time -> Integer))
+(define (time-milli time)
+  (Time-milli time))
+
+; This function consumes a Datetime and returns its
+; date.
+(: datetime-date (Datetime -> Date))
+(define (datetime-date datetime)
+  (Datetime-date datetime))
+
+; This function consumes a Datetime and returns its
+; time.
+(: datetime-time (Datetime -> Time))
+(define (datetime-time datetime)
+  (Datetime-time datetime))
 
 ;; (define-type Tics Integer)
 ;; (define-type (ICtor X) (Tics -> X))

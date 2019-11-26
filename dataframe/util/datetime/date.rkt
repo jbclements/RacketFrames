@@ -89,8 +89,6 @@
      (else
       (+ (- current-century 100) n)))))
 
-;; Shite and Stuff
-
 ;;;;;;;;;;;;;; FORMAT AND STUFF
 ;; (define (tm:char->int ch)
 ;;   (cond

@@ -7,9 +7,7 @@
  (all-from-out "datetime/format.rkt"))
 
 (require
- (only-in "datetime/types.rkt"
-	  Datetime Date Time
-	  InstantTAI InstantUTC)
+ "datetime/types.rkt"
  "datetime/instant.rkt"
  "datetime/date.rkt"
  "datetime/format.rkt")

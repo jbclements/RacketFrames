@@ -50,6 +50,6 @@
 (check-equal? (datetime-series-length series-datetime-2) 4)
 
 ; map tests
-;(check-equal? (ISeries-data (map/is series-integer (λ: ((x : Fixnum)) (unsafe-fx+ x 1))))
-              ;(vector 2 3 4 5))
+(check-equal? (DatetimeSeries-data ( map/datetime-series-data series-datetime (λ: ((x : Datetime)) (unsafe-fx+ x 1))))
+              (vector 2 3 4 5))
 

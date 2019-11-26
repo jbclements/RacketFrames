@@ -7,7 +7,7 @@
 (require typed/rackunit)
 
 (require
-  "../util/datetime.rkt"
+ "../util/datetime.rkt"         
  racket/unsafe/ops
  (only-in "indexed-series.rkt"
 	  RFIndex RFIndex? build-index-from-list
@@ -37,6 +37,20 @@
  [datetime-series-data (DatetimeSeries -> (Vectorof Datetime))]
  [datetime-series-index (DatetimeSeries -> (U False RFIndex))]
  [map/datetime-series-data (DatetimeSeries (Datetime -> Datetime) -> DatetimeSeries)]
+
+ [bop/datetime-series (DatetimeSeries DatetimeSeries (Datetime Datetime -> Datetime) -> DatetimeSeries)]
+ ;[comp/datetime-series (DatetimeSeries DatetimeSeries (Datetime Datetime -> Boolean) -> BSeries)]
+ [+/datetime-series (DatetimeSeries DatetimeSeries -> DatetimeSeries)]
+ [-/datetime-series (DatetimeSeries DatetimeSeries -> DatetimeSeries)]
+ ;[+./datetime-series (DatetimeSeries Datetime -> DatetimeSeries)]
+ ;[-./datetime-series (DatetimeSeries Datetime -> DatetimeSeries)]
+ ;[>/datetime-series (DatetimeSeries DatetimeSeries -> BSeries)]
+ ;[</is (DatetimeSeries DatetimeSeries -> BSeries)]
+ ;[>=/is (DatetimeSeries DatetimeSeries -> BSeries)]
+ ;[<=/is (DatetimeSeries DatetimeSeries -> BSeries)]
+ ;[=/is (DatetimeSeries DatetimeSeries -> BSeries)]
+ ;[!=/is (DatetimeSeries DatetimeSeries -> BSeries)]
+ 
  [datetime-series-print (DatetimeSeries Output-Port -> Void)])
 ; ***********************************************************
 
@@ -259,5 +273,94 @@
                     (build-vector (vector-length old-data)
                                   (λ: ((idx : Natural))
                                     (fn (vector-ref old-data idx)))))))
+
+(: bop/datetime-series (DatetimeSeries DatetimeSeries (Datetime Datetime -> Datetime) -> DatetimeSeries))
+(define (bop/datetime-series datetime-series-1 datetime-series-2 bop)
+  (define v1 (DatetimeSeries-data datetime-series-1))
+  (define v2 (DatetimeSeries-data datetime-series-2))
+  (define: len : Index (vector-length v1))
+  
+  (unless (eqv? len (vector-length v2))
+	  (error 'bop/datetime-series "Series must be of equal length."))
+
+  (define: v-bop : (Vectorof Datetime) (make-vector len #{(Datetime (Date 0 0 0) (Time 0 0 0 0 0)) : Datetime}))
+
+  ; Do loop returns DatetimeSeries, idx to 0 and increments by 1 Fixnum on
+  ; each iteration (this is the step-exprs). When the loop has gone
+  ; through the whole vector, the resulting new ISeries is returned
+  ; which the v-bop as the data.
+  (do: : DatetimeSeries ([idx : Fixnum 0 (unsafe-fx+ idx #{1 : Fixnum})])
+       ((= idx len) (DatetimeSeries #f v-bop))
+       (vector-set! v-bop idx (bop (vector-ref v1 idx)
+				   (vector-ref v2 idx)))))
+
+; (: comp/datetime-series (DatetimeSeries DatetimeSeries (Datetime Datetime -> Boolean) -> BSeries))
+; ***********************************************************
+
+; ***********************************************************
+; These functions apply addition, subtraction,
+; using datetime+ and datetime- and the bop/datetime-series function defined
+; above.
+
+(: datetime+ (Datetime Datetime -> Datetime))
+(define (datetime+ datetime-1 datetime-2)
+  (let* ([date-1 : Date (datetime-date datetime-1)]
+         [date-2 : Date (datetime-date datetime-2)]
+         [time-1 : Time (datetime-time datetime-1)]
+         [time-2 : Time (datetime-time datetime-2)]
+         [year-1 : Integer (date-year date-1)]
+         [year-2 : Integer (date-year date-2)]
+         [month-1 : Integer (date-month date-1)]
+         [month-2 : Integer (date-month date-2)]
+         [day-1 : Integer (date-day date-1)]
+         [day-2 : Integer (date-day date-2)]
+         [offset-1 : Integer (time-offset time-1)]
+         [offset-2 : Integer (time-offset time-2)]
+         [hour-1 : Integer (time-hour time-1)]
+         [hour-2 : Integer (time-hour time-2)]
+         [minute-1 : Integer (time-minute time-1)]
+         [minute-2 : Integer (time-minute time-2)]
+         [second-1 : Integer (time-second time-1)]
+         [second-2 : Integer (time-second time-2)]
+         [milli-1 : Integer (time-milli time-1)]
+         [milli-2 : Integer (time-milli time-2)])
+
+    (Datetime (Date (+ year-1 year-2) (+ month-1 month-2) (+ day-1 day-2))
+              (Time (+ offset-1 offset-2) (+ hour-1 hour-2) (+ minute-1 minute-2) (+ second-1 second-2) (+ milli-1 milli-2)))))
+
+(: datetime- (Datetime Datetime -> Datetime))
+(define (datetime- datetime-1 datetime-2)
+  (let* ([date-1 : Date (datetime-date datetime-1)]
+         [date-2 : Date (datetime-date datetime-2)]
+         [time-1 : Time (datetime-time datetime-1)]
+         [time-2 : Time (datetime-time datetime-2)]
+         [year-1 : Integer (date-year date-1)]
+         [year-2 : Integer (date-year date-2)]
+         [month-1 : Integer (date-month date-1)]
+         [month-2 : Integer (date-month date-2)]
+         [day-1 : Integer (date-day date-1)]
+         [day-2 : Integer (date-day date-2)]
+         [offset-1 : Integer (time-offset time-1)]
+         [offset-2 : Integer (time-offset time-2)]
+         [hour-1 : Integer (time-hour time-1)]
+         [hour-2 : Integer (time-hour time-2)]
+         [minute-1 : Integer (time-minute time-1)]
+         [minute-2 : Integer (time-minute time-2)]
+         [second-1 : Integer (time-second time-1)]
+         [second-2 : Integer (time-second time-2)]
+         [milli-1 : Integer (time-milli time-1)]
+         [milli-2 : Integer (time-milli time-2)])
+
+    (Datetime (Date (- year-1 year-2) (- month-1 month-2) (- day-1 day-2))
+              (Time (- offset-1 offset-2) (- hour-1 hour-2) (- minute-1 minute-2) (- second-1 second-2) (- milli-1 milli-2)))))
+
+(: +/datetime-series (DatetimeSeries DatetimeSeries -> DatetimeSeries))
+(define (+/datetime-series datetime-1 datetime-2)
+  (bop/datetime-series datetime-1 datetime-2 datetime+))
+
+(: -/datetime-series (DatetimeSeries DatetimeSeries -> DatetimeSeries))
+(define (-/datetime-series datetime-1 datetime-2)
+  (bop/datetime-series datetime-1 datetime-2 datetime-))
+
 ; ***********************************************************
 

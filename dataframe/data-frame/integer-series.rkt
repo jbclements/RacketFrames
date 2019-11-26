@@ -214,13 +214,13 @@
 ; data vector. This data vector is the data of the new ISeries
 ; which is returned.
 (: bop/is (ISeries ISeries (Fixnum Fixnum -> Fixnum) -> ISeries))
-(define (bop/is ns1 ns2 bop)
-  (define v1 (ISeries-data ns1))
-  (define v2 (ISeries-data ns2))
+(define (bop/is is1 is2 bop)
+  (define v1 (ISeries-data is1))
+  (define v2 (ISeries-data is2))
   (define: len : Index (vector-length v1))
   
   (unless (eqv? len (vector-length v2))
-	  (error '+/is "Series must be of equal length."))
+	  (error 'bop/is "Series must be of equal length."))
   
   (define: v-bop : (Vectorof Fixnum) (make-vector len #{0 : Fixnum}))
 

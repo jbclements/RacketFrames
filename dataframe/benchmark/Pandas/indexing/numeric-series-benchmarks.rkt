@@ -3,18 +3,7 @@
 ; ***********************************************************
 ; use build-index-from-labels function and Label, SIndex and
 ; LabelIndex structs from indexed-series.
-(require
- racket/unsafe/ops
- (only-in "../../data-frame/indexed-series.rkt"
-	  build-index-from-labels
-	  Label SIndex LabelIndex
-          label-index label->idx)
-
- (only-in "../../data-frame/numeric-series.rkt"
-          new-NSeries
-          nseries-iref
-          nseries-label-ref
-          nseries-range))
+(require RacketFrames)
 
 (require racket/format
          racket/flonum)
@@ -90,13 +79,13 @@
 
 #| def time_getitem_scalar(self, index):
       self.data[800000] |#
-(define i-ref-bench-before (now))
-(define nseries-iref-value (nseries-iref series-float 80000))
-(define i-ref-bench-after (- (now) i-ref-bench-before))
+(define i-loc-bench-before (now))
+(define nseries-iloc-value (nseries-iloc series-float 80000))
+(define i-loc-bench-after (- (now) i-loc-bench-before))
 
 (fprintf (current-output-port)
          "Numeric Series i-ref bench ~v ms.\n"
-         i-ref-bench-after)
+         i-loc-bench-after)
 
 (printf "Pandas Compare* indexing.NumericSeriesIndexing.time_getitem_scalar 25.58μs \n")
 
@@ -119,14 +108,24 @@
                       (string->symbol (string-append "a" (number->string i)))))
 
 (define series-float-with-label-index (new-NSeries data
-                                                     (build-index-from-labels label-index)))
+                                                     (build-index-from-list label-index)))
 
 (define n-ref-label-bench-before (now))
-(define nseries-label-ref-value (nseries-label-ref series-float-with-label-index 'a100))
+(define nseries-label-ref-value (nseries-loc series-float-with-label-index 'a100))
 (define n-ref-label-bench-after (- (now) n-ref-label-bench-before))
 
 (fprintf (current-output-port)
          "Numeric Series ref label bench ~v ms.\n"
          n-ref-label-bench-after)
+
+(printf "Pandas Compare* NumericSeriesIndexing.time_ix_scalar 80.14μs. \n")
+
+(define n-ref-label-list-bench-before (now))
+(define nseries-label-list-ref-value (nseries-loc series-float-with-label-index (list 'a100)))
+(define n-ref-label-list-bench-after (- (now) n-ref-label-bench-before))
+
+(fprintf (current-output-port)
+         "Numeric Series ref label list bench ~v ms.\n"
+         n-ref-label-list-bench-after)
 
 (printf "Pandas Compare* NumericSeriesIndexing.time_ix_scalar 80.14μs. \n")

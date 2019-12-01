@@ -87,4 +87,5 @@
  (all-from-out "dataframe/data-frame/categorical-series-ops.rkt")
  (all-from-out "dataframe/data-frame/gen-nseries.rkt")
  (all-from-out "dataframe/data-frame/series-print.rkt")
+ (all-from-out "dataframe/plot/plot.rkt")
  (all-from-out racket/flonum))

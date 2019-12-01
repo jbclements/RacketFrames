@@ -30,7 +30,12 @@
 
 (check-equal? (iseries-iref series-integer (list 0)) (list 1))
 
+(check-equal? (iseries-data (assert (iseries-iloc series-integer (list 0)) ISeries?))
+              (vector 1))
+
 (check-equal? (iseries-iref series-integer (list 1)) (list 2))
+
+(check-equal? (iseries-iloc series-integer 1) 2)
 
 (check-equal? (iseries-loc series-integer 'd) 4)
 
@@ -110,4 +115,6 @@
 (check-equal? (apply-stat-is 'skewness series-integer) 0.0)
 
 ; iseries print
+(iseries-print (assert (iseries-iloc series-integer (list 1 3)) ISeries?) (current-output-port))
+
 (iseries-print series-integer (current-output-port))

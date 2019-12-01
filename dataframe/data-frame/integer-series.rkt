@@ -582,7 +582,9 @@
       (new-ISeries
        (for/vector: : (Vectorof Fixnum) ([i idx])
          (vector-ref (iseries-data iseries) i))
-       (build-index-from-list (map (lambda ([i : Index]) (idx->key (assert (ISeries-index iseries)) i)) idx)))
+       (if (not (ISeries-index iseries))
+           (build-index-from-list (range (length idx)))
+           (build-index-from-list (map (lambda ([i : Index]) (idx->key (assert (ISeries-index iseries)) i)) idx))))
       (referencer idx))))
 
 ; ***********************************************************

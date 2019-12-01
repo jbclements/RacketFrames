@@ -225,7 +225,9 @@
       (new-GenSeries
        (for/vector: : (Vectorof GenericType) ([i idx])
          (vector-ref (gen-series-data gen-series) i))
-       (build-index-from-list (map (lambda ([i : Index]) (idx->key (assert (GenSeries-index gen-series)) i)) idx)))
+       (if (not (GenSeries-index gen-series))
+           (build-index-from-list (range (length idx)))
+           (build-index-from-list (map (lambda ([i : Index]) (idx->key (assert (GenSeries-index gen-series)) i)) idx))))
       (referencer idx))))
 
 ; ***********************************************************

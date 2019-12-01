@@ -194,7 +194,11 @@
       ; sub-vector the data vector to get the data and create a new-BSeries
       (new-CSeries
        (for/vector: : (Vectorof Label) ([i idx])
-         (vector-ref (cseries-data cseries) i)) #f)
+         (vector-ref (cseries-data cseries) i))
+       
+       (if (not (CSeries-index cseries))
+           (build-index-from-list (range (length idx)))
+           (build-index-from-list (map (lambda ([i : Index]) (idx->key (assert (CSeries-index cseries)) i)) idx))))
       (referencer idx))))
 
 (: true? (Boolean -> Boolean))

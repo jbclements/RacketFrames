@@ -188,6 +188,8 @@
 ; create new data-frame-integer-3
 (define data-frame-integer-3 (new-data-frame columns-integer-3))
 
+(data-frame-join-left data-frame-integer-2 data-frame-integer-3 #:on (list 'col1))
+
 (data-frame-write-tab (data-frame-join-left data-frame-integer-2 data-frame-integer-3 #:on (list 'col1)) (current-output-port))
 
 (data-frame-write-tab (data-frame-join-left data-frame-integer-2 data-frame-integer-3 #:on (list 'col2)) (current-output-port))

@@ -247,7 +247,10 @@
       (new-BSeries
        (for/vector: : (Vectorof Boolean) ([i idx])
          (vector-ref (bseries-data bseries) i))
-       (build-index-from-list (map (lambda ([i : Index]) (idx->key (assert (BSeries-index bseries)) i)) idx)))
+
+       (if (not (BSeries-index bseries))
+           (build-index-from-list (range (length idx)))
+           (build-index-from-list (map (lambda ([i : Index]) (idx->key (assert (BSeries-index bseries)) i)) idx))))
       (referencer idx))))
 
 ; ***********************************************************

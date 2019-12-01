@@ -213,7 +213,9 @@
       (new-DatetimeSeries
        (for/vector: : (Vectorof Datetime) ([i idx])
          (vector-ref (datetime-series-data datetime-series) i))
-       (build-index-from-list (map (lambda ([i : Index]) (idx->key (assert (DatetimeSeries-index datetime-series)) i)) idx)))
+       (if (not (DatetimeSeries-index datetime-series))
+           (build-index-from-list (range (length idx)))
+           (build-index-from-list (map (lambda ([i : Index]) (idx->key (assert (DatetimeSeries-index datetime-series)) i)) idx))))
       (referencer idx))))
 
 

@@ -1,5 +1,9 @@
 #lang typed/racket
 
+(require RacketFrames)
+
+(require "../../../util/list.rkt")
+
 #| class Join(object):
 
     goal_time = 0.2
@@ -46,5 +50,14 @@
 
     def time_join_dataframe_index_shuffle_key_bigger_sort(self, sort):
         self.df_shuf.join(self.df_key2, on='key2', sort=sort) |#
+
+
+
+
+(define level1 (build-index-from-list (list 'a 'b 'c 'd 'e 'f 'g 'h 'i 'j)))
+
+(random-number-list 5 20)
+
+(random-symbol-list 50 10 "" '())
 
 

@@ -1,15 +1,6 @@
 #lang typed/racket
 
-(require
- (only-in "../../data-frame/indexed-series.rkt"
-	  build-index-from-labels
-	  Label SIndex LabelIndex
-          label-index label->idx)
-
- (only-in "../../data-frame/categorical-series.rkt"
-          new-CSeries
-          cseries-iref
-          cseries-range))
+(require RacketFrames)
 
 (require racket/format)
 
@@ -41,15 +32,15 @@
 (: data (Vectorof Symbol))
 (define data (make-vector N 'a))
 
-(define series-categorical (new-CSeries data))
+(define series-categorical (new-CSeries data #f))
 
-(define c-iref-bench-before (now))
-(define cseries-iref-result (cseries-iref series-categorical 80000))
-(define c-iref-bench-after (- (now) c-iref-bench-before))
+(define c-iloc-bench-before (now))
+(define cseries-iloc-result (cseries-iloc series-categorical 80000))
+(define c-iloc-bench-after (- (now) c-iloc-bench-before))
 
 (fprintf (current-output-port)
-         "Categorical Series i-ref bench ~v ms.\n"
-         c-iref-bench-after)
+         "Categorical Series i-loc bench ~v ms.\n"
+         c-iloc-bench-after)
 
 (printf "Pandas Compare* Running indexing.NonNumericSeriesIndexing.time_getitem_scalar 20.88ms. \n")
 

@@ -1,32 +1,6 @@
 #lang typed/racket
 
-(require
- racket/pretty
- racket/unsafe/ops
- racket/flonum
- racket/set
- (only-in racket/set
-	  set set-member?
-	  list->set set->list
-	  set-intersect set-subtract)
- (only-in grip/data/symbol
-	  symbol-prefix)
- (only-in "../../../data-frame/indexed-series.rkt"
-	  Label Labeling LabelProjection)
- (only-in "../../../data-frame/series.rkt"
-	  series-complete)
- (only-in "../../../data-frame/data-frame.rkt"
-	  DataFrame new-data-frame
-	  data-frame-cseries data-frame-extend)
- (only-in "../../../data-frame/data-frame-concat.rkt"
-          data-frame-concat-vertical)
- (only-in "../../../data-frame/numeric-series.rkt"
-	  NSeries nseries-iref nseries-label-ref new-NSeries)
- (only-in "../../../data-frame/integer-series.rkt"
-	  ISeries iseries-iref new-ISeries)
- (only-in "../../../data-frame/categorical-series.rkt"
-          cseries-iref
-	  CSeries new-CSeries))
+(require RacketFrames)
 
 #| 
     def setup(self):
@@ -97,8 +71,8 @@
    (cons 'B (new-ISeries col-b-data #f))
    (cons 'C (new-ISeries col-c-data #f))
    (cons 'D (new-NSeries col-d-data #f))
-   (cons 'ob1 (new-CSeries col-obj1-data))
-   (cons 'ob2 (new-CSeries col-obj2-data))
+   (cons 'ob1 (new-CSeries col-obj1-data #f))
+   (cons 'ob2 (new-CSeries col-obj2-data #f))
    (cons 'int1 (new-ISeries col-int1-data #f))))
 
 ; create new data-frame-numerical

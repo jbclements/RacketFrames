@@ -733,7 +733,10 @@
         (new-NSeries
          (list->flvector (for/list: : (Listof Float) ([i idx])
                            (flvector-ref (nseries-data nseries) i)))
-         (build-index-from-list (map (lambda ([i : Index]) (idx->key (assert (NSeries-index nseries)) i)) idx)))
+
+         (if (not (NSeries-index nseries))
+           (build-index-from-list (range (length idx)))
+           (build-index-from-list (map (lambda ([i : Index]) (idx->key (assert (NSeries-index nseries)) i)) idx))))
         (referencer idx))))
 
 ; ***********************************************************

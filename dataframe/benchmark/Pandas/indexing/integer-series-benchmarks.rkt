@@ -3,10 +3,7 @@
 ; ***********************************************************
 ; use build-index-from-labels function and Label, SIndex and
 ; LabelIndex structs from indexed-series.
-(require
- racket/unsafe/ops
- "../../../data-frame/indexed-series.rkt"
- "../../../data-frame/integer-series.rkt")
+(require RacketFrames)
 
 (require racket/format)
 ; ***********************************************************
@@ -84,8 +81,10 @@
 (define iseries-iref-value (iseries-iloc series-integer 80000))
 (define i-ref-bench-after (- (now) i-ref-bench-before))
 
+(iseries-iloc series-integer 80000)
+
 (fprintf (current-output-port)
-         "Integer Series i-ref Bench: ~v ms.\n"
+         "Integer Series i-loc Bench: ~v ms.\n"
          i-ref-bench-after)
 
 #| def time_getitem_slice(self, index):
@@ -125,12 +124,12 @@
                       (string->symbol (string-append "a" (number->string i)))))
 
 (define series-integer-with-label-index (new-ISeries data
-                                                     (build-index-from-labels label-index)))
+                                                     (build-index-from-list label-index)))
 
 (define i-ref-label-bench-before (now))
-(define iseries-label-ref-value (iseries-label-ref series-integer-with-label-index 'a80000))
+(define iseries-label-ref-value (iseries-loc series-integer-with-label-index 'a80000))
 (define i-ref-label-bench-after (- (now) i-ref-label-bench-before))
 
 (fprintf (current-output-port)
-         "Integer Series label ref bench: ~v ms.\n"
+         "Integer Series loc bench: ~v ms.\n"
          i-ref-label-bench-after)

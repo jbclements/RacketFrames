@@ -189,7 +189,7 @@
                  ((DatetimeSeries? a-series)
                   (display (format-datetime-series a-series row)))
                  (else
-                  (error 'data-frame-head "Unknown series types ~s"
+                  (error 'display-data-frame-row "Unknown series types ~s"
                          (series-type a-series)))))
           (display " "))
         (newline)))

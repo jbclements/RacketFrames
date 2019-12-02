@@ -76,8 +76,8 @@
 		  (loop (sub1 idx))
 		  (substring s 0 idx)))))))
 
-(displayln "trim-right")
-(trim-right "hello world      ")
+;(displayln "trim-right")
+;(trim-right "hello world      ")
 
 ; This function consumes an Input-Port and Output-Port and 
 (: read-quoted-field (Input-Port Output-Port -> String))
@@ -100,10 +100,10 @@
 		  (display ch outp)
 		  (loop (read-char inp)))))))
 
-(displayln "read-quoted-field")
-(read-quoted-field (open-input-string "\"hello world\"") (open-output-string))
+;(displayln "read-quoted-field")
+;(read-quoted-field (open-input-string "\"hello world\"") (open-output-string))
 ; input must have an opening quote, else the first character gets shaved off
-(read-quoted-field (open-input-string "hello world") (open-output-string))
+;(read-quoted-field (open-input-string "hello world") (open-output-string))
 
 (: read-unquoted-field (Input-Port Output-Port -> String))
 (define (read-unquoted-field inp outp)
@@ -117,8 +117,8 @@
 		  (read-char inp)
 		  (loop (peek-char inp)))))))
 
-(displayln "read-unquoted-field")
-(read-unquoted-field (open-input-string "hello world  ") (open-output-string))
+;(displayln "read-unquoted-field")
+;(read-unquoted-field (open-input-string "hello world  ") (open-output-string))
 
 (: read-field (Input-Port -> String))
 (define (read-field inp)
@@ -131,9 +131,9 @@
       (read-quoted-field inp outp))
      (else (read-unquoted-field inp outp)))))
 
-(read-field (open-input-string "hello world  "))
-(read-field (open-input-string "\"hello world  \""))
-(read-field (open-input-string "   hello world  "))
+;(read-field (open-input-string "hello world  "))
+;(read-field (open-input-string "\"hello world  \""))
+;(read-field (open-input-string "   hello world  "))
 
 ; This is the LineParser function, consume a String and
 ; returns a Listof String.

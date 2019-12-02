@@ -34,8 +34,8 @@
  [is-indexed? (RFIndex -> Boolean)])
 
 (provide
- SIndex IIndex FIndex DTIndex Labeling ListofLabel? ListofIndexDataType?
- Label Label? LabelProjection LabelProjection? LabelIndex? RFIndex?
+ SIndex IIndex FIndex DTIndex Labeling ListofLabel? ListofIndexDataType? ListofAny?
+ Label Label? LabelProjection LabelProjection? LabelIndex? RFIndex? Datetime?
  RFIndex IndexDataType
  LabelIndex LabelIndex-index
  FIndex FloatIndex
@@ -72,6 +72,8 @@
 (define-predicate ListofFloat? (Listof Float))
 
 (define-predicate ListofDatetime? (Listof Datetime))
+
+(define-predicate ListofAny? (Listof (Pair Any Any)))
 
 (define-type Labeling (Listof (Pair Label (Listof Index))))
 

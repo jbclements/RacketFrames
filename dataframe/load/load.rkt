@@ -19,6 +19,8 @@
 	  Schema-SeriesTypes Schema-headers)
  (only-in "../data-frame/series-builder.rkt"
 	  SeriesBuilder)
+ (only-in "../data-frame/indexed-series.rkt"
+          ListofAny?)
  (only-in "../data-frame/generic-series-builder.rkt"
 	  new-GenSeriesBuilder
 	  GenSeriesBuilder
@@ -68,7 +70,8 @@
  (only-in "schema.rkt"
 	  Schema)
  (only-in "sample.rkt"
-	  determine-schema-from-sample)
+	  determine-schema-from-sample
+          determine-schema-from-sql-sample)
  (only-in "csv-delimited.rkt"
 	  read-csv-file)
  (only-in "delimited.rkt"
@@ -155,6 +158,10 @@
   (check-data-file-exists fpath)
   (determine-schema-from-sample (sample-formatted-file fpath cnt) delim))
 
+(: determine-schema-sql (QueryResult -> Schema))
+(define (determine-schema-sql query-result)
+  (determine-schema-from-sql-sample (QueryResult-headers query-result) (QueryResult-rows query-result)))
+
 (: get-query-result (Connection String (Listof Any) -> QueryResult))
 (define (get-query-result conn sql-query params)
   ;(mysql-connect #:socket "/Applications/MAMP/tmp/mysql/mysql.sock"
@@ -164,15 +171,15 @@
 
   (define result (query conn sql-query))
 
-  (: headers (Listof String))
-  (define headers (list "id" "artist"))
-    ;(for/list: : (Listof String) ([hdr (rows-result-headers result)])
-      ;(cond ((assq 'name hdr) => cdr)
-            ;(#t "unnamed"))))
+  (define headers
+    (for/list: : (Listof Any) ([hdr (rows-result-headers (assert result rows-result?))])
+      (cond [(assq 'name (assert hdr ListofAny?)) => cdr]
+            [else "unnamed"])))
+    
   (define rows (rows-result-rows (assert result rows-result?)))
   (define num-rows (length rows))
 
-  (QueryResult headers (cast rows (Listof (Vectorof Any))) num-rows))
+  (QueryResult (cast headers (Listof String)) (cast rows (Listof (Vectorof Any))) num-rows))
 
 ; Create a data frame from the result of running SQL-QUERY on the database DB
 ; with the supplied PARAMS.  SQL-QUERY can be either a string or a
@@ -181,13 +188,11 @@
 (: data-frame-from-sql (Connection Boolean String (Listof Any) -> DataFrame))
 (define (data-frame-from-sql conn schema-test sql-query params)
 
-  (define query-result (get-query-result conn sql-query params))
-
-  ; (QueryResult-num-rows query-result) 
+  (define query-result (get-query-result conn sql-query params)) 
 
   ;; If query returned 0 rows, don't add any series to the data frame
   (when (> 1 0)
-    (let* ((schema (Schema #t (list (ColumnInfo 'id 'INTEGER) (ColumnInfo 'genre 'GENERIC))))) ; determine schema from first row of data, fill this in later
+    (let ((schema (determine-schema-sql query-result))) ; determine schema from first row of data, fill this in later
       ; make data-frame by passing in the schema and associated data-frame-builder
            (make-data-frame schema (read-sql-results (QueryResult-headers query-result)
                                                    (QueryResult-rows query-result)
@@ -195,3 +200,11 @@
 
   ; return empty dataframe if query returned 0 results
   )
+
+(define data-frame-from-sql-invoices (data-frame-from-sql (sqlite3-connect #:database "/Users/shubhamkahal/Documents/RacketFrames/dataframe/validation/db/chinook.db") #f "SELECT * FROM invoices" empty))
+
+(data-frame-head data-frame-from-sql-invoices)
+
+(define data-frame-from-sql-customers (data-frame-from-sql (sqlite3-connect #:database "/Users/shubhamkahal/Documents/RacketFrames/dataframe/validation/db/chinook.db") #f "SELECT * FROM customers" empty))
+
+(data-frame-head data-frame-from-sql-customers)

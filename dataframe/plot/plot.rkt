@@ -67,7 +67,16 @@
  [make-points ((Listof (Listof Real)) -> renderer2d)]
  [make-lines ((Listof (Listof Real)) -> renderer2d)]
  [make-scatter-plot ((U Series (Listof Series) DataFrame Column Columns) -> Any)]
- [make-line-plot ((U Series (Listof Series) DataFrame Column Columns) -> Any)])
+ [make-line-plot ((U Series (Listof Series) DataFrame Column Columns) -> Any)]
+ [make-hist-bin-stacked (-> HistBinStacked)]
+ [get-discrete-hist-data ((U (Vectorof Any) (Vectorof Boolean) (Vectorof Datetime) (Vectorof Fixnum) (Vectorof Symbol) FlVector) -> HistBin)] 
+ [get-discrete-hist-data-vec ((U (Vectorof IndexDataType) (Vectorof Any) (Vectorof Boolean) (Vectorof Datetime) (Vectorof Fixnum) (Vectorof Symbol) FlVector)
+                               PlottableSeries -> HistBinStacked)]
+ [discrete-histogram-stacked-from-vector ((U (Vectorof Any) (Vectorof IndexDataType) (Vectorof Boolean) (Vectorof Datetime) (Vectorof Fixnum) (Vectorof Label) FlVector)
+                                           PlottableSeries -> (Listof renderer2d))]
+ [make-discrete-histogram ((U Series (Listof Series) DataFrame Column Columns) -> Any)]
+ [make-discrete-histogram-stacked ((U Series (Listof Series) DataFrame Column Columns) -> Any)]
+ [get-index-vector (Series -> (U (Vectorof IndexDataType) (Vectorof Fixnum)))])
 
 #|
 #:x-min [x-min -10]

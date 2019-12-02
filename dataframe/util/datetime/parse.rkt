@@ -93,7 +93,7 @@
 		       (Datetime (Date y mo d) (Time 0 h mn s ms)))
 		      (_ #f)))))
 
-(parse-date-string "2099-12-31")
-(parse-date "2099-12-31")
-(parse-datetime-string "2099-12-31T23:59:59.123")
-(parse-datetime "2099-12-31T23:59:59.123")
+;(parse-date-string "2099-12-31")
+;(parse-date "2099-12-31")
+;(parse-datetime-string "2099-12-31T23:59:59.123")
+;(parse-datetime "2099-12-31T23:59:59.123")

@@ -273,6 +273,10 @@
 
 (data-frame-head random-demographic-data-frame-delimited-no-schema)
 
-(define data-frame-from-sql-genres (data-frame-from-sql (sqlite3-connect #:database "/Users/shubhamkahal/Downloads/chinook.db") #f "SELECT * FROM genres" empty))
+(define data-frame-from-sql-genres (data-frame-from-sql (sqlite3-connect #:database "db/chinook.db") #f "SELECT * FROM genres" empty))
 
 (data-frame-head data-frame-from-sql-genres)
+
+(define data-frame-from-sql-customers (data-frame-from-sql (sqlite3-connect #:database "db/chinook.db") #f "SELECT * FROM customers" empty))
+
+(data-frame-head data-frame-from-sql-customers)

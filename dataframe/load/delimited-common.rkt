@@ -12,6 +12,8 @@
 	  FilePath FilePath->string)
  (only-in "../data-frame/series-builder.rkt"
 	  SeriesBuilder)
+ (only-in "../data-frame/indexed-series.rkt"
+          Datetime?)
  (only-in "../data-frame/generic-series-builder.rkt"
 	  GenSeriesBuilder GenSeriesBuilder?
 	  append-GenSeriesBuilder)
@@ -33,6 +35,8 @@
  (only-in "data-frame-builder.rkt"	  
 	  DataFrameBuilder DataFrameBuilder-builders
 	  append-data-fields append-sql-data-fields)
+ (only-in "../util/datetime/types.rkt"
+          Datetime)
  (only-in "schema.rkt"
 	  Schema)
  (only-in "types.rkt"
@@ -72,7 +76,7 @@
               (append-GenSeriesBuilder builder val))]
            [(CSeriesBuilder? builder)
             (λ: ((val : Any))
-              (append-CSeriesBuilder builder (assert val symbol?)))]
+              (append-CSeriesBuilder builder (if (string? val) (string->symbol val) (assert val symbol?))))]
            [(ISeriesBuilder? builder)
             (λ: ((val : Any))
               (append-ISeriesBuilder builder (assert val fixnum?)))]
@@ -82,9 +86,9 @@
            [(NSeriesBuilder? builder)
             (λ: ((val : Any))
               (append-NSeriesBuilder builder (assert val flonum?)))]
-           ;[(DatetimeSeriesBuilder? builder)
-            ;(λ: ((str : Datetime))
-             ; (append-DatetimeSeriesBuilder builder str))]
+           [(DatetimeSeriesBuilder? builder)
+            (λ: ((val : Any))
+              (append-DatetimeSeriesBuilder builder (assert val Datetime?)))]
            [else (λ: ((val : Any)) (void))]))
        (DataFrameBuilder-builders data-frame-builder)))
 

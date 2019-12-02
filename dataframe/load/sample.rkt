@@ -1,7 +1,15 @@
 #lang typed/racket/base
 
+(require racket/vector)	
+
 (provide:
- [determine-schema-from-sample ((Listof String) String -> Schema)])
+ [determine-schema-from-sample ((Listof String) String -> Schema)]
+ [determine-schema-from-sql-sample ((Listof String) (Listof (Vectorof Any)) -> Schema)]
+ [canonicalize-to-string-or-num ((Listof String) -> (Listof (U Number String)))]
+ [guess-series-type ((Listof String) -> SeriesTypes)]
+ [guess-if-headers ((Listof String) -> Boolean)]
+ [guess-series-meta ((Listof String) (Listof (Listof String)) -> (Listof ColumnInfo))]
+ [transpose-rows-to-cols ((Listof (Listof String)) -> (Listof (Listof String)))])
 
 (require
  (only-in "schema.rkt"
@@ -42,6 +50,20 @@
       [else 'CATEGORICAL]))
    (else 'GENERIC)))
 
+(: guess-series-type-sql ((Listof Any) -> SeriesTypes))
+(define (guess-series-type-sql col)
+  (cond
+   ((andmap exact-integer? col)
+    'INTEGER)
+   ((andmap real? col)
+    'NUMERIC)
+   ((andmap string? col)
+    (cond
+      [(andmap is-valid-datetime? col) 'DATETIME]
+      [(andmap is-valid-date? col) 'DATETIME]
+      [else 'CATEGORICAL]))
+   (else 'GENERIC)))
+
 (: guess-series-meta ((Listof String) (Listof (Listof String)) -> (Listof ColumnInfo)))
 (define (guess-series-meta headers cols)
   (let: loop : (Listof ColumnInfo)
@@ -52,8 +74,22 @@
 	    (reverse meta)
 	    (loop (cdr headers)
 		  (cdr cols)
-		  (cons (ColumnInfo (string->symbol(car headers))
+		  (cons (ColumnInfo (string->symbol (car headers))
 				    (guess-series-type (car cols)))
+			meta)))))
+
+(: guess-series-meta-sql ((Listof String) (Listof (Listof Any)) -> (Listof ColumnInfo)))
+(define (guess-series-meta-sql headers cols)
+  (let: loop : (Listof ColumnInfo)
+	((headers : (Listof String) headers)
+	 (cols : (Listof (Listof Any)) cols)
+	 (meta : (Listof ColumnInfo) '()))
+	(if (null? headers)
+	    (reverse meta)
+	    (loop (cdr headers)
+		  (cdr cols)
+		  (cons (ColumnInfo (string->symbol (car headers))
+				    (guess-series-type-sql (car cols)))
 			meta)))))
 
 (: transpose-rows-to-cols ((Listof (Listof String)) -> (Listof (Listof String))))
@@ -96,6 +132,48 @@
 		(deep-reverse cols)
 		(loop (cdr rows) (transpose-row-to-col (car rows) cols))))))
 
+(: transpose-rows-to-cols-sql ((Listof (Listof Any)) -> (Listof (Listof Any))))
+(define (transpose-rows-to-cols-sql rows)
+
+  (: transpose-row-to-col ((Listof Any) (Listof (Listof Any)) -> (Listof (Listof Any))))
+  (define (transpose-row-to-col row cols)
+    (let: loop : (Listof (Listof Any)) ((row : (Listof Any) row)
+					   (cols : (Listof (Listof Any)) cols)
+					   (accum : (Listof (Listof Any)) '()))
+	  (if (null? row)
+	      (reverse accum)
+	      (let ((elem (car row)) (col (car cols)))
+		(loop (cdr row) (cdr cols) (cons (cons elem col) accum))))))
+
+  (: create-accumulator ((Listof Any) -> (Listof (Listof Any))))
+  (define (create-accumulator protos)
+    (let: loop : (Listof (Listof Any))
+	  ((protos : (Listof Any) protos)
+	   (accum : (Listof (Listof Any)) '()))
+	  (if (null? protos)
+	      accum
+	      (loop (cdr protos) (cons '() accum)))))
+
+  (: deep-reverse ((Listof (Listof Any)) -> (Listof (Listof Any))))
+  (define (deep-reverse cols)
+    (let: loop : (Listof (Listof Any))
+	  ((cols : (Listof (Listof Any)) cols)
+	   (accum : (Listof (Listof Any)) '()))
+	  (if (null? cols)
+	      (reverse accum)
+	      (loop (cdr cols) (cons (reverse (car cols)) accum)))))
+
+  (if (null? rows)
+      '()
+      (let: loop : (Listof (Listof Any))
+	    ((rows : (Listof (Listof Any)) rows)
+	     (cols : (Listof (Listof Any)) (create-accumulator (car rows))))
+	    (if (null? rows)
+		(deep-reverse cols)
+		(loop (cdr rows) (transpose-row-to-col (car rows) cols))))))
+
+
+
 ; This function takes in a list of parsed lines with delimeter from a delimited file
 ; and determines the Schema from that.
 (: determine-schema-from-sample ((Listof String) String -> Schema))
@@ -127,35 +205,26 @@
                           (transpose-rows-to-cols samples))))
 	    (Schema headers? (guess-series-meta headers cols)))))))
 
-(define schema-1 (determine-schema-from-sample (list "header1, header2, header3, header4" "hello, world, fizz, buzz") ","))
-(Schema-headers schema-1)
+(: determine-schema-from-sql-sample ((Listof String) (Listof (Vectorof Any)) -> Schema))
+(define (determine-schema-from-sql-sample headers lines)
 
-(Schema-SeriesTypes schema-1)
+  (: sample-length ((Listof Any) -> Integer))
+  (define (sample-length sample)
+    (length sample))
 
-; this function gets the string split on the delimter (Listof (Listof String)) 
-;(transpose-rows-to-cols (list (list "header1" "header2" "header3" "header4") (list "hello" "world" "fizz" "buzz") (list "hello" "world" "fizz" "buzz") (list "hello, world, fizz, buzz") (list "hello, world, fizz, buzz") (list "hello" "world" "fizz" "buzz")))
+  (: check-consistent-fields ((Listof (Listof Any)) -> Void))
+  (define (check-consistent-fields samples)
+    (when (pair? samples)
+	  (let ((l0 (sample-length (car samples))))
+	    (unless (andmap (λ: ((sample : (Listof Any)))
+				(eq? (sample-length sample) l0))
+			    samples)
+		    (error "Sampling of data indicates lines of varying field length")))))
 
-;(transpose-rows-to-cols (list (list "hello" "world") (list "fizz" "buzz")))
+  (if (null? lines)
+      (Schema #f '())
+      (let ((samples (map vector->list lines)))
+	(check-consistent-fields samples)
+        (let ((cols (transpose-rows-to-cols-sql (cdr samples))))
+          (Schema #t (guess-series-meta-sql headers cols))))))
 
-; (list "first|last|gender|yn|char|float" "Louis|Lawson|Male|Y|z|-320102186614.784") needs to become
-; (list (list "first" "Louis") (list "last" "Lawson") etc.)
-
-(determine-schema-from-sample (list "first|last|gender|yn|char|float" "Louis|Lawson|Male|Y|z|-320102186614.784") "|")
-
-(define schema-2 (determine-schema-from-sample (list "5.7" "generic header" "world" "fizz" "buzz" "1" "2.5") ","))
-
-(Schema-headers schema-2)
-
-(Schema-SeriesTypes schema-2)
-
-(define schema-3 (determine-schema-from-sample (list "generic header" "5.7" "world" "fizz" "buzz" "1" "2.5") ","))
-
-(Schema-headers schema-3)
-
-(Schema-SeriesTypes schema-3)
-
-(define schema-4 (determine-schema-from-sample (list "Numeric Header" "5.7" "2.5") ","))
-
-(Schema-headers schema-4)
-
-(Schema-SeriesTypes schema-4)

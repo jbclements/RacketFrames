@@ -9,6 +9,36 @@
 (require plot)
 (require plot/utils)
 
+(require
+  racket/pretty
+  racket/unsafe/ops
+  racket/flonum
+  racket/fixnum
+  racket/set
+  racket/vector
+   (only-in "../data-frame/series-description.rkt"
+	  SeriesType Series Series? SeriesList SeriesList?
+	  SeriesDescription-type
+	  series-iref series-type series-length
+          series-data get-series-index has-series-index?)
+   (only-in "../data-frame/data-frame.rkt"
+	  DataFrame DataFrame? Column Columns Columns? Column? new-data-frame data-frame-names
+	  data-frame-cseries data-frame-explode column-series
+	  DataFrameDescription DataFrameDescription-series data-frame-description)
+  (only-in "../data-frame/generic-series.rkt"
+           GenSeries GenSeries? GenericType gen-series-iref new-GenSeries
+           gen-series-referencer)
+  (only-in "../data-frame/numeric-series.rkt"
+           NSeries NSeries? nseries-iref nseries-index-ref new-NSeries)
+  (only-in "../data-frame/integer-series.rkt"
+           ISeries ISeries? iseries-iref new-ISeries
+           iseries-referencer)
+  (only-in "../data-frame/categorical-series.rkt"
+           cseries-referencer cseries-length cseries-iref
+           CSeries CSeries? new-CSeries)
+  (only-in "../data-frame/indexed-series.rkt"
+           build-index-from-list))
+
 (require "../plot/plot.rkt")
 
 ;******************

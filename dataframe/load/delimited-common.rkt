@@ -36,7 +36,9 @@
 	  DataFrameBuilder DataFrameBuilder-builders
 	  append-data-fields append-sql-data-fields)
  (only-in "../util/datetime/types.rkt"
-          Datetime)
+          Datetime Date)
+  (only-in "../util/datetime/parse.rkt"
+          parse-date parse-datetime is-valid-date? is-valid-datetime?)
  (only-in "schema.rkt"
 	  Schema)
  (only-in "types.rkt"
@@ -88,7 +90,9 @@
               (append-NSeriesBuilder builder (assert val flonum?)))]
            [(DatetimeSeriesBuilder? builder)
             (λ: ((val : Any))
-              (append-DatetimeSeriesBuilder builder (assert val Datetime?)))]
+              (let* ([trimmed-val : String (string-trim (assert val string?))]
+                     [dt : Datetime (if (not (parse-datetime trimmed-val)) (assert (parse-date trimmed-val)) (assert (parse-datetime trimmed-val)))])
+                (append-DatetimeSeriesBuilder builder (assert dt Datetime?))))]
            [else (λ: ((val : Any)) (void))]))
        (DataFrameBuilder-builders data-frame-builder)))
 

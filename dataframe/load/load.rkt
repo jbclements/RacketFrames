@@ -177,6 +177,8 @@
             [else "unnamed"])))
     
   (define rows (rows-result-rows (assert result rows-result?)))
+
+  ;(println rows)
   (define num-rows (length rows))
 
   (QueryResult (cast headers (Listof String)) (cast rows (Listof (Vectorof Any))) num-rows))
@@ -201,10 +203,11 @@
   ; return empty dataframe if query returned 0 results
   )
 
-(define data-frame-from-sql-invoices (data-frame-from-sql (sqlite3-connect #:database "/Users/shubhamkahal/Documents/RacketFrames/dataframe/validation/db/chinook.db") #f "SELECT * FROM invoices" empty))
+;tests
+;(define data-frame-from-sql-invoices (data-frame-from-sql (sqlite3-connect #:database "/Users/shubhamkahal/Documents/RacketFrames/dataframe/validation/db/chinook.db") #f "SELECT * FROM invoices" empty))
 
-(data-frame-head data-frame-from-sql-invoices)
+;(data-frame-head data-frame-from-sql-invoices)
 
-(define data-frame-from-sql-customers (data-frame-from-sql (sqlite3-connect #:database "/Users/shubhamkahal/Documents/RacketFrames/dataframe/validation/db/chinook.db") #f "SELECT * FROM customers" empty))
+;(define data-frame-from-sql-customers (data-frame-from-sql (sqlite3-connect #:database "/Users/shubhamkahal/Documents/RacketFrames/dataframe/validation/db/chinook.db") #f "SELECT * FROM customers" empty))
 
-(data-frame-head data-frame-from-sql-customers)
+;(data-frame-head data-frame-from-sql-customers)

@@ -37,6 +37,8 @@
 ; create new data-frame-integer
 (define data-frame-integer (new-data-frame columns-integer))
 
+(data-frame-iloc data-frame-integer (list 1 2) 2)
+
 (data-frame-write-tab data-frame-integer (current-output-port))
 
 ;******************
@@ -53,6 +55,14 @@
 
 ; create new data-frame-float
 (define data-frame-float (new-data-frame columns-float))
+
+(set! data-frame-float (data-frame-set-index data-frame-float (list 'a 'b 'c 'd)))
+
+(hash->list (LabelIndex-index data-frame-float))
+
+(label-index (LabelIndex-index data-frame-float) 'col1)
+
+(data-frame-write-tab (assert (data-frame-iloc data-frame-float (list 1 2) (list 0 1)) DataFrame?) (current-output-port))
 
 (data-frame-write-tab data-frame-float (current-output-port))
 
@@ -207,12 +217,14 @@
 
 (show-data-frame-description (data-frame-description data-frame-integer))
 
+(check-equal? (series-iloc (data-frame-series data-frame-integer 'col3) 2) 11)
+
 (set! data-frame-integer (data-frame-set-index data-frame-integer (list 'a 'b 'c 'd)))
 ;(LabelIndex-index (cdr (list-ref (data-frame-explode data-frame-integer) 0)))
 
 (data-frame-write-tab data-frame-integer (current-output-port))
 
-(series-data (data-frame-series data-frame-integer 'col3))
+(check-equal? (series-data (data-frame-series data-frame-integer 'col3)) (vector 9 10 11 12))
 
 (check-equal? (series-loc (data-frame-series data-frame-integer 'col3) 'c) 11)
 

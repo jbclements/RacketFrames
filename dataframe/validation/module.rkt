@@ -214,6 +214,9 @@
  (assert (data-frame-iloc data-frame-integer-labeled (list 1 2 3) (list 0 1)) DataFrame?)
  (current-output-port))
 
+(println "Hash list")
+(hash->list (LabelIndex-index data-frame-integer-labeled))
+
 (iseries-data (assert (data-frame-iloc data-frame-integer-labeled (list 1 2 3) 1) ISeries?))
 
 (gen-series-data (assert (data-frame-iloc data-frame-integer-labeled 3 1) GenSeries?))

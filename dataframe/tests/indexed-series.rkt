@@ -110,7 +110,3 @@
 ; check label sorting by position
 ; (check-equal? (label-sort-positional (LabelIndex (build-index-from-list (list 'b 'd 'a 'c))))
 ;              '((b . 0) (d . 1) (a . 2) (c . 3)))
-
-(build-multi-index-from-list (list (list 'a 'b 'c) (list 1 2 3)))
-
-(build-multi-index-from-list (list (list 'a 'b 'c 'a 'c) (list 1 2 3 4 3)))

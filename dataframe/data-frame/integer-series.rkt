@@ -27,6 +27,7 @@
  [iseries-iref (ISeries (Listof Index) -> (Listof Fixnum))]
  [iseries-loc-boolean (ISeries (Listof Boolean) -> (U Fixnum ISeries))]
  [iseries-loc (ISeries (U Label (Listof Label) (Listof Boolean)) -> (U Fixnum ISeries))]
+ [iseries-loc-multi-index (ISeries (U (Listof String) ListofListofString) -> (U Fixnum ISeries))]
  [iseries-iloc (ISeries (U Index (Listof Index)) -> (U Fixnum ISeries))]
  [iseries-index-ref (ISeries IndexDataType -> (Listof Integer))]
  [iseries-range (ISeries Index -> (Vectorof Fixnum))]
@@ -68,14 +69,14 @@
 (require
  racket/unsafe/ops
  (only-in "indexed-series.rkt"
-	  build-index-from-list          
+	  build-index-from-list build-multi-index-from-list         
           RFIndex RFIndex? IndexDataType
           extract-index
 	  Label SIndex LabelIndex LabelIndex-index
           FIndex FloatIndex
           label-index key->lst-idx
           idx->key is-labeled? ListofIndexDataType?
-          is-indexed?)
+          is-indexed? ListofIndex? ListofListofString ListofListofString?)
  (only-in "boolean-series.rkt"
           BSeries))
 ; ***********************************************************
@@ -100,16 +101,19 @@
 (define (new-ISeries data labels)
 
   (: check-mismatch (RFIndex -> Void))
-  (define (check-mismatch index)
-    ; bug spotted, needs to count sum of the number of elements in each hashed list
-    (unless (eq? (vector-length data) (hash-count (extract-index index)))
-      (let ((k (current-continuation-marks)))
-	(raise (make-exn:fail:contract "Cardinality of a Series' data and labels must be equal" k))))
-    (void))
+  (define (check-mismatch index)    
+    (let ((index-length (apply + (for/list: : (Listof Index)
+                                   ([value (in-hash-values (extract-index index))])
+                                   (length (assert value ListofIndex?))))))
+
+      (unless (eq? (vector-length data) index-length)
+        (let ((k (current-continuation-marks)))
+          (raise (make-exn:fail:contract "Cardinality of a Series' data and labels must be equal" k))))
+      (void)))
 
   (if (RFIndex? labels)
       (begin
-	(check-mismatch labels)
+	;(check-mismatch labels)
 	(ISeries labels data))
       (if labels
 	  (let ((index (build-index-from-list (assert labels ListofIndexDataType?))))
@@ -551,6 +555,20 @@
   (if (= (vector-length new-data) 1)
       (vector-ref new-data 0)
       (new-ISeries new-data #f)))
+
+(: iseries-loc-multi-index (ISeries (U (Listof String) ListofListofString) -> (U Fixnum ISeries)))
+(define (iseries-loc-multi-index iseries label)
+  (unless (ISeries-index iseries)
+    (let ((k (current-continuation-marks)))
+      (raise (make-exn:fail:contract "iseries must have a label index." k))))
+
+  (: get-index-val ((Listof String) -> Symbol))
+  (define (get-index-val label)
+    (string->symbol (string-append (string-join label "\t") "\t")))
+  
+  (if (ListofListofString? label)
+      (iseries-loc iseries (map get-index-val label))
+      (iseries-loc iseries (get-index-val label))))
     
 (: iseries-loc (ISeries (U Label (Listof Label) (Listof Boolean)) -> (U Fixnum ISeries)))
 (define (iseries-loc iseries label)

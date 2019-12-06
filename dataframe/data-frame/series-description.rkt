@@ -38,25 +38,25 @@
  (only-in racket/flonum
           flvector-length)
  (only-in "indexed-series.rkt"
-          Label RFIndex)
+          Label RFIndex ListofListofString ListofListofString?)
  (only-in "generic-series.rkt"
           GenericType GenSeries GenSeries? GenSeries-index GenSeries-data gen-series-length gen-series-data gen-series-index gen-series-iref
-          set-GenSeries-index gen-series-loc-boolean gen-series-loc gen-series-iloc)
+          set-GenSeries-index gen-series-loc-boolean gen-series-loc gen-series-loc-multi-index gen-series-iloc)
  (only-in "categorical-series.rkt"
           CSeries CSeries? CSeries-index CSeries-data cseries-length cseries-data cseries-index cseries-iref set-CSeries-index
-          cseries-loc-boolean cseries-iloc cseries-loc)
+          cseries-loc-boolean cseries-iloc cseries-loc cseries-loc-multi-index)
  (only-in "numeric-series.rkt"
           NSeries NSeries? NSeries-index NSeries-data nseries-length nseries-data nseries-index nseries-iref
-          set-NSeries-index nseries-loc-boolean nseries-loc nseries-iloc)
+          set-NSeries-index nseries-loc-boolean nseries-loc nseries-loc-multi-index nseries-iloc)
  (only-in "integer-series.rkt"
 	  ISeries ISeries? ISeries-index ISeries-data iseries-length iseries-data iseries-index iseries-iref
-          set-ISeries-index iseries-loc-boolean iseries-loc iseries-iloc)
+          set-ISeries-index iseries-loc-boolean iseries-loc iseries-loc-multi-index iseries-iloc)
  (only-in "boolean-series.rkt"
 	  BSeries BSeries? BSeries-index BSeries-data bseries-length bseries-data bseries-index bseries-iref
-          set-BSeries-index bseries-loc-boolean bseries-loc bseries-iloc)
+          set-BSeries-index bseries-loc-boolean bseries-loc bseries-loc-multi-index bseries-iloc)
  (only-in "datetime-series.rkt"
 	  DatetimeSeries DatetimeSeries? DatetimeSeries-index DatetimeSeries-data datetime-series-length datetime-series-data datetime-series-index datetime-series-iref
-          set-DatetimeSeries-index datetime-series-loc-boolean datetime-series-loc datetime-series-iloc)
+          set-DatetimeSeries-index datetime-series-loc-boolean datetime-series-loc datetime-series-loc-multi-index datetime-series-iloc)
  (only-in "../util/datetime/types.rkt"
           Datetime))
 
@@ -156,6 +156,17 @@
     [(ISeries? series) (iseries-loc series label)]
     [(BSeries? series) (bseries-loc series label)]
     [(DatetimeSeries? series) (datetime-series-loc series label)]
+    [else (error "Unknown Series type in DataFrame")]))
+
+(: series-loc-multi-index (Series (U (Listof String) ListofListofString) -> (U Any Series)))
+(define (series-loc-multi-index series label)
+  (cond
+    [(GenSeries? series) (gen-series-loc-multi-index series label)]
+    [(NSeries? series) (nseries-loc-multi-index series label)]
+    [(CSeries? series) (cseries-loc-multi-index series label)]   
+    [(ISeries? series) (iseries-loc-multi-index series label)]
+    [(BSeries? series) (bseries-loc-multi-index series label)]
+    [(DatetimeSeries? series) (datetime-series-loc-multi-index series label)]
     [else (error "Unknown Series type in DataFrame")]))
 
 (: series-iloc (Series (U Index (Listof Index)) -> (U Any Series)))

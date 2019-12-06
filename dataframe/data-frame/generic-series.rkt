@@ -6,7 +6,10 @@
           IndexDataType extract-index
           Label LabelIndex-index
           LabelIndex label-index label->lst-idx key->lst-idx
-          idx->key is-indexed? ListofIndexDataType?))
+          idx->key is-indexed? ListofIndexDataType? ListofIndex?
+          ListofListofString ListofListofString?)
+ (only-in "../load/types.rkt"
+          ListofString?))
 
 
 ; ***********************************************************
@@ -32,6 +35,7 @@
  [gen-series-index (GenSeries -> (U False RFIndex))]
  [gen-series-loc-boolean (GenSeries (Listof Boolean) -> (U GenericType GenSeries))]
  [gen-series-loc (GenSeries (U Label (Listof Label) (Listof Boolean)) -> (U GenericType GenSeries))]
+ [gen-series-loc-multi-index (GenSeries (U (Listof String) ListofListofString) -> (U GenericType GenSeries))]
  [gen-series-iloc (GenSeries (U Index (Listof Index)) -> (U GenericType GenSeries))]
  [map/gen-s (GenSeries (GenericType -> GenericType) -> GenSeries)]
  [gen-series-print (GenSeries Output-Port -> Void)])
@@ -47,11 +51,15 @@
 (define (new-GenSeries data labels)
 
   (: check-mismatch (RFIndex -> Void))
-  (define (check-mismatch index)
-    (unless (eq? (vector-length data) (hash-count (extract-index index)))
-      (let ((k (current-continuation-marks)))
-	(raise (make-exn:fail:contract "Cardinality of a Series' data and labels must be equal" k))))
-    (void))
+  (define (check-mismatch index)    
+    (let ((index-length (apply + (for/list: : (Listof Index)
+                                   ([value (in-hash-values (extract-index index))])
+                                   (length (assert value ListofIndex?))))))
+
+      (unless (eq? (vector-length data) index-length)
+        (let ((k (current-continuation-marks)))
+          (raise (make-exn:fail:contract "Cardinality of a Series' data and labels must be equal" k))))
+      (void)))
 
   (if (RFIndex? labels)
       (begin
@@ -194,7 +202,22 @@
   (if (= (vector-length new-data) 1)
       (vector-ref new-data 0)
       (new-GenSeries new-data #f)))
-    
+
+
+(: gen-series-loc-multi-index (GenSeries (U (Listof String) ListofListofString) -> (U GenericType GenSeries)))
+(define (gen-series-loc-multi-index gen-series label)
+  (unless (GenSeries-index gen-series)
+    (let ((k (current-continuation-marks)))
+      (raise (make-exn:fail:contract "gen-series must have a label index." k))))
+
+  (: get-index-val ((Listof String) -> Symbol))
+  (define (get-index-val label)
+    (string->symbol (string-append (string-join label "\t") "\t")))
+  
+  (if (ListofListofString? label)
+      (gen-series-loc gen-series (map get-index-val label))
+      (gen-series-loc gen-series (get-index-val label))))
+
 (: gen-series-loc (GenSeries (U Label (Listof Label) (Listof Boolean)) -> (U GenericType GenSeries)))
 (define (gen-series-loc gen-series label)
   (unless (GenSeries-index gen-series)

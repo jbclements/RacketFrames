@@ -31,6 +31,7 @@
  [map/bs (BSeries (Boolean -> Boolean) -> BSeries)]
  [bseries-loc-boolean (BSeries (Listof Boolean) -> (U Boolean BSeries))]
  [bseries-loc (BSeries (U Label (Listof Label) (Listof Boolean)) -> (U Boolean BSeries))]
+ [bseries-loc-multi-index (BSeries (U (Listof String) ListofListofString) -> (U Boolean BSeries))]
  [bseries-iloc (BSeries (U Index (Listof Index)) -> (U Boolean BSeries))]
  [bseries-not (BSeries -> BSeries)]
  [bseries-print (BSeries Output-Port -> Void)])
@@ -46,19 +47,11 @@
           IndexDataType extract-index
           Label LabelIndex-index
           LabelIndex label-index label->lst-idx key->lst-idx
-          idx->key ListofIndexDataType?))
+          idx->key ListofIndexDataType? ListofIndex?
+          ListofListofString ListofListofString?))
 ; ***********************************************************
 
 ; ***********************************************************
-; racket/fixnum library provides operations like fx+ that
-; consumes and produce only fixnums. The operations in this
-; library are meant to be safe versions of unsafe operations
-; like unsafe-fx+. These safe operations are generally no
-; faster than using generic primitives like +. But they are
-; slower than the unsafe versions, with the benefit of being
-; safer. This library will be using unsafe operations for
-; speed improvement.
-
 ;; Boolean series.
 (struct BSeries ([index : (Option RFIndex)] [data : (Vectorof Boolean)]))
 
@@ -69,11 +62,15 @@
 (define (new-BSeries data labels)
 
   (: check-mismatch (RFIndex -> Void))
-  (define (check-mismatch index)
-    (unless (eq? (vector-length data) (hash-count (extract-index index)))
-      (let ((k (current-continuation-marks)))
-	(raise (make-exn:fail:contract "Cardinality of a Series' data and labels must be equal" k))))
-    (void))
+  (define (check-mismatch index)    
+    (let ((index-length (apply + (for/list: : (Listof Index)
+                                   ([value (in-hash-values (extract-index index))])
+                                   (length (assert value ListofIndex?))))))
+
+      (unless (eq? (vector-length data) index-length)
+        (let ((k (current-continuation-marks)))
+          (raise (make-exn:fail:contract "Cardinality of a Series' data and labels must be equal" k))))
+      (void)))
 
   (if (RFIndex? labels)
       (begin
@@ -215,6 +212,20 @@
   (if (= (vector-length new-data) 1)
       (vector-ref new-data 0)
       (new-BSeries new-data #f)))
+
+(: bseries-loc-multi-index (BSeries (U (Listof String) ListofListofString) -> (U Boolean BSeries)))
+(define (bseries-loc-multi-index bseries label)
+  (unless (BSeries-index bseries)
+    (let ((k (current-continuation-marks)))
+      (raise (make-exn:fail:contract "bseries must have a label index." k))))
+
+  (: get-index-val ((Listof String) -> Symbol))
+  (define (get-index-val label)
+    (string->symbol (string-append (string-join label "\t") "\t")))
+  
+  (if (ListofListofString? label)
+      (bseries-loc bseries (map get-index-val label))
+      (bseries-loc bseries (get-index-val label))))
     
 (: bseries-loc (BSeries (U Label (Listof Label) (Listof Boolean)) -> (U Boolean BSeries)))
 (define (bseries-loc bseries label)

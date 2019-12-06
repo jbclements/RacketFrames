@@ -23,6 +23,13 @@
 (define series-integer-2 (new-ISeries (vector 5 6 7 8)
                                       (build-index-from-list (list 'a 'b 'c 'd))))
 
+(define series-integer-3 (new-ISeries (vector 5 5 6 7 8)
+                                      (build-index-from-list (list 'a 'a 'b 'c 'd))))
+
+(extract-index (build-index-from-list (list 'a 'b 'c 'a 'd)))
+
+(check-equal? (iseries-data (assert (iseries-loc series-integer-3 'a) ISeries?)) (vector 5 5))
+
 ; iseries reference tests
 (check-equal? ((iseries-referencer series-integer) 0) 1)
 
@@ -118,3 +125,18 @@
 (iseries-print (assert (iseries-iloc series-integer (list 1 3)) ISeries?) (current-output-port))
 
 (iseries-print series-integer (current-output-port))
+
+(LabelIndex-index (build-multi-index-from-list (list (list 'a 'b 'c 'a 'c) (list 1 2 3 4 3))))
+
+; iseries multi-index
+(define multi-index-iseries (new-ISeries (vector 1 2 3 4 5) (build-multi-index-from-list (list (list 'a 'b 'c 'a 'c) (list 1 2 3 4 5)))))
+
+(define multi-index-iseries-2 (new-ISeries (vector 500 2 3 4 100) (build-multi-index-from-list (list (list 'a 'b 'c 'a 'c) (list 1 2 3 4 3) (list 5 6 7 8 9)))))
+
+(define multi-index-iseries-3 (new-ISeries (vector 100 200 300 400 500) (build-multi-index-from-list (list (list 'a 'b 'c 'a 'c) (list 1 2 3 4 3)))))
+
+(check-equal? (iseries-loc-multi-index multi-index-iseries (list "a" "1")) 1)
+
+(check-equal? (iseries-loc-multi-index multi-index-iseries-2 (list "c" "3" "9")) 100)
+
+(iseries-print (assert (iseries-loc-multi-index multi-index-iseries-3 (list "c" "3")) ISeries?) (current-output-port))

@@ -16,12 +16,14 @@
  [cseries-iloc (CSeries (U Index (Listof Index)) -> (U Label CSeries))]
  [cseries-print (CSeries Output-Port -> Void)]
  [cseries-loc-boolean (CSeries (Listof Boolean) -> (U Label CSeries))]
- [cseries-loc (CSeries (U Label (Listof Label) (Listof Boolean)) -> (U Label CSeries))])
+ [cseries-loc (CSeries (U Label (Listof Label) (Listof Boolean)) -> (U Label CSeries))]
+ [cseries-loc-multi-index (CSeries (U (Listof String) ListofListofString) -> (U Label CSeries))])
 
 (require
  (only-in "indexed-series.rkt"
 	  RFIndex RFIndex? Label idx->key key->lst-idx extract-index build-index-from-list
-	  LabelIndex LabelIndex-index is-labeled? IndexDataType))
+          build-multi-index-from-list LabelIndex LabelIndex-index is-labeled? IndexDataType
+          ListofIndex? ListofListofString ListofListofString?))
 
 (define-type CSeriesFn (Label -> Label))
 
@@ -67,12 +69,15 @@
     nominals)
 
   (: check-mismatch (RFIndex -> Void))
-  (define (check-mismatch index)
-    ; bug spotted, needs to count sum of the number of elements in each hashed list
-    (unless (eq? (vector-length data) (hash-count (extract-index index)))
-      (let ((k (current-continuation-marks)))
-	(raise (make-exn:fail:contract "Cardinality of a Series' data and labels must be equal" k))))
-    (void))
+  (define (check-mismatch index)    
+    (let ((index-length (apply + (for/list: : (Listof Index)
+                                   ([value (in-hash-values (extract-index index))])
+                                   (length (assert value ListofIndex?))))))
+
+      (unless (eq? (vector-length data) index-length)
+        (let ((k (current-continuation-marks)))
+          (raise (make-exn:fail:contract "Cardinality of a Series' data and labels must be equal" k))))
+      (void)))
 
 
   (let: loop : CSeries ((idx : Natural 0) (code : Index 0))
@@ -163,6 +168,20 @@
 ; for two different use cases:
 ; a.) Selecting rows by label/index
 ; b.) Selecting rows with a boolean / conditional lookup
+
+(: cseries-loc-multi-index (CSeries (U (Listof String) ListofListofString) -> (U Label CSeries)))
+(define (cseries-loc-multi-index cseries label)
+  (unless (CSeries-index cseries)
+    (let ((k (current-continuation-marks)))
+      (raise (make-exn:fail:contract "cseries must have a label index." k))))
+
+  (: get-index-val ((Listof String) -> Symbol))
+  (define (get-index-val label)
+    (string->symbol (string-append (string-join label "\t") "\t")))
+  
+  (if (ListofListofString? label)
+      (cseries-loc cseries (map get-index-val label))
+      (cseries-loc cseries (get-index-val label))))
     
     
 (: cseries-loc (CSeries (U Label (Listof Label) (Listof Boolean)) -> (U Label CSeries)))

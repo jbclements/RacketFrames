@@ -14,7 +14,8 @@
           IndexDataType extract-index
           Label LabelIndex-index
           LabelIndex label-index label->lst-idx key->lst-idx
-          idx->key is-indexed? ListofIndexDataType?)
+          idx->key is-indexed? ListofIndexDataType? ListofIndex?
+          ListofListofString ListofListofString?)
  (only-in "boolean-series.rkt"
           BSeries))
 
@@ -27,6 +28,7 @@
  [new-DatetimeSeries ((Vectorof Datetime) (Option (U (Listof IndexDataType) RFIndex)) -> DatetimeSeries)]
  [set-DatetimeSeries-index (DatetimeSeries (U (Listof IndexDataType) RFIndex) -> DatetimeSeries)]
  [datetime-series-iref (DatetimeSeries (Listof Index) -> (Listof Datetime))]
+ [datetime-series-loc-multi-index (DatetimeSeries (U (Listof String) ListofListofString) -> (U Datetime DatetimeSeries))]
  [datetime-series-loc-boolean (DatetimeSeries (Listof Boolean) -> (U Datetime DatetimeSeries))]
  [datetime-series-loc (DatetimeSeries (U Label (Listof Label) (Listof Boolean)) -> (U Datetime DatetimeSeries))]
  [datetime-series-iloc (DatetimeSeries (U Index (Listof Index)) -> (U Datetime DatetimeSeries))]
@@ -63,11 +65,15 @@
 (define (new-DatetimeSeries data labels)
 
   (: check-mismatch (RFIndex -> Void))
-  (define (check-mismatch index)
-    (unless (eq? (vector-length data) (hash-count (extract-index index)))
-      (let ((k (current-continuation-marks)))
-	(raise (make-exn:fail:contract "Cardinality of a Series' data and labels must be equal" k))))
-    (void))
+  (define (check-mismatch index)    
+    (let ((index-length (apply + (for/list: : (Listof Index)
+                                   ([value (in-hash-values (extract-index index))])
+                                   (length (assert value ListofIndex?))))))
+
+      (unless (eq? (vector-length data) index-length)
+        (let ((k (current-continuation-marks)))
+          (raise (make-exn:fail:contract "Cardinality of a Series' data and labels must be equal" k))))
+      (void)))
 
   (if (RFIndex? labels)
       (begin
@@ -182,6 +188,20 @@
       (list label)))
 
 (define-predicate ListofDatetime? (Listof Datetime))
+
+(: datetime-series-loc-multi-index (DatetimeSeries (U (Listof String) ListofListofString) -> (U Datetime DatetimeSeries)))
+(define (datetime-series-loc-multi-index datetime-series label)
+  (unless (DatetimeSeries-index datetime-series)
+    (let ((k (current-continuation-marks)))
+      (raise (make-exn:fail:contract "datetime-series must have a label index." k))))
+
+  (: get-index-val ((Listof String) -> Symbol))
+  (define (get-index-val label)
+    (string->symbol (string-append (string-join label "\t") "\t")))
+  
+  (if (ListofListofString? label)
+      (datetime-series-loc datetime-series (map get-index-val label))
+      (datetime-series-loc datetime-series (get-index-val label))))
 
 (: datetime-series-loc (DatetimeSeries (U Label (Listof Label) (Listof Boolean)) -> (U Datetime DatetimeSeries)))
 (define (datetime-series-loc datetime-series label)

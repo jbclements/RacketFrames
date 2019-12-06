@@ -26,7 +26,7 @@
  [label-sort-lexical (LabelIndex -> Labeling)]
  ;[gseries-length (GSeries -> Index)]
  ;[gseries-data (All (A) (GSeries A) -> (Vectorof A))]
- [build-multi-index-from-list ((Listof (Listof GenericType)) -> SIndex)]
+ [build-multi-index-from-list ((Listof (Listof GenericType)) -> LabelIndex)]
  [build-index-from-list ((Listof IndexDataType) -> RFIndex)]
  [labeling (LabelIndex -> (Listof (Pair Label (Listof Index))))]
  [get-index (RFIndex IndexDataType -> (Listof Index))]
@@ -36,7 +36,7 @@
 (provide
  SIndex IIndex FIndex DTIndex Labeling ListofLabel? ListofIndexDataType? ListofAny?
  Label Label? LabelProjection LabelProjection? LabelIndex? RFIndex? Datetime?
- RFIndex IndexDataType
+ RFIndex IndexDataType ListofIndex ListofIndex? ListofListofString ListofListofString?
  LabelIndex LabelIndex-index
  FIndex FloatIndex
  ;(struct-out GSeries)
@@ -69,6 +69,8 @@
 
 (define-predicate ListofInteger? (Listof Integer))
 
+(define-predicate ListofIndex? (Listof Index))
+
 (define-predicate ListofFloat? (Listof Float))
 
 (define-predicate ListofDatetime? (Listof Datetime))
@@ -91,6 +93,12 @@
 (define-predicate ListofIndexDataType? (Listof IndexDataType))
 
 (define-type LabelProjection (U (Listof Label) (Setof Label)))
+
+(define-type ListofIndex (Listof Index))
+
+(define-type ListofListofString (Listof (Listof String)))
+
+(define-predicate ListofListofString? (Listof (Listof String)))
 
 (define-predicate LabelProjection? LabelProjection)
 
@@ -264,6 +272,45 @@
 (: datetime-index (DTIndex Datetime -> (Listof Index)))
 (define (datetime-index index datetime)      
   (hash-ref index datetime))
+
+#|
+B	business day frequency
+C	custom business day frequency
+D	calendar day frequency
+W	weekly frequency
+M	month end frequency
+SM	semi-month end frequency (15th and end of month)
+BM	business month end frequency
+CBM	custom business month end frequency
+MS	month start frequency
+SMS	semi-month start frequency (1st and 15th)
+BMS	business month start frequency
+CBMS	custom business month start frequency
+Q	quarter end frequency
+BQ	business quarter end frequency
+QS	quarter start frequency
+BQS	business quarter start frequency
+A, Y	year end frequency
+BA, BY	business year end frequency
+AS, YS	year start frequency
+BAS, BYS	business year start frequency
+BH	business hour frequency
+H	hourly frequency
+T, min	minutely frequency
+S	secondly frequency
+L, ms	milliseconds
+U, us	microseconds
+N	nanoseconds
+|#
+; todo
+;(: check-valid-freq (Label -> Boolean))
+
+;(: date-range (Datetime Datetime [#:freq Label] -> DatetimeIndex))
+;(define (date-range datetime-1 datetime-2 #:freq [freq 'D])
+ ; (let ((day (Datetime-day datetime-1) (Datetime-day) 
+
+
+;(: date-range-periods (Datetime Index [#:freq Label] -> DatetimeIndex))
 ; ***********************************************************
 
 ; ***********************************************************
@@ -536,14 +583,14 @@
       (get-output-string outp))))
 
 
-(: build-multi-index-from-list ((Listof (Listof GenericType)) -> SIndex))
+(: build-multi-index-from-list ((Listof (Listof GenericType)) -> LabelIndex))
 (define (build-multi-index-from-list nested-label-lst)
 
   ; Get length of one of the IndexableSeries
   (define len (length (car nested-label-lst)))
   (define: series-key : (Index -> String) (key-fn-list nested-label-lst))
 
-  (let ((index : SIndex (make-hash '())))
+  (LabelIndex (let ((index : SIndex (make-hash '())))
 
     (let loop ([i 0])
       (if (>= i len)
@@ -554,7 +601,7 @@
                             (λ: ((idx : (Listof Index)))
                               (append idx (list i)))
                             (λ () (list))))
-            (loop (add1 i)))))))
+            (loop (add1 i))))))))
 
 ; ***********************************************************
 

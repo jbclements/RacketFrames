@@ -21,8 +21,9 @@
 (provide:
  [set-NSeries-index (NSeries (U (Listof Label) RFIndex) -> NSeries)]
  [nseries-iref (NSeries (Listof Index) -> (Listof Float))]
- [nseries-loc-boolean (NSeries (Listof Boolean) -> (U Float NSeries))]
+ [nseries-loc-boolean (NSeries (Listof Boolean) -> (U Float NSeries))] 
  [nseries-loc (NSeries (U Label (Listof Label) (Listof Boolean)) -> (U Float NSeries))]
+ [nseries-loc-multi-index (NSeries (U (Listof String) ListofListofString) -> (U Float NSeries))]
  [nseries-iloc (NSeries (U Index (Listof Index)) -> (U Float NSeries))]
  [nseries-index-ref (NSeries IndexDataType -> (Listof Float))]
  [nseries-range (NSeries Index -> FlVector)]
@@ -94,9 +95,10 @@
 	  build-index-from-list IndexDataType
 	  Label RFIndex extract-index
 	  LabelIndex LabelIndex-index
-          idx->key is-indexed? 
+          idx->key is-indexed?
           key->lst-idx
-          is-labeled? ListofIndexDataType?)
+          is-labeled? ListofIndexDataType? ListofIndex?
+          ListofListofString ListofListofString?)
  (only-in "boolean-series.rkt"
           BSeries BSeries-data)
  (only-in "integer-series.rkt"
@@ -157,11 +159,15 @@
 (define (new-NSeries data labels)
 
   (: check-mismatch (RFIndex -> Void))
-  (define (check-mismatch index)
-    (unless (eq? (flvector-length data) (hash-count (extract-index index)))
-	    (let ((k (current-continuation-marks)))
-	      (raise (make-exn:fail:contract "Cardinality of a Series' data and labels must be equal" k))))
-    (void))
+  (define (check-mismatch index)    
+    (let ((index-length (apply + (for/list: : (Listof Index)
+                                   ([value (in-hash-values (extract-index index))])
+                                   (length (assert value ListofIndex?))))))
+
+      (unless (eq? (flvector-length data) index-length)
+        (let ((k (current-continuation-marks)))
+          (raise (make-exn:fail:contract "Cardinality of a Series' data and labels must be equal" k))))
+      (void)))
 
   (if (RFIndex? labels)
       (begin
@@ -702,6 +708,20 @@
   (if (= (flvector-length new-data) 1)
       (flvector-ref new-data 0)
       (new-NSeries new-data #f)))
+
+(: nseries-loc-multi-index (NSeries (U (Listof String) ListofListofString) -> (U Float NSeries)))
+(define (nseries-loc-multi-index nseries label)
+  (unless (NSeries-index nseries)
+    (let ((k (current-continuation-marks)))
+      (raise (make-exn:fail:contract "nseries must have a label index." k))))
+
+  (: get-index-val ((Listof String) -> Symbol))
+  (define (get-index-val label)
+    (string->symbol (string-append (string-join label "\t") "\t")))
+  
+  (if (ListofListofString? label)
+      (nseries-loc nseries (map get-index-val label))
+      (nseries-loc nseries (get-index-val label))))
     
 (: nseries-loc (NSeries (U Label (Listof Label) (Listof Boolean)) -> (U Float NSeries)))
 (define (nseries-loc nseries label)

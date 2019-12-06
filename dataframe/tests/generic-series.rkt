@@ -45,3 +45,11 @@
 
 ; point series ref by label
 (check-equal? (gen-series-label-ref gen-series-point 'd) (list (point 7 8)))
+
+(define multi-index-gen-series (new-GenSeries (vector "hello moto" 2 3 4 5) (build-multi-index-from-list (list (list 'a 'b 'c 'd 'e) (list 1 2 3 4 3) (list 5 6 7 8 9)))))
+
+(define multi-index-gen-series-2 (new-GenSeries (vector "hello moto" 2 3 4 "robo") (build-multi-index-from-list (list (list 'a 'b 'c 'a 'c) (list 1 2 3 4 3) (list 5 6 7 8 9)))))
+
+(check-equal? (gen-series-loc-multi-index multi-index-gen-series (list "a" "1" "5")) "hello moto")
+
+(check-equal? (gen-series-loc-multi-index multi-index-gen-series-2 (list "c" "3" "9")) "robo")

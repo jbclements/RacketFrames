@@ -99,9 +99,9 @@
 (define (is-plottable-series series)
   (or (GenSeries? series) (ISeries? series) (NSeries? series) (DatetimeSeries? series)))
 
-(define-type PlottableSeries (U NSeries ISeries))
+(define-type PlottableSeries (U GenSeries NSeries ISeries DatetimeSeries))
 
-(define-predicate PlottableSeries? (U NSeries ISeries))
+(define-predicate PlottableSeries? (U GenSeries NSeries ISeries DatetimeSeries))
 
 (define-predicate RealList? (Listof Real))
 

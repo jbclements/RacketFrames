@@ -4,10 +4,14 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 #lang typed/racket
-(require typed/rackunit)
+
+(require typed/racket/date)
 
 (require
- "../util/datetime.rkt"         
+ (only-in "../util/datetime.rkt"
+          Datetime Date Time datetime-date datetime-time
+          rf-date-year rf-date-month rf-date-day
+          time-offset time-hour time-minute time-second time-milli)
  racket/unsafe/ops
  (only-in "indexed-series.rkt"
 	  RFIndex RFIndex? build-index-from-list
@@ -18,6 +22,8 @@
           ListofListofString ListofListofString?)
  (only-in "boolean-series.rkt"
           BSeries))
+
+(date->seconds (date 1 2 3 4 5 1971 5 8 #f 0))
 
 ; ***********************************************************
 ; Provide functions in this file to other files.
@@ -330,12 +336,12 @@
          [date-2 : Date (datetime-date datetime-2)]
          [time-1 : Time (datetime-time datetime-1)]
          [time-2 : Time (datetime-time datetime-2)]
-         [year-1 : Integer (date-year date-1)]
-         [year-2 : Integer (date-year date-2)]
-         [month-1 : Integer (date-month date-1)]
-         [month-2 : Integer (date-month date-2)]
-         [day-1 : Integer (date-day date-1)]
-         [day-2 : Integer (date-day date-2)]
+         [year-1 : Integer (rf-date-year date-1)]
+         [year-2 : Integer (rf-date-year date-2)]
+         [month-1 : Integer (rf-date-month date-1)]
+         [month-2 : Integer (rf-date-month date-2)]
+         [day-1 : Integer (rf-date-day date-1)]
+         [day-2 : Integer (rf-date-day date-2)]
          [offset-1 : Integer (time-offset time-1)]
          [offset-2 : Integer (time-offset time-2)]
          [hour-1 : Integer (time-hour time-1)]
@@ -345,10 +351,17 @@
          [second-1 : Integer (time-second time-1)]
          [second-2 : Integer (time-second time-2)]
          [milli-1 : Integer (time-milli time-1)]
-         [milli-2 : Integer (time-milli time-2)])
+         [milli-2 : Integer (time-milli time-2)]
 
-    (Datetime (Date (+ year-1 year-2) (+ month-1 month-2) (+ day-1 day-2))
-              (Time (+ offset-1 offset-2) (+ hour-1 hour-2) (+ minute-1 minute-2) (+ second-1 second-2) (+ milli-1 milli-2)))))
+         [racket-date-1 : date (date (assert second-1 exact-nonnegative-integer?) (assert minute-1 exact-nonnegative-integer?) (assert hour-1 exact-nonnegative-integer?)
+                                     (assert day-1 exact-nonnegative-integer?) (assert month-1 exact-nonnegative-integer?) (assert year-1 exact-nonnegative-integer?) 0 0 #f offset-1)]
+         [racket-date-2 : date (date (assert second-2 exact-nonnegative-integer?) (assert minute-2 exact-nonnegative-integer?) (assert hour-2 exact-nonnegative-integer?)
+                                     (assert day-2 exact-nonnegative-integer?) (assert month-2 exact-nonnegative-integer?) (assert year-2 exact-nonnegative-integer?) 0 0 #f offset-2)]
+         [result : date (seconds->date (+ (date->seconds racket-date-1) (date->seconds racket-date-2)))])
+
+
+    (Datetime (Date (date-year result) (date-month result) (date-day result))
+              (Time (date-time-zone-offset result) (date-hour result) (date-minute result) (date-second result) (+ milli-1 milli-2)))))
 
 (: datetime- (Datetime Datetime -> Datetime))
 (define (datetime- datetime-1 datetime-2)
@@ -356,12 +369,12 @@
          [date-2 : Date (datetime-date datetime-2)]
          [time-1 : Time (datetime-time datetime-1)]
          [time-2 : Time (datetime-time datetime-2)]
-         [year-1 : Integer (date-year date-1)]
-         [year-2 : Integer (date-year date-2)]
-         [month-1 : Integer (date-month date-1)]
-         [month-2 : Integer (date-month date-2)]
-         [day-1 : Integer (date-day date-1)]
-         [day-2 : Integer (date-day date-2)]
+         [year-1 : Integer (rf-date-year date-1)]
+         [year-2 : Integer (rf-date-year date-2)]
+         [month-1 : Integer (rf-date-month date-1)]
+         [month-2 : Integer (rf-date-month date-2)]
+         [day-1 : Integer (rf-date-day date-1)]
+         [day-2 : Integer (rf-date-day date-2)]
          [offset-1 : Integer (time-offset time-1)]
          [offset-2 : Integer (time-offset time-2)]
          [hour-1 : Integer (time-hour time-1)]
@@ -371,10 +384,17 @@
          [second-1 : Integer (time-second time-1)]
          [second-2 : Integer (time-second time-2)]
          [milli-1 : Integer (time-milli time-1)]
-         [milli-2 : Integer (time-milli time-2)])
+         [milli-2 : Integer (time-milli time-2)]
 
-    (Datetime (Date (- year-1 year-2) (- month-1 month-2) (- day-1 day-2))
-              (Time (- offset-1 offset-2) (- hour-1 hour-2) (- minute-1 minute-2) (- second-1 second-2) (- milli-1 milli-2)))))
+         [racket-date-1 : date (date (assert second-1 exact-nonnegative-integer?) (assert minute-1 exact-nonnegative-integer?) (assert hour-1 exact-nonnegative-integer?)
+                                     (assert day-1 exact-nonnegative-integer?) (assert month-1 exact-nonnegative-integer?) (assert year-1 exact-nonnegative-integer?) 0 0 #f offset-1)]
+         [racket-date-2 : date (date (assert second-2 exact-nonnegative-integer?) (assert minute-2 exact-nonnegative-integer?) (assert hour-2 exact-nonnegative-integer?)
+                                     (assert day-2 exact-nonnegative-integer?) (assert month-2 exact-nonnegative-integer?) (assert year-2 exact-nonnegative-integer?) 0 0 #f offset-2)]
+         [result : date (seconds->date (- (date->seconds racket-date-1) (date->seconds racket-date-2)))])
+
+
+    (Datetime (Date (date-year result) (date-month result) (date-day result))
+              (Time (date-time-zone-offset result) (date-hour result) (date-minute result) (date-second result) (+ milli-1 milli-2)))))
 
 (: +/datetime-series (DatetimeSeries DatetimeSeries -> DatetimeSeries))
 (define (+/datetime-series datetime-1 datetime-2)
@@ -383,6 +403,14 @@
 (: -/datetime-series (DatetimeSeries DatetimeSeries -> DatetimeSeries))
 (define (-/datetime-series datetime-1 datetime-2)
   (bop/datetime-series datetime-1 datetime-2 datetime-))
+
+(: datetime-range (Datetime [#:period Symbol] [#:end Datetime] -> (Listof Datetime)))
+(define (datetime-range datetime #:period [period 'D] #:end [end (Datetime (Date 0 0 0) (Time 0 0 0 0 0))])
+  (if (not (= end (Datetime (Date 0 0 0) (Datetime 0 0 0 0 0))))
+      (datetime- end datetime)
+  )
+
+
 
 ; ***********************************************************
 

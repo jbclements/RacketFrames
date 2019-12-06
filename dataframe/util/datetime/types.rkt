@@ -13,9 +13,9 @@
  (struct-out Datetime))
 
 (provide:
- [date-year (Date -> Integer)]
- [date-month (Date -> Integer)]
- [date-day (Date -> Integer)]
+ [rf-date-year (Date -> Integer)]
+ [rf-date-month (Date -> Integer)]
+ [rf-date-day (Date -> Integer)]
  [time-offset (Time -> Integer)]
  [time-hour (Time -> Integer)]
  [time-minute (Time -> Integer)]
@@ -56,16 +56,17 @@
 		   [time : Time]) #:transparent)
 
 
-(: date-year (Date -> Integer))
-(define (date-year date)
+; need to change namespace to use date package
+(: rf-date-year (Date -> Integer))
+(define (rf-date-year date)
   (Date-year date))
 
-(: date-month (Date -> Integer))
-(define (date-month date)
+(: rf-date-month (Date -> Integer))
+(define (rf-date-month date)
   (Date-month date))
 
-(: date-day (Date -> Integer))
-(define (date-day date)
+(: rf-date-day (Date -> Integer))
+(define (rf-date-day date)
   (Date-day date))
 
 (: time-offset (Time -> Integer))

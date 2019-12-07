@@ -23,7 +23,7 @@
  (only-in "boolean-series.rkt"
           BSeries))
 
-(date->seconds (date 1 2 3 4 5 1971 5 8 #f 0))
+;(date->seconds (date 1 2 3 4 5 1971 5 8 #f 0))
 
 ; ***********************************************************
 ; Provide functions in this file to other files.
@@ -53,10 +53,10 @@
  ;[+./datetime-series (DatetimeSeries Datetime -> DatetimeSeries)]
  ;[-./datetime-series (DatetimeSeries Datetime -> DatetimeSeries)]
  ;[>/datetime-series (DatetimeSeries DatetimeSeries -> BSeries)]
- ;[</is (DatetimeSeries DatetimeSeries -> BSeries)]
- ;[>=/is (DatetimeSeries DatetimeSeries -> BSeries)]
- ;[<=/is (DatetimeSeries DatetimeSeries -> BSeries)]
- ;[=/is (DatetimeSeries DatetimeSeries -> BSeries)]
+ ;[</datetime-series (DatetimeSeries DatetimeSeries -> BSeries)]
+ ;[>=/datetime-series (DatetimeSeries DatetimeSeries -> BSeries)]
+ ;[<=/datetime-series (DatetimeSeries DatetimeSeries -> BSeries)]
+ ;[=/datetime-series (DatetimeSeries DatetimeSeries -> BSeries)]
  ;[!=/is (DatetimeSeries DatetimeSeries -> BSeries)]
  
  [datetime-series-print (DatetimeSeries Output-Port -> Void)])
@@ -374,7 +374,7 @@
     (< date-seconds-1 date-seconds-2)))
 
 (: datetime<= (Datetime Datetime -> Boolean))
-(define (datetime< datetime-1 datetime-2)
+(define (datetime<= datetime-1 datetime-2)
   (let* ([date-seconds-1 : Integer (date-to-seconds datetime-1)]
          [date-seconds-2 : Integer (date-to-seconds datetime-2)])
 
@@ -388,11 +388,18 @@
     (> date-seconds-1 date-seconds-2)))
 
 (: datetime>= (Datetime Datetime -> Boolean))
-(define (datetime> datetime-1 datetime-2)
+(define (datetime>= datetime-1 datetime-2)
   (let* ([date-seconds-1 : Integer (date-to-seconds datetime-1)]
          [date-seconds-2 : Integer (date-to-seconds datetime-2)])
 
     (>= date-seconds-1 date-seconds-2)))
+
+(: datetime= (Datetime Datetime -> Boolean))
+(define (datetime= datetime-1 datetime-2)
+  (let* ([date-seconds-1 : Integer (date-to-seconds datetime-1)]
+         [date-seconds-2 : Integer (date-to-seconds datetime-2)])
+
+    (= date-seconds-1 date-seconds-2)))
 
 (: +/datetime-series (DatetimeSeries DatetimeSeries -> DatetimeSeries))
 (define (+/datetime-series datetime-1 datetime-2)
@@ -402,8 +409,8 @@
 (define (-/datetime-series datetime-1 datetime-2)
   (bop/datetime-series datetime-1 datetime-2 datetime-))
 
-(: period-offset (Symbol -> Real))
-(define (period-offset freq)
+(: freq-offset (Symbol -> Real))
+(define (freq-offset freq)
   (let ([milli : Real (/ 1 1000)]
         [second : Real 1]
         [minute : Real 60]
@@ -413,30 +420,41 @@
         [month : Real 2.628e+6]
         [year : Real 3.154e+7])
   (cond
-   [(= freq 'MS) milli]
-   [(= freq 'S) second]
-   [(= freq 'M) minute]
-   [(= freq 'H) hour]   
-   [(= freq 'D) day]
-   [(= freq 'W) week]
-   [(= freq 'MO) month]
-   [(= freq 'Y) year]
-   [else (error "invalid period")])))))
+   [(equal? freq 'MS) milli]
+   [(equal? freq 'S) second]
+   [(equal? freq 'M) minute]
+   [(equal? freq 'H) hour]   
+   [(equal? freq 'D) day]
+   [(equal? freq 'W) week]
+   [(equal? freq 'MO) month]
+   [(equal? freq 'Y) year]
+   [else (error "invalid freq")])))
 
-(: datetime-range (Datetime [#:freq (Option Symbol)] [#:periods (Option Index)] [#:end (Option Datetime)] -> (Listof Datetime)))
-(define (datetime-range datetime #:freq [freq 1] #:periods [period 'D] #:end [end (Datetime (Date 0 0 0) (Time 0 0 0 0 0))])
-  (let ([date-seconds (date-to-seconds datetime)]
-        [
-        )
+(: datetime-range (Datetime (Option Symbol) (Option Index) (Option Datetime) -> (Listof Datetime)))
+(define (datetime-range datetime freq periods end)
+  (let* ([date-seconds : Integer (date-to-seconds datetime)]
+        [offset : Real (freq-offset (if (not freq) 'D freq))]
+        [interval : Real (* (assert (if (not periods) 1 periods)) offset)]        
+        [end-date-seconds : Real (if (not end)
+                              (+ date-seconds interval)
+                              (date-to-seconds end))]
+        [end-loop : Real (/ (- end-date-seconds date-seconds) interval)])
+
     
+    (if (<= date-seconds end-date-seconds)
+        (for/list: : (Listof Datetime) ([i (range end-loop)])
 
-  (for/list: : (Listof Datetime) (#:break (not (<= end (date-seconds (Date 0 0 0) (Datetime 0 0 0 0 0)))))
-  
-    (if (not (= end (Datetime (Date 0 0 0) (Datetime 0 0 0 0 0))))
-      (datetime+ end datetime)
-  ))
+          (let* ((result : date (seconds->date (exact-round (+ date-seconds (* i interval)))))
+                (dt (Datetime (Date (date-year result) (date-month result) (date-day result))
+                                    (Time (date-time-zone-offset result) (date-hour result) (date-minute result) (date-second result) (time-milli (datetime-time datetime))))))
+           
+           dt))
+        (list datetime))
+    ))
 
+;(range (/ (- (date-to-seconds (Datetime (Date 2018 6 19) (Time 0 0 0 0 0))) (date-to-seconds (Datetime (Date 2018 5 19) (Time 0 0 0 0 0)))) 86400))
 
+;(datetime-range (Datetime (Date 2018 5 19) (Time 0 0 0 0 0)) 'MO 2 (Datetime (Date 2018 10 23) (Time 0 0 0 0 0)))
 
 ; ***********************************************************
 

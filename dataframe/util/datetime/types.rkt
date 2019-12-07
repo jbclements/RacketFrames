@@ -10,7 +10,8 @@
  (struct-out ModifiedJulianDay)
  (struct-out Date)
  (struct-out Time)
- (struct-out Datetime))
+ (struct-out Datetime)
+ tic?)
 
 (provide:
  [rf-date-year (Date -> Integer)]
@@ -28,6 +29,7 @@
 ;; Instant in time in millis along with a Chronometry.
 ;; Assumes a 64 bit build of Racket for the long haul.
 (define-type Tic Integer)
+(define-predicate tic? Tic)
 (define-type Chronometry (U 'TAI 'UTC))
 (define-type (InstantMaker X) (Tic -> X))
 

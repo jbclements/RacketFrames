@@ -45,6 +45,7 @@
  [datetime-series-data (DatetimeSeries -> (Vectorof Datetime))]
  [datetime-series-index (DatetimeSeries -> (U False RFIndex))]
  [map/datetime-series-data (DatetimeSeries (Datetime -> Datetime) -> DatetimeSeries)]
+ [datetime-range (Datetime (Option Symbol) (Option Index) (Option Datetime) -> (Listof Datetime))]
 
  [bop/datetime-series (DatetimeSeries DatetimeSeries (Datetime Datetime -> Datetime) -> DatetimeSeries)]
  ;[comp/datetime-series (DatetimeSeries DatetimeSeries (Datetime Datetime -> Boolean) -> BSeries)]

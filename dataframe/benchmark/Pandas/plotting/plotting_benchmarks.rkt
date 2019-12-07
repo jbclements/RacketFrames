@@ -127,3 +127,5 @@ Timing out
          "Integer Dataframe Discrete Histogram Stacked Bench: ~v ms.\n"
          integer-dataframe-discrete-histogram-stacked-bench-after)
 |#
+
+(datetime-range (Datetime (Date 1975 1 1) (Time 0 0 0 0 0)) 'MO 100 #f)

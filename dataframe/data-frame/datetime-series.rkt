@@ -434,17 +434,19 @@
 (define (datetime-range datetime freq periods end)
   (let* ([date-seconds : Integer (date-to-seconds datetime)]
         [offset : Real (freq-offset (if (not freq) 'D freq))]
-        [interval : Real (* (assert (if (not periods) 1 periods)) offset)]        
+        [interval : Real (if (not end) offset (* offset (assert (if (not periods) 1 periods))))]
         [end-date-seconds : Real (if (not end)
-                              (+ date-seconds interval)
+                              (+ date-seconds (* offset (assert (if (not periods) 1 periods))))
                               (date-to-seconds end))]
-        [end-loop : Real (/ (- end-date-seconds date-seconds) interval)])
+        [end-loop : Real (if (not end) 
+                             (/  (- end-date-seconds date-seconds) (assert offset))
+                             (/ (- end-date-seconds date-seconds) (assert interval)))])
 
-    
+
     (if (<= date-seconds end-date-seconds)
-        (for/list: : (Listof Datetime) ([i (range end-loop)])
+        (for/list: : (Listof Datetime) ([i (range (exact-ceiling end-loop))])
 
-          (let* ((result : date (seconds->date (exact-round (+ date-seconds (* i interval)))))
+          (let* ((result : date (seconds->date (exact-ceiling (+ date-seconds (* i interval)))))
                 (dt (Datetime (Date (date-year result) (date-month result) (date-day result))
                                     (Time (date-time-zone-offset result) (date-hour result) (date-minute result) (date-second result) (time-milli (datetime-time datetime))))))
            
@@ -452,9 +454,11 @@
         (list datetime))
     ))
 
-;(range (/ (- (date-to-seconds (Datetime (Date 2018 6 19) (Time 0 0 0 0 0))) (date-to-seconds (Datetime (Date 2018 5 19) (Time 0 0 0 0 0)))) 86400))
+;(range (/ (- (date-to-seconds (Datetime (Date 2018 6 19) (Time 0 0 0 0 0))) (date-to-seconds (Datetime (Date 2018 5 19) (Time 0 0 0 0 0)))) 864 00))
 
-;(datetime-range (Datetime (Date 2018 5 19) (Time 0 0 0 0 0)) 'MO 2 (Datetime (Date 2018 10 23) (Time 0 0 0 0 0)))
+(datetime-range (Datetime (Date 2018 5 19) (Time 0 0 0 0 0)) 'MO 2 (Datetime (Date 2018 10 23) (Time 0 0 0 0 0)))
+
+(datetime-range (Datetime (Date 1975 1 1) (Time 0 0 0 0 0)) 'MO 100 #f)
 
 ; ***********************************************************
 

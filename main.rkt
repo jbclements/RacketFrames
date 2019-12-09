@@ -41,8 +41,9 @@
  "dataframe/data-frame/categorical-series.rkt"
  "dataframe/data-frame/boolean-series.rkt"
  "dataframe/data-frame/date.rkt"
- "dataframe/data-frame/datetime-series.rkt"
+ "dataframe/data-frame/datetime-series.rkt" 
  "dataframe/data-frame/categorical-series-ops.rkt"
+ "dataframe/util/datetime.rkt"
  "dataframe/data-frame/series-iter.rkt"
  "dataframe/data-frame/series-print.rkt"
  (only-in "dataframe/load/schema-syntax.rkt"
@@ -88,4 +89,5 @@
  (all-from-out "dataframe/data-frame/gen-nseries.rkt")
  (all-from-out "dataframe/data-frame/series-print.rkt")
  (all-from-out "dataframe/plot/plot.rkt")
+ (all-from-out "dataframe/util/datetime.rkt")
  (all-from-out racket/flonum))

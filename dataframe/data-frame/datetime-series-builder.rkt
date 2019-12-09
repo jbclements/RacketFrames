@@ -19,9 +19,7 @@
  (only-in "../util/datetime/parse.rkt"
           parse-date parse-datetime is-valid-date? is-valid-datetime?)
  (only-in "../util/datetime/types.rkt"
-          Datetime Date Time))
-
-(define-predicate Datetime? Datetime)
+          Datetime Datetime? Date Time))
 
 (struct: DatetimeSeriesBuilder ([index  : Index]
                                 [data : (Vectorof Datetime)]) #:mutable)

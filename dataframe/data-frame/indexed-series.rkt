@@ -63,8 +63,6 @@
 
 (define-predicate Label? Label)
 
-(define-predicate Datetime? Datetime)
-
 (define-predicate ListofLabel? (Listof Label))
 
 (define-predicate ListofInteger? (Listof Integer))

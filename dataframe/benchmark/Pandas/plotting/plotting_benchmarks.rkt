@@ -128,4 +128,4 @@ Timing out
          integer-dataframe-discrete-histogram-stacked-bench-after)
 |#
 
-(datetime-range (Datetime (Date 1975 1 1) (Time 0 0 0 0 0)) 'MO 100 #f)
+(build-index-from-list (datetime-range (Datetime (Date 1975 1 1) (Time 0 0 0 0 0)) 'D 2000 #f))

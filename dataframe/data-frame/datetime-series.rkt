@@ -48,17 +48,17 @@
  [datetime-range (Datetime (Option Symbol) (Option Index) (Option Datetime) -> (Listof Datetime))]
 
  [bop/datetime-series (DatetimeSeries DatetimeSeries (Datetime Datetime -> Datetime) -> DatetimeSeries)]
- ;[comp/datetime-series (DatetimeSeries DatetimeSeries (Datetime Datetime -> Boolean) -> BSeries)]
+ [comp/datetime-series (DatetimeSeries DatetimeSeries (Datetime Datetime -> Boolean) -> BSeries)]
  [+/datetime-series (DatetimeSeries DatetimeSeries -> DatetimeSeries)]
  [-/datetime-series (DatetimeSeries DatetimeSeries -> DatetimeSeries)]
  ;[+./datetime-series (DatetimeSeries Datetime -> DatetimeSeries)]
  ;[-./datetime-series (DatetimeSeries Datetime -> DatetimeSeries)]
- ;[>/datetime-series (DatetimeSeries DatetimeSeries -> BSeries)]
- ;[</datetime-series (DatetimeSeries DatetimeSeries -> BSeries)]
- ;[>=/datetime-series (DatetimeSeries DatetimeSeries -> BSeries)]
- ;[<=/datetime-series (DatetimeSeries DatetimeSeries -> BSeries)]
- ;[=/datetime-series (DatetimeSeries DatetimeSeries -> BSeries)]
- ;[!=/is (DatetimeSeries DatetimeSeries -> BSeries)]
+ [>/datetime-series (DatetimeSeries DatetimeSeries -> BSeries)]
+ [</datetime-series (DatetimeSeries DatetimeSeries -> BSeries)]
+ [>=/datetime-series (DatetimeSeries DatetimeSeries -> BSeries)]
+ [<=/datetime-series (DatetimeSeries DatetimeSeries -> BSeries)]
+ [=/datetime-series (DatetimeSeries DatetimeSeries -> BSeries)]
+ [!=/datetime-series (DatetimeSeries DatetimeSeries -> BSeries)]
  
  [datetime-series-print (DatetimeSeries Output-Port -> Void)])
 ; ***********************************************************
@@ -323,7 +323,25 @@
        (vector-set! v-bop idx (bop (vector-ref v1 idx)
 				   (vector-ref v2 idx)))))
 
-; (: comp/datetime-series (DatetimeSeries DatetimeSeries (Datetime Datetime -> Boolean) -> BSeries))
+(: comp/datetime-series (DatetimeSeries DatetimeSeries (Datetime Datetime -> Boolean) -> BSeries))
+(define (comp/datetime-series datetime-series-1 datetime-series-2 comp)
+  (define v1 (DatetimeSeries-data datetime-series-1))
+  (define v2 (DatetimeSeries-data datetime-series-2))
+  (define: len : Index (vector-length v1))
+  
+  (unless (eqv? len (vector-length v2))
+	  (error 'comp/datetime-series "Series must be of equal length."))
+
+  (define: v-comp : (Vectorof Boolean) (make-vector len #f))
+
+  ; Do loop returns DatetimeSeries, idx to 0 and increments by 1 Fixnum on
+  ; each iteration (this is the step-exprs). When the loop has gone
+  ; through the whole vector, the resulting new ISeries is returned
+  ; which the v-bop as the data.
+  (do: : BSeries ([idx : Fixnum 0 (unsafe-fx+ idx #{1 : Fixnum})])
+       ((= idx len) (BSeries #f v-comp))
+       (vector-set! v-comp idx (comp (vector-ref v1 idx)
+				   (vector-ref v2 idx)))))
 ; ***********************************************************
 
 ; ***********************************************************
@@ -402,6 +420,13 @@
 
     (= date-seconds-1 date-seconds-2)))
 
+(: datetime!= (Datetime Datetime -> Boolean))
+(define (datetime!= datetime-1 datetime-2)
+  (let* ([date-seconds-1 : Integer (date-to-seconds datetime-1)]
+         [date-seconds-2 : Integer (date-to-seconds datetime-2)])
+
+    (not (= date-seconds-1 date-seconds-2))))
+
 (: +/datetime-series (DatetimeSeries DatetimeSeries -> DatetimeSeries))
 (define (+/datetime-series datetime-1 datetime-2)
   (bop/datetime-series datetime-1 datetime-2 datetime+))
@@ -409,6 +434,30 @@
 (: -/datetime-series (DatetimeSeries DatetimeSeries -> DatetimeSeries))
 (define (-/datetime-series datetime-1 datetime-2)
   (bop/datetime-series datetime-1 datetime-2 datetime-))
+
+(: >/datetime-series (DatetimeSeries DatetimeSeries -> BSeries))
+(define (>/datetime-series datetime-1 datetime-2)
+  (comp/datetime-series datetime-1 datetime-2 datetime>))
+
+(: </datetime-series (DatetimeSeries DatetimeSeries -> BSeries))
+(define (</datetime-series datetime-1 datetime-2)
+  (comp/datetime-series datetime-1 datetime-2 datetime<))
+
+(: >=/datetime-series (DatetimeSeries DatetimeSeries -> BSeries))
+(define (>=/datetime-series datetime-1 datetime-2)
+  (comp/datetime-series datetime-1 datetime-2 datetime>=))
+
+(: <=/datetime-series (DatetimeSeries DatetimeSeries -> BSeries))
+(define (<=/datetime-series datetime-1 datetime-2)
+  (comp/datetime-series datetime-1 datetime-2 datetime<=))
+
+(: =/datetime-series (DatetimeSeries DatetimeSeries -> BSeries))
+(define (=/datetime-series datetime-1 datetime-2)
+  (comp/datetime-series datetime-1 datetime-2 datetime=))
+
+(: !=/datetime-series (DatetimeSeries DatetimeSeries -> BSeries))
+(define (!=/datetime-series datetime-1 datetime-2)
+  (comp/datetime-series datetime-1 datetime-2 datetime!=))
 
 (: freq-offset (Symbol -> Real))
 (define (freq-offset freq)
@@ -457,9 +506,9 @@
 
 ;(range (/ (- (date-to-seconds (Datetime (Date 2018 6 19) (Time 0 0 0 0 0))) (date-to-seconds (Datetime (Date 2018 5 19) (Time 0 0 0 0 0)))) 864 00))
 
-(datetime-range (Datetime (Date 2018 5 19) (Time 0 0 0 0 0)) 'MO 2 (Datetime (Date 2018 10 23) (Time 0 0 0 0 0)))
+;(datetime-range (Datetime (Date 2018 5 19) (Time 0 0 0 0 0)) 'MO 2 (Datetime (Date 2018 10 23) (Time 0 0 0 0 0)))
 
-(datetime-range (Datetime (Date 1975 1 1) (Time 0 0 0 0 0)) 'MO 100 #f)
+;(datetime-range (Datetime (Date 1975 1 1) (Time 0 0 0 0 0)) 'MO 100 #f)
 
 ; ***********************************************************
 

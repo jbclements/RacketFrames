@@ -11,7 +11,7 @@
  (struct-out Date)
  (struct-out Time)
  (struct-out Datetime)
- tic?)
+ Datetime? tic?)
 
 (provide:
  [rf-date-year (Date -> Integer)]

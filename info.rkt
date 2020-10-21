@@ -11,4 +11,5 @@
                              "dataframe/validation/"
                              "dataframe/jupyter-notebooks/"
                              "dataframe/sample-csv/"                            
-                             "dataframe/util/future-work"))
+                             "dataframe/util/future-work/"
+                             "dataframe/stats/future-work/"))

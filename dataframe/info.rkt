@@ -11,4 +11,5 @@
                              "jupyter-notebooks/"
                              "sample-csv/"
                              ;"data-frame/categorical-series.rkt"
-                             "util/future-work"))
+                             "util/future-work/"
+                             "stats/future-work/"))

@@ -10,5 +10,7 @@
                              "dataframe/slides/"
                              "dataframe/validation/"
                              "dataframe/jupyter-notebooks/"
-                             "dataframe/sample-csv/"
-                             "dataframe/data-frame/categorical-series.rkt"))
+                             "dataframe/sample-csv/"                            
+                             "dataframe/util/plot-datetime.rkt"
+                             "dataframe/util/math.rkt"                             
+                             "dataframe/stats/tabulate.rkt"))

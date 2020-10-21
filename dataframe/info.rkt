@@ -10,4 +10,7 @@
                              "validation/"
                              "jupyter-notebooks/"
                              "sample-csv/"
-                             "data-frame/categorical-series.rkt"))
+                             "data-frame/categorical-series.rkt"
+                             "util/plot-datetime.rkt"
+                             "util/math.rkt"                           
+                             "stats/tabulate.rkt"))

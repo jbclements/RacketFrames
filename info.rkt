@@ -11,6 +11,4 @@
                              "dataframe/validation/"
                              "dataframe/jupyter-notebooks/"
                              "dataframe/sample-csv/"                            
-                             "dataframe/util/plot-datetime.rkt"
-                             "dataframe/util/math.rkt"                             
-                             "dataframe/stats/tabulate.rkt"))
+                             "dataframe/util/future-work"))

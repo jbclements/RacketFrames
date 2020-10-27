@@ -9,8 +9,6 @@
 	  set set-member?
 	  list->set set->list
 	  set-intersect set-subtract)
- (only-in grip/data/symbol
-	  symbol-prefix)
  (only-in "../../../data-frame/indexed-series.rkt"
 	  Label Labeling LabelProjection)
  (only-in "../../../data-frame/series.rkt"
@@ -23,7 +21,7 @@
  (only-in "../../../data-frame/data-frame.rkt"
 	  DataFrame new-data-frame data-frame-names
 	  data-frame-cseries data-frame-explode data-frame-extend
-	  DataFrameDescription DataFrameDescription-series data-frame-description
+	  DataFrameDescription DataFrameDescription-series data-frame-description show-data-frame-description
           Column Columns)
  (only-in "../../../data-frame/data-frame-concat.rkt"
           data-frame-concat-vertical
@@ -31,7 +29,7 @@
           data-frame-concat-horizontal
           data-frame-concat-horizontal-list)
  (only-in "../../../data-frame/numeric-series.rkt"
-	  NSeries NSeries? nseries-iref nseries-label-ref new-NSeries)
+	  NSeries NSeries? nseries-iref new-NSeries)
  (only-in "../../../data-frame/integer-series.rkt"
 	  ISeries ISeries? iseries-iref new-ISeries
 	  iseries-referencer)
@@ -53,9 +51,7 @@
  (only-in "../../../data-frame/numeric-series-builder.rkt"
 	  NSeriesBuilder NSeriesBuilder?
 	  append-NSeriesBuilder complete-NSeriesBuilder
-	  new-NSeriesBuilder)
- (only-in "../../../data-frame/data-frame-print.rkt"
-          frame-write-tab))
+	  new-NSeriesBuilder))
 
 #|  def setup(self, axis, ignore_index):
         frame_c = DataFrame(np.zeros((10000, 200),
@@ -79,10 +75,13 @@
 
 (define frame-c (new-data-frame
                  (for/list: : Columns ([col 200])
-                   (cons (string->symbol (number->string col))
+                   (cons (string->symbol (number->string (+ col (random))))
                            (new-ISeries (for/vector: : (Vectorof Fixnum) ([i N]) 0) #f)))))
 
-(define twenty-frame-c (for/list: : (Listof DataFrame) ([i 20]) frame-c))
+(define twenty-frame-c (for/list: : (Listof DataFrame) ([i 20]) (new-data-frame
+                 (for/list: : Columns ([col 200])
+                   (cons (string->symbol (number->string (+ col (random))))
+                           (new-ISeries (for/vector: : (Vectorof Fixnum) ([i N]) 0) #f))))))
 
 (define frame-f (new-data-frame
                  (for/list: : Columns ([col 200])
@@ -96,12 +95,14 @@
 (define concat-horizontal-result (data-frame-concat-horizontal-list twenty-frame-c))
 (define data-frame-list-horizontal-concat-bench-after (- (now) data-frame-list-horizontal-concat-bench-before))
 
+(show-data-frame-description (data-frame-description concat-horizontal-result))
+
 (fprintf (current-output-port)
          "DataFrame list horizontal concat bench ~v ms.\n"
          data-frame-list-horizontal-concat-bench-after)
 (printf "Pandas Compare* join_merge.ConcatDataFrames.time_c_ordered 123.69ms")
 
-; vertical concat benchmark
+;vertical concat benchmark
 (define data-frame-list-vertical-concat-bench-before (now))
 (define concat-vertical-result (data-frame-concat-vertical-list twenty-frame-f))
 (define data-frame-list-vertical-concat-bench-after (- (now) data-frame-list-vertical-concat-bench-before))

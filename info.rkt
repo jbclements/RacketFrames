@@ -1,10 +1,11 @@
 #lang info
 
-(define collection 'RacketFrames 'multi)
+(define collection 'RacketFrames)
 (define version "1.0")
 
 (define deps '("typed-racket-lib"               
                "plot-lib"))
+
 (define build-deps '("racket-doc"
                      "scribble-lib"))
 

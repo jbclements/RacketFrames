@@ -1,6 +1,5 @@
 #lang info
 
-;(define collection 'RacketFrames)
 (define collection 'multi)
 (define version "1.0")
 
@@ -17,3 +16,7 @@
                              "dataframe/sample-csv/"                            
                              "dataframe/util/future-work/"
                              "dataframe/stats/future-work/"))
+
+(define pkg-desc "RacketFrames: A DataFrame implemenation in Racket.")
+
+(define pkg-authors '(skahal))

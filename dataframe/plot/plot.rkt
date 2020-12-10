@@ -66,8 +66,8 @@
  [get-columns-point-sequence (Columns -> (Listof (Listof (Listof Real))))]
  [make-points ((Listof (Listof Real)) -> renderer2d)]
  [make-lines ((Listof (Listof Real)) -> renderer2d)]
- [make-scatter-plot ((U Series (Listof Series) DataFrame Column Columns) -> Any)]
- [make-line-plot ((U Series (Listof Series) DataFrame Column Columns) -> Any)]
+ [make-scatter-plot ((U Series (Listof Series) DataFrame Column Columns) [#:x-min Real] [#:x-max Real] [#:y-min Real] [#:y-max Real] -> Any)]
+ [make-line-plot ((U Series (Listof Series) DataFrame Column Columns) [#:x-min Real] [#:x-max Real] [#:y-min Real] [#:y-max Real] -> Any)]
  [make-hist-bin-stacked (-> HistBinStacked)]
  [get-discrete-hist-data ((U (Vectorof Any) (Vectorof Boolean) (Vectorof Datetime) (Vectorof Fixnum) (Vectorof Symbol) FlVector) -> HistBin)] 
  [get-discrete-hist-data-vec ((U (Vectorof IndexDataType) (Vectorof Any) (Vectorof Boolean) (Vectorof Datetime) (Vectorof Fixnum) (Vectorof Symbol) FlVector)

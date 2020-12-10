@@ -4,10 +4,7 @@
 (define version "1.0")
 
 (define compile-omit-paths '("dataframe/tests/"                            
-                             "dataframe/benchmark/"
-                             "dataframe/thesis-paper/"
-                             "dataframe/images/"
-                             "dataframe/slides/"
+                             "dataframe/benchmark/"                         
                              "dataframe/validation/"
                              "dataframe/jupyter-notebooks/"
                              "dataframe/sample-csv/"                            

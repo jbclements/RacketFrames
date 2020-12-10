@@ -48,7 +48,7 @@ class TimeseriesPlotting(object):
 
 (define now current-inexact-milliseconds)
 
-(define N (expt 10 6))
+(define N 1000000)
 
 (: data (Vectorof Fixnum))
 ;(define data (make-vector N (random N)))
@@ -74,7 +74,7 @@ class TimeseriesPlotting(object):
 (define data-frame-integer (new-data-frame columns-integer))
 
 (define integer-dataframe-scatter-plot-bench-before (now))
-(make-scatter-plot data-frame-integer)
+(make-scatter-plot data-frame-integer #:x-min -50)
 (define integer-dataframe-scatter-plot-bench-after (- (now) integer-dataframe-scatter-plot-bench-before))
 
 (fprintf (current-output-port)

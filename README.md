@@ -118,9 +118,4 @@ sh benchmark/join_merge/join_merge.sh
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
-
-## Acknowledgments
-
-A huge thank you to [Ray Racine](https://github.com/RayRacine) who's repo [Munger](https://github.com/RayRacine/munger) was used as the starting point of this project. This project aims to add further functionality, test cases and performance benchmarks to this existing library.
-
+This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details.

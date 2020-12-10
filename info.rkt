@@ -1,5 +1,6 @@
 #lang info
-(define deps '("typed-racket-lib"))
+(define deps '("typed-racket-lib"               
+               "plot-lib"))
 (define collection 'RacketFrames)
 (define version "1.0")
 

@@ -162,8 +162,8 @@
 (define (make-lines list-of-points)
   (lines list-of-points))
 
-(: make-scatter-plot ((U Series (Listof Series) DataFrame Column Columns) -> Any))
-(define (make-scatter-plot data)
+(: make-scatter-plot ((U Series (Listof Series) DataFrame Column Columns) [#:x-min Real] [#:x-max Real] [#:y-min Real] [#:y-max Real]  -> Any))
+(define (make-scatter-plot data #:x-min [x-min -20] #:x-max [x-max 20] #:y-min [y-min -20] #:y-max [y-max 20])
   (let: ((plot-points : (Treeof renderer2d)
          (cond
            [(and (Series? data) (is-plottable-series data)) (list (points (get-series-point-sequence data)))]
@@ -174,10 +174,10 @@
            [else (error 'make-scatter-plot "Invalid data to plot")])))
     (plot
      plot-points         
-     #:x-min -20 #:x-max 20 #:y-min -20 #:y-max 20)))
+     #:x-min x-min #:x-max x-max #:y-min y-min #:y-max y-max)))
 
-(: make-line-plot ((U Series (Listof Series) DataFrame Column Columns) -> Any))
-(define (make-line-plot data)
+(: make-line-plot ((U Series (Listof Series) DataFrame Column Columns) [#:x-min Real] [#:x-max Real] [#:y-min Real] [#:y-max Real] -> Any))
+(define (make-line-plot data #:x-min [x-min -20] #:x-max [x-max 20] #:y-min [y-min -20] #:y-max [y-max 20])
   (let: ((plot-points : (Treeof renderer2d)
          (cond
            [(and (Series? data) (is-plottable-series data)) (list (lines (get-series-point-sequence data)))]
@@ -188,7 +188,7 @@
            [else (error 'make-line-plot "Invalid data to plot")])))
     (plot
      plot-points         
-     #:x-min -20 #:x-max 20 #:y-min -20 #:y-max 20)))
+     #:x-min x-min #:x-max x-max #:y-min y-min #:y-max y-max)))
 
 ; ***********************************************************
 

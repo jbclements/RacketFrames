@@ -283,3 +283,5 @@
 (define data-frame-from-sql-customers (data-frame-from-sql (sqlite3-connect #:database "db/chinook.db") #f "SELECT * FROM customers" empty))
 
 (data-frame-head data-frame-from-sql-customers)
+
+(hash 1 (list 2 2))

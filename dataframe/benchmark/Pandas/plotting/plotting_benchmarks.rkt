@@ -51,7 +51,11 @@ class TimeseriesPlotting(object):
 (define N (expt 10 6))
 
 (: data (Vectorof Fixnum))
-(define data (make-vector N (random N)))
+;(define data (make-vector N (random N)))
+
+(define data (for/vector: : (Vectorof Fixnum)
+    ([n : Fixnum (range 1000)])
+  (random (add1 n))))
 
 (define integer-series (new-ISeries data #f))
 

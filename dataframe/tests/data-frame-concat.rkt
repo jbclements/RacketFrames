@@ -38,13 +38,13 @@
 ; create new data-frame-integer-3
 (define data-frame-integer-2 (new-data-frame columns-integer-2))
 
-;(displayln "Concat Test 1")
+(displayln "Concat Test 1")
 
-;(data-frame-write-tab data-frame-integer-1 (current-output-port))
+(data-frame-write-tab data-frame-integer-1 (current-output-port))
 
-;(data-frame-write-tab data-frame-integer-2 (current-output-port))
+(data-frame-write-tab data-frame-integer-2 (current-output-port))
 
-;(data-frame-write-tab (data-frame-concat-vertical data-frame-integer-1 data-frame-integer-2) (current-output-port))
+(data-frame-write-tab (data-frame-concat-vertical data-frame-integer-1 data-frame-integer-2) (current-output-port))
 
 (define columns-mixed-1
   (list 

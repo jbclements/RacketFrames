@@ -107,6 +107,8 @@
 (define concat-vertical-result (data-frame-concat-vertical-list twenty-frame-f))
 (define data-frame-list-vertical-concat-bench-after (- (now) data-frame-list-vertical-concat-bench-before))
 
+(show-data-frame-description (data-frame-description concat-vertical-result))
+
 (fprintf (current-output-port)
          "DataFrame list vertical concat bench ~v ms.\n"
          data-frame-list-vertical-concat-bench-after)

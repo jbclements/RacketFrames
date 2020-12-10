@@ -21,7 +21,6 @@
 
 #lang typed/racket
 
-
 (require
  (only-in "dataframe/load/load.rkt"
 	  load-csv-file

@@ -4,7 +4,7 @@ This is RacketFrames implemented as a masters thesis at California Polytechnic S
 
 ## Getting Started
 
-Today procedural and functional programmers alike are working with large amounts of data. Many analytical libraries have been developed for many domains to work with such data. Python/Pandas, R or even the command prompt can be used to accomplish these tasks, but this option is especially good if you are 1) using Racket already 2) may need to integrate your solution with other Racket applications in the future or 3) just plain love functional programming.
+Today procedural and functional programmers alike are working with large amounts of data, and analytical libraries have been developed for many domains to work with such data. Python/Pandas, R or even the command prompt can be used to accomplish these tasks, but this option is especially good if you are 1) using Racket already 2) may need to integrate your solution with other Racket applications in the future or 3) just plain love functional programming.
 
 ### Prerequisites
 

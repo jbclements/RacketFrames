@@ -8,7 +8,7 @@ Today procedural and functional programmers alike are working with large amounts
 
 ### Prerequisites
 
-[Racket Version 6](http://racket-lang.org/download/)
+[Racket Version 6.8](http://racket-lang.org/download/) or above.
 
 ### Installing
 
@@ -99,7 +99,7 @@ DataFrame::(Cols: 5, Rows: 200)
 
 ## Running the tests
 
-Currently the tests are integrated into the files themselves. A full test suite is in the works.
+Unit tests can be run from dataframe/tests which contains individual test files written in Racket using typed/rackunit.
 
 ### Benchmarks
 

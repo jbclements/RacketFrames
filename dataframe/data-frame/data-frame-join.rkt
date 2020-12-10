@@ -485,7 +485,6 @@
 ; This function consumes two DataFrames to join and an optional
 ; on argument which contains a Listof column names to join on.
 ; This function does a left join on dfa to dfb.
-; Currently this function only supports joining on one column.
 (: data-frame-join-left (DataFrame DataFrame [#:on (Listof Symbol)] -> DataFrame))
 (define (data-frame-join-left dfa dfb #:on [cols '()])
 
@@ -565,7 +564,6 @@
 
 ; This function consumes two DataFrames to join and an optional
 ; on argument which contains a Listof column names to join on.
-; Currently this function only supports joining on one column.
 (: data-frame-join-right (DataFrame DataFrame [#:on (Listof Symbol)] -> DataFrame))
 (define (data-frame-join-right dfa dfb #:on [cols '()])
 
@@ -645,7 +643,7 @@
 ; This function consumes two DataFrames to join and an optional
 ; on argument which contains a Listof column names to join on.
 ; This function does a left join on dfa to dfb.
-; Currently this function only supports joining on one column.
+
 (: data-frame-join-inner (DataFrame DataFrame [#:on (Listof Symbol)] -> DataFrame))
 (define (data-frame-join-inner dfa dfb #:on [cols '()])
 
@@ -733,7 +731,7 @@
 ; This function consumes two DataFrames to join and an optional
 ; on argument which contains a Listof column names to join on.
 ; This function does a left join on dfa to dfb.
-; Currently this function only supports joining on one column.
+
 (: data-frame-join-outer (DataFrame DataFrame [#:on (Listof Symbol)] -> DataFrame))
 (define (data-frame-join-outer dfa dfb #:on [cols '()])
 

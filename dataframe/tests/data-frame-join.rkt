@@ -330,7 +330,7 @@
 
 (data-frame-write-tab (data-frame-join-inner data-frame-mixed-7 data-frame-mixed-8 #:on (list 'col3)) (current-output-port))
 
-(data-frame-write-tab (data-frame-join-outer data-frame-mixed-7 data-frame-mixed-8 #:on (list 'col3)) (current-output-port))
+(data-frame-write-tab (data-frame-join-outer data-frame-mixed-7 data-frame-mixed-8 #:on (list 'col2 'col3)) (current-output-port))
 
 (define columns-mixed-9
   (list 

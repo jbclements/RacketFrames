@@ -5,7 +5,8 @@
 ; LabelIndex structs from indexed-series.
 (require RacketFrames)
 
-(require racket/format)
+(require racket/format
+         racket/fixnum)
 ; ***********************************************************
 
  #| class Plotting(object):
@@ -48,13 +49,14 @@ class TimeseriesPlotting(object):
 
 (define now current-inexact-milliseconds)
 
-(define N 1000000)
+(: N Positive-Integer)
+(define N 100)
+(: N-MIN Negative-Integer)
+(define N-MIN (* -1 N))
 
 (: data (Vectorof Fixnum))
-;(define data (make-vector N (random N)))
-
 (define data (for/vector: : (Vectorof Fixnum)
-    ([n : Fixnum (range 1000)])
+    ([n : Fixnum (assert (range N) fixnum?)])
   (random (add1 n))))
 
 (define integer-series (new-ISeries data #f))
@@ -62,7 +64,7 @@ class TimeseriesPlotting(object):
 #| def time_getitem_scalar(self, index):
       self.data[800000] |#
 (define integer-series-scatter-plot-bench-before (now))
-(make-scatter-plot integer-series)
+(make-scatter-plot integer-series #:x-min N-MIN #:x-max N #:y-min N-MIN #:y-max N)
 (define integer-series-scatter-plot-bench-after (- (now) integer-series-scatter-plot-bench-before))
 
 (fprintf (current-output-port)
@@ -74,7 +76,7 @@ class TimeseriesPlotting(object):
 (define data-frame-integer (new-data-frame columns-integer))
 
 (define integer-dataframe-scatter-plot-bench-before (now))
-(make-scatter-plot data-frame-integer #:x-min -50)
+(make-scatter-plot data-frame-integer)
 (define integer-dataframe-scatter-plot-bench-after (- (now) integer-dataframe-scatter-plot-bench-before))
 
 (fprintf (current-output-port)

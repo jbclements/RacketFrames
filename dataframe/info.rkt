@@ -1,5 +1,7 @@
 #lang info
 
+(define name "RacketFrames")
+
 (define scribblings '(("documentation/dataframe.scrbl" ())))
 
 (define compile-omit-paths '("tests"                            

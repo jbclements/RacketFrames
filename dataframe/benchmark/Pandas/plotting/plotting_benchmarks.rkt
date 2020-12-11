@@ -47,22 +47,43 @@ class TimeseriesPlotting(object):
     def time_plot_irregular(self):
         self.df2.plot() |#
 
-(define now current-inexact-milliseconds)
-
+; 1000000 elements for scatter and line plot
 (: N Positive-Integer)
-(define N 100)
+(define N 100000)
 (: N-MIN Negative-Integer)
 (define N-MIN (* -1 N))
 
 (: data (Vectorof Fixnum))
 (define data (for/vector: : (Vectorof Fixnum)
-    ([n : Fixnum (assert (range N) fixnum?)])
-  (random (add1 n))))
+    ([n : Real (range N)])
+  (random (add1 (assert n fixnum?)))))
 
 (define integer-series (new-ISeries data #f))
 
-#| def time_getitem_scalar(self, index):
-      self.data[800000] |#
+(define columns-integer (list (cons 'col integer-series)))
+
+(define data-frame-integer (new-data-frame columns-integer))
+
+; 10000 elements for histogram
+(: HISTOGRAM-N Positive-Integer)
+(define HISTOGRAM-N 1000)
+(: HISTOGRAM-N-MIN Negative-Integer)
+(define HISTOGRAM-N-MIN (* -1 N))
+
+(: histogram-data (Vectorof Fixnum))
+(define histogram-data (for/vector: : (Vectorof Fixnum)
+    ([n : Real (range HISTOGRAM-N)])
+  (random (add1 (assert n fixnum?)))))
+
+(define histogram-integer-series (new-ISeries histogram-data #f))
+
+(define histogram-columns-integer (list (cons 'col histogram-integer-series)))
+
+(define histogram-data-frame-integer (new-data-frame histogram-columns-integer))
+
+; benchmark start
+(define now current-inexact-milliseconds)
+
 (define integer-series-scatter-plot-bench-before (now))
 (make-scatter-plot integer-series #:x-min N-MIN #:x-max N #:y-min N-MIN #:y-max N)
 (define integer-series-scatter-plot-bench-after (- (now) integer-series-scatter-plot-bench-before))
@@ -70,10 +91,6 @@ class TimeseriesPlotting(object):
 (fprintf (current-output-port)
          "Integer Series Scatter Plot Bench: ~v ms.\n"
          integer-series-scatter-plot-bench-after)
-
-(define columns-integer (list (cons 'col integer-series)))
-
-(define data-frame-integer (new-data-frame columns-integer))
 
 (define integer-dataframe-scatter-plot-bench-before (now))
 (make-scatter-plot data-frame-integer)
@@ -84,7 +101,7 @@ class TimeseriesPlotting(object):
          integer-dataframe-scatter-plot-bench-after)
 
 (define integer-series-line-plot-bench-before (now))
-(make-line-plot integer-series)
+(make-line-plot integer-series #:x-min N-MIN #:x-max N #:y-min N-MIN #:y-max N)
 (define integer-series-line-plot-bench-after (- (now) integer-series-line-plot-bench-before))
 
 (fprintf (current-output-port)
@@ -115,8 +132,7 @@ class TimeseriesPlotting(object):
          "Integer Dataframe Discrete Histogram Bench: ~v ms.\n"
          integer-dataframe-discrete-histogram-bench-after)
 
-#|
-Timing out
+
 (define integer-series-discrete-historgram-stacked-bench-before (now))
 (make-discrete-histogram-stacked integer-series)
 (define integer-series-discrete-historgram-stacked-bench-after (- (now) integer-series-discrete-historgram-stacked-bench-before))
@@ -132,6 +148,13 @@ Timing out
 (fprintf (current-output-port)
          "Integer Dataframe Discrete Histogram Stacked Bench: ~v ms.\n"
          integer-dataframe-discrete-histogram-stacked-bench-after)
-|#
 
+
+; datetime range generation
+(define date-range-bench-before (now))
 (build-index-from-list (datetime-range (Datetime (Date 1975 1 1) (Time 0 0 0 0 0)) 'D 2000 #f))
+(define date-range-bench-after (- (now) date-range-bench-before))
+
+(fprintf (current-output-port)
+         "Date Range Generation Bench: ~v ms.\n"
+         date-range-bench-after)

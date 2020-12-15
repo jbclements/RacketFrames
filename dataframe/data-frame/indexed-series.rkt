@@ -8,7 +8,7 @@
 ; ***********************************************************
 ; One-dimensional array like structure with axis labels. Labels
 ; must be unique and must be a hashable type. The series object
-; supports both integer (idx) and label-based indexing. Functions
+; supports both fixnum (idx) and label-based indexing. Functions
 ; can be mapped to each value of the series allowing for various
 ; operations. The series can hold any generic type.
 
@@ -38,7 +38,7 @@
  Label Label? LabelProjection LabelProjection? LabelIndex? RFIndex? Datetime?
  RFIndex IndexDataType ListofIndex ListofIndex? ListofListofString ListofListofString?
  LabelIndex LabelIndex-index
- FIndex FloatIndex
+ FIndex FlonumIndex
  ;(struct-out GSeries)
  ;new-GSeries 
  ;gseries-iref
@@ -65,11 +65,11 @@
 
 (define-predicate ListofLabel? (Listof Label))
 
-(define-predicate ListofInteger? (Listof Integer))
+(define-predicate ListofFixnum? (Listof Fixnum))
 
 (define-predicate ListofIndex? (Listof Index))
 
-(define-predicate ListofFloat? (Listof Float))
+(define-predicate ListofFlonum? (Listof Flonum))
 
 (define-predicate ListofDatetime? (Listof Datetime))
 
@@ -80,13 +80,13 @@
 (define-type SIndex (HashTable Label (Listof Index)))
 
 ; Range Index
-(define-type IIndex (HashTable Integer (Listof Index)))
+(define-type IIndex (HashTable Fixnum (Listof Index)))
 
-(define-type FIndex (HashTable Float (Listof Index)))
+(define-type FIndex (HashTable Flonum (Listof Index)))
 
 (define-type DTIndex (HashTable Datetime (Listof Index)))
 
-(define-type IndexDataType (U Label Integer Float Datetime))
+(define-type IndexDataType (U Label Fixnum Flonum Datetime))
 
 (define-predicate ListofIndexDataType? (Listof IndexDataType))
 
@@ -103,14 +103,14 @@
 ; like in Pandas, it could be dictionary of labels to values or not
 ; that's what the LabelIndex is for
 (struct LabelIndex ([index : SIndex]) #:mutable)
-(struct IntegerIndex ([index : IIndex]) #:mutable)
-(struct FloatIndex ([index : FIndex]) #:mutable)
+(struct FixnumIndex ([index : IIndex]) #:mutable)
+(struct FlonumIndex ([index : FIndex]) #:mutable)
 (struct DatetimeIndex ([index : DTIndex]) #:mutable)
 
 (define-type IndexType (U SIndex IIndex FIndex DTIndex))
 
 ; add RangeIndex later
-(define-type RFIndex (U LabelIndex IntegerIndex FloatIndex DatetimeIndex))
+(define-type RFIndex (U LabelIndex FixnumIndex FlonumIndex DatetimeIndex))
 
 (define-predicate RFIndex? RFIndex)
 ; ***********************************************************
@@ -122,8 +122,8 @@
 (define (build-index-from-list lst)
   (cond
     [(ListofLabel? lst) (LabelIndex (build-index-from-labels lst))]
-    [(ListofInteger? lst) (IntegerIndex (build-index-from-integers lst))]
-    [(ListofFloat? lst) (FloatIndex (build-index-from-floats lst))]
+    [(ListofFixnum? lst) (FixnumIndex (build-index-from-fixnums lst))]
+    [(ListofFlonum? lst) (FlonumIndex (build-index-from-flonums lst))]
     [(ListofDatetime? lst) (DatetimeIndex (build-index-from-datetimes lst))]
     [else (error "Unsupported index datatype.")]))
 
@@ -131,8 +131,8 @@
 (define (get-index index item)
   (cond
     [(and (LabelIndex? index) (Label? item)) (label-index (LabelIndex-index index) item)]
-    [(and (IntegerIndex? index) (exact-integer? item)) (integer-index (IntegerIndex-index index) item)]
-    [(and (FloatIndex? index) (flonum? item)) (float-index (FloatIndex-index index) item)]
+    [(and (FixnumIndex? index) (exact-integer? item)) (fixnum-index (FixnumIndex-index index) item)]
+    [(and (FlonumIndex? index) (flonum? item)) (Flonum-index (FlonumIndex-index index) item)]
     [(and (DatetimeIndex? index) (Datetime? item)) (datetime-index (DatetimeIndex-index index) item)]
     [else (error "Unsupported index datatype.")]))
 
@@ -140,8 +140,8 @@
 (define (extract-index index)
   (cond
     [(LabelIndex? index) (LabelIndex-index index)]
-    [(IntegerIndex? index) (IntegerIndex-index index)]
-    [(FloatIndex? index) (FloatIndex-index index)]
+    [(FixnumIndex? index) (FixnumIndex-index index)]
+    [(FlonumIndex? index) (FlonumIndex-index index)]
     [(DatetimeIndex? index) (DatetimeIndex-index index)]
     [else (error "Unsupported index datatype.")]))
 
@@ -152,8 +152,8 @@
 (define (is-indexed? index)
   (cond
     [(LabelIndex? index) (is-labeled? index)]
-    [(IntegerIndex? index) (has-integer-index? index)]
-    [(FloatIndex? index) (has-float-index? index)]
+    [(FixnumIndex? index) (has-fixnum-index? index)]
+    [(FlonumIndex? index) (has-Flonum-index? index)]
     [(DatetimeIndex? index) (has-datetime-index? index)]
     [else (error "Unsupported index datatype.")]))
 
@@ -161,8 +161,8 @@
 (define (key->lst-idx index item)
   (cond
     [(LabelIndex? index) (label->lst-idx index (assert item Label?))]
-    [(IntegerIndex? index) (integer->lst-idx index (assert item exact-integer?))]
-    [(FloatIndex? index) (float->lst-idx index (assert item flonum?))]
+    [(FixnumIndex? index) (fixnum->lst-idx index (assert item exact-integer?))]
+    [(FlonumIndex? index) (Flonum->lst-idx index (assert item flonum?))]
     [(DatetimeIndex? index) (datetime->lst-idx index (assert item Datetime?))]
     [else (error "Unsupported index datatype.")]))
 
@@ -173,8 +173,8 @@
 (define (idx->key index idx)
   (cond
     [(LabelIndex? index) (idx->label index idx)]
-    [(IntegerIndex? index) (idx->integer index idx)]
-    [(FloatIndex? index) (idx->float index idx)]
+    [(FixnumIndex? index) (idx->fixnum index idx)]
+    [(FlonumIndex? index) (idx->Flonum index idx)]
     [(DatetimeIndex? index) (idx->datetime index idx)]
     [else (error "Unsupported index datatype.")]))
 
@@ -206,47 +206,47 @@
 ; ***********************************************************
 ; This function consumes a list of Labels and produces a
 ; SIndex which is a HashTable Label to Index.
-(: build-index-from-integers ((Listof Integer) -> IIndex))
-(define (build-index-from-integers integers)
+(: build-index-from-fixnums ((Listof Fixnum) -> IIndex))
+(define (build-index-from-fixnums fixnums)
   (let ((index : IIndex (make-hash '())))
-    (let loop : IIndex ((idx : Index 0) (integers : (Listof Integer) integers))
-      (if (null? integers)
+    (let loop : IIndex ((idx : Index 0) (fixnums : (Listof Fixnum) fixnums))
+      (if (null? fixnums)
           index
           (begin
-            (hash-update! index (car integers)
+            (hash-update! index (car fixnums)
                           (λ: ((lst-index : (Listof Index)))
                             (append lst-index (list idx)))
                           (λ () (list)))
 
             
-            (loop (assert (+ idx 1) index?) (cdr integers)))))))
+            (loop (assert (+ idx 1) index?) (cdr fixnums)))))))
 
-(: integer-index (IIndex Integer -> (Listof Index)))
-(define (integer-index index integer)      
-  (hash-ref index integer))
+(: fixnum-index (IIndex Fixnum -> (Listof Index)))
+(define (fixnum-index index fixnum)      
+  (hash-ref index fixnum))
 ; ***********************************************************
 
 ; ***********************************************************
-; This function consumes a list of Floats and produces a
+; This function consumes a list of Flonums and produces a
 ; FIndex which is a HashTable Label to Index.
-(: build-index-from-floats ((Listof Float) -> FIndex))
-(define (build-index-from-floats floats)
+(: build-index-from-flonums ((Listof Flonum) -> FIndex))
+(define (build-index-from-flonums Flonums)
   (let ((index : FIndex (make-hash '())))
-    (let loop : FIndex ((idx : Index 0) (floats : (Listof Float) floats))
-      (if (null? floats)
+    (let loop : FIndex ((idx : Index 0) (Flonums : (Listof Flonum) Flonums))
+      (if (null? Flonums)
           index
           (begin
-            (hash-update! index (car floats)
+            (hash-update! index (car Flonums)
                           (λ: ((lst-index : (Listof Index)))
                             (append lst-index (list idx)))
                           (λ () (list)))
 
             
-            (loop (assert (+ idx 1) index?) (cdr floats)))))))
+            (loop (assert (+ idx 1) index?) (cdr Flonums)))))))
 
-(: float-index (FIndex Float -> (Listof Index)))
-(define (float-index index float)      
-  (hash-ref index float))
+(: Flonum-index (FIndex Flonum -> (Listof Index)))
+(define (Flonum-index index Flonum)      
+  (hash-ref index Flonum))
 ; ***********************************************************
 
 ; ***********************************************************
@@ -272,33 +272,33 @@
   (hash-ref index datetime))
 
 #|
-B	business day frequency
-C	custom business day frequency
-D	calendar day frequency
-W	weekly frequency
-M	month end frequency
-SM	semi-month end frequency (15th and end of month)
-BM	business month end frequency
-CBM	custom business month end frequency
-MS	month start frequency
-SMS	semi-month start frequency (1st and 15th)
-BMS	business month start frequency
-CBMS	custom business month start frequency
-Q	quarter end frequency
-BQ	business quarter end frequency
-QS	quarter start frequency
-BQS	business quarter start frequency
-A, Y	year end frequency
-BA, BY	business year end frequency
-AS, YS	year start frequency
-BAS, BYS	business year start frequency
-BH	business hour frequency
-H	hourly frequency
-T, min	minutely frequency
-S	secondly frequency
-L, ms	milliseconds
-U, us	microseconds
-N	nanoseconds
+B business day frequency
+C custom business day frequency
+D calendar day frequency
+W weekly frequency
+M month end frequency
+SM  semi-month end frequency (15th and end of month)
+BM  business month end frequency
+CBM custom business month end frequency
+MS  month start frequency
+SMS semi-month start frequency (1st and 15th)
+BMS business month start frequency
+CBMS  custom business month start frequency
+Q quarter end frequency
+BQ  business quarter end frequency
+QS  quarter start frequency
+BQS business quarter start frequency
+A, Y  year end frequency
+BA, BY  business year end frequency
+AS, YS  year start frequency
+BAS, BYS  business year start frequency
+BH  business hour frequency
+H hourly frequency
+T, min  minutely frequency
+S secondly frequency
+L, ms milliseconds
+U, us microseconds
+N nanoseconds
 |#
 ; todo
 ;(: check-valid-freq (Label -> Boolean))
@@ -321,7 +321,7 @@ N	nanoseconds
 (define (gseries-data gseries)
   (GSeries-data gseries))
 
-(: get-total-index-value-count (SIndex -> Integer))
+(: get-total-index-value-count (SIndex -> Fixnum))
 (define (get-total-index-value-count index)
   (define value-count 0)
 
@@ -347,7 +347,7 @@ N	nanoseconds
      (begin
        (check-mismatch labels)
        (GSeries labels data))
-     (if labels	 
+     (if labels  
          (let ((index (build-index-from-labels labels)))
            (check-mismatch index)
            (GSeries index data))
@@ -372,8 +372,8 @@ N	nanoseconds
         (let ((k (current-continuation-marks)))
           (raise (make-exn:fail:contract "Cannot obtain the index of a label for a series which is unlabeled" k))))))
 
-; This function consumes LabelIndex and Label and returns the
-; numerical Index of the Label in the LabelIndex. The index
+; This function consumes LabelIndex and Index and returns the
+; Label at the numerical Index in the LabelIndex. The index
 ; must be a SIndex else an exception is raised.
 (: idx->label (LabelIndex Index -> Label))
 (define (idx->label series idx)
@@ -387,29 +387,29 @@ N	nanoseconds
 ; ***********************************************************
 ; This function consumes a series and returns a boolean
 ; indicating whether series is a SIndex or not.
-(: has-integer-index? (IntegerIndex -> Boolean))
-(define (has-integer-index? index)
+(: has-fixnum-index? (FixnumIndex -> Boolean))
+(define (has-fixnum-index? index)
   (if (extract-index index) #t #f))
 
 ; This function consumes LabelIndex and Label and returns the
 ; numerical Index of the Label in the LabelIndex. The index
 ; must be a SIndex else an exception is raised.
-(: integer->lst-idx (IntegerIndex Integer -> (Listof Index)))
-(define (integer->lst-idx index integer)
-  (let ((index : IIndex (IntegerIndex-index index)))
+(: fixnum->lst-idx (FixnumIndex Fixnum -> (Listof Index)))
+(define (fixnum->lst-idx index fixnum)
+  (let ((index : IIndex (FixnumIndex-index index)))
     (if index
-        (hash-ref index integer)
+        (hash-ref index fixnum)
         (let ((k (current-continuation-marks)))
           (raise (make-exn:fail:contract "Cannot obtain the index of a label for a series which is unlabeled" k))))))
 
 ; This function consumes LabelIndex and Label and returns the
 ; numerical Index of the Label in the LabelIndex. The index
 ; must be a SIndex else an exception is raised.
-(: idx->integer (IntegerIndex Index -> Integer))
-(define (idx->integer index idx)
-  (let ((index : IIndex (IntegerIndex-index index)))
+(: idx->fixnum (FixnumIndex Index -> Fixnum))
+(define (idx->fixnum index idx)
+  (let ((index : IIndex (FixnumIndex-index index)))
     (if index
-        (car (car (filter (lambda ([pair : (Pair Integer (Listof Index))]) (member idx (cdr pair))) (hash->list index))))
+        (car (car (filter (lambda ([pair : (Pair Fixnum (Listof Index))]) (member idx (cdr pair))) (hash->list index))))
         (let ((k (current-continuation-marks)))
           (raise (make-exn:fail:contract "Cannot obtain the index of a label for a series which is unlabeled" k))))))
 ; ***********************************************************
@@ -417,29 +417,29 @@ N	nanoseconds
 ; ***********************************************************
 ; This function consumes a series and returns a boolean
 ; indicating whether series is a SIndex or not.
-(: has-float-index? (FloatIndex -> Boolean))
-(define (has-float-index? index)
+(: has-Flonum-index? (FlonumIndex -> Boolean))
+(define (has-Flonum-index? index)
   (if (extract-index index) #t #f))
 
 ; This function consumes LabelIndex and Label and returns the
 ; numerical Index of the Label in the LabelIndex. The index
 ; must be a SIndex else an exception is raised.
-(: float->lst-idx (FloatIndex Float -> (Listof Index)))
-(define (float->lst-idx index float)
-  (let ((index : FIndex (FloatIndex-index index)))
+(: Flonum->lst-idx (FlonumIndex Flonum -> (Listof Index)))
+(define (Flonum->lst-idx index Flonum)
+  (let ((index : FIndex (FlonumIndex-index index)))
     (if index
-        (hash-ref index float)
+        (hash-ref index Flonum)
         (let ((k (current-continuation-marks)))
           (raise (make-exn:fail:contract "Cannot obtain the index of a label for a series which is unlabeled" k))))))
 
 ; This function consumes LabelIndex and Label and returns the
 ; numerical Index of the Label in the LabelIndex. The index
 ; must be a SIndex else an exception is raised.
-(: idx->float (FloatIndex Index -> Float))
-(define (idx->float index idx)
-  (let ((index : FIndex (FloatIndex-index index)))
+(: idx->Flonum (FlonumIndex Index -> Flonum))
+(define (idx->Flonum index idx)
+  (let ((index : FIndex (FlonumIndex-index index)))
     (if index
-        (car (car (filter (lambda ([pair : (Pair Float (Listof Index))]) (member idx (cdr pair))) (hash->list index))))
+        (car (car (filter (lambda ([pair : (Pair Flonum (Listof Index))]) (member idx (cdr pair))) (hash->list index))))
         (let ((k (current-continuation-marks)))
           (raise (make-exn:fail:contract "Cannot obtain the index of a label for a series which is unlabeled" k))))))
 ; ***********************************************************
@@ -478,14 +478,14 @@ N	nanoseconds
 ; ***********************************************************
 ; This function consumes a series and an Listof Index and returns
 ; the value at that index in the series.
-(: gseries-iref (All (A) (GSeries A) (Listof Index) -> (U (Listof Float) (Listof A))))
+(: gseries-iref (All (A) (GSeries A) (Listof Index) -> (U (Listof Flonum) (Listof A))))
 (define (gseries-iref series lst-idx)
   (map (lambda ((idx : Index)) (vector-ref (GSeries-data series) idx))
        lst-idx))
 
 ; This function consumes a series and a Label and returns
 ; the value at that Label in the series.
-(: series-ref (All (A) (GSeries A) Label -> (U (Listof A) (Listof Float))))
+(: series-ref (All (A) (GSeries A) Label -> (U (Listof A) (Listof Flonum))))
 (define (series-ref series label)
   (gseries-iref series (label->lst-idx series label)))
 
@@ -504,7 +504,7 @@ N	nanoseconds
 (define (map/GSeries series fn)
   (let*: ((old-data : (Vectorof A) (GSeries-data series))
           (new-data : (Vectorof B) (build-vector (vector-length old-data) 
-                                                 (λ: ((idx : Integer)) 
+                                                 (λ: ((idx : Fixnum)) 
                                                    (fn (vector-ref old-data idx))))))
     (GSeries (LabelIndex-index series) new-data)))
 ; ***********************************************************
@@ -602,4 +602,3 @@ N	nanoseconds
             (loop (add1 i))))))))
 
 ; ***********************************************************
-

@@ -49,7 +49,7 @@ class TimeseriesPlotting(object):
 
 ; 1000000 elements for scatter and line plot
 (: N Positive-Integer)
-(define N 100000)
+(define N 1000)
 (: N-MIN Negative-Integer)
 (define N-MIN (* -1 N))
 
@@ -66,9 +66,9 @@ class TimeseriesPlotting(object):
 
 ; 10000 elements for histogram
 (: HISTOGRAM-N Positive-Integer)
-(define HISTOGRAM-N 1000)
+(define HISTOGRAM-N 50)
 (: HISTOGRAM-N-MIN Negative-Integer)
-(define HISTOGRAM-N-MIN (* -1 N))
+(define HISTOGRAM-N-MIN (* -1 HISTOGRAM-N))
 
 (: histogram-data (Vectorof Fixnum))
 (define histogram-data (for/vector: : (Vectorof Fixnum)
@@ -78,6 +78,10 @@ class TimeseriesPlotting(object):
 (define histogram-integer-series (new-ISeries histogram-data #f))
 
 (define histogram-columns-integer (list (cons 'col histogram-integer-series)))
+
+(define plot-columns-integer (list (cons 'x integer-series) (cons 'y integer-series)))
+
+(define plot-data-frame-integer (new-data-frame plot-columns-integer))
 
 (define histogram-data-frame-integer (new-data-frame histogram-columns-integer))
 
@@ -93,7 +97,7 @@ class TimeseriesPlotting(object):
          integer-series-scatter-plot-bench-after)
 
 (define integer-dataframe-scatter-plot-bench-before (now))
-(make-scatter-plot data-frame-integer)
+(make-scatter-plot plot-data-frame-integer)
 (define integer-dataframe-scatter-plot-bench-after (- (now) integer-dataframe-scatter-plot-bench-before))
 
 (fprintf (current-output-port)
@@ -109,7 +113,7 @@ class TimeseriesPlotting(object):
          integer-dataframe-scatter-plot-bench-after)
 
 (define integer-dataframe-line-plot-bench-before (now))
-(make-line-plot data-frame-integer)
+(make-line-plot plot-data-frame-integer)
 (define integer-dataframe-line-plot-bench-after (- (now) integer-dataframe-line-plot-bench-before))
 
 (fprintf (current-output-port)
@@ -121,11 +125,11 @@ class TimeseriesPlotting(object):
 (define integer-series-discrete-historgram-bench-after (- (now) integer-series-discrete-historgram-bench-before))
 
 (fprintf (current-output-port)
-         "Integer Dataframe Discrete Histogram Bench: ~v ms.\n"
+         "Integer Series Discrete Histogram Bench: ~v ms.\n"
          integer-series-discrete-historgram-bench-after)
 
 (define integer-dataframe-discrete-histogram-bench-before (now))
-(make-discrete-histogram data-frame-integer)
+(make-discrete-histogram histogram-data-frame-integer)
 (define integer-dataframe-discrete-histogram-bench-after (- (now) integer-dataframe-discrete-histogram-bench-before))
 
 (fprintf (current-output-port)
@@ -138,11 +142,11 @@ class TimeseriesPlotting(object):
 (define integer-series-discrete-historgram-stacked-bench-after (- (now) integer-series-discrete-historgram-stacked-bench-before))
 
 (fprintf (current-output-port)
-         "Integer Dataframe Discrete Histogram Stacked Bench: ~v ms.\n"
+         "Integer Series Discrete Histogram Stacked Bench: ~v ms.\n"
          integer-series-discrete-historgram-stacked-bench-after)
 
 (define integer-dataframe-discrete-histogram-stacked-bench-before (now))
-(make-discrete-histogram-stacked data-frame-integer)
+(make-discrete-histogram-stacked histogram-data-frame-integer)
 (define integer-dataframe-discrete-histogram-stacked-bench-after (- (now) integer-dataframe-discrete-histogram-stacked-bench-before))
 
 (fprintf (current-output-port)

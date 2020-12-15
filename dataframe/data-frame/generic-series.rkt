@@ -1,5 +1,7 @@
 #lang typed/racket
 
+(require math/statistics)
+
 (require
  (only-in "indexed-series.rkt"
 	  RFIndex RFIndex? build-index-from-list
@@ -17,10 +19,12 @@
 (provide
  (struct-out GenSeries)
  GenSeries-index
- GenericType)
+ GenericType
+ GenericType?)
 
 (define-type GenericType Any)
 
+(define-predicate GenericType? GenericType)
 (define-predicate ListofGenericType? (Listof GenericType))
 
 (provide:

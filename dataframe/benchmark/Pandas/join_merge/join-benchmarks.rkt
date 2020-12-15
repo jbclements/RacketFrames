@@ -4,60 +4,47 @@
 
 (require "../../../util/list.rkt")
 
-#| class Join(object):
-
-    goal_time = 0.2
-    params = [True, False]
-    param_names = ['sort']
-
-    def setup(self, sort):
-        level1 = tm.makeStringIndex(10).values
-        level2 = tm.makeStringIndex(1000).values
-        label1 = np.arange(10).repeat(1000)
-        label2 = np.tile(np.arange(1000), 10)
-        index2 = MultiIndex(levels=[level1, level2],
-                            labels=[label1, label2])
-        self.df_multi = DataFrame(np.random.randn(len(index2), 4),
-                                  index=index2,
-                                  columns=['A', 'B', 'C', 'D'])
-
-        self.key1 = np.tile(level1.take(label1), 10)
-        self.key2 = np.tile(level2.take(label2), 10)
-        self.df = DataFrame({'data1': np.random.randn(100000),
-                             'data2': np.random.randn(100000),
-                             'key1': self.key1,
-                             'key2': self.key2})
-
-        self.df_key1 = DataFrame(np.random.randn(len(level1), 4),
-                                 index=level1,
-                                 columns=['A', 'B', 'C', 'D'])
-        self.df_key2 = DataFrame(np.random.randn(len(level2), 4),
-                                 index=level2,
-                                 columns=['A', 'B', 'C', 'D'])
-
-        shuf = np.arange(100000)
-        np.random.shuffle(shuf)
-        self.df_shuf = self.df.reindex(self.df.index[shuf])
-
-    def time_join_dataframe_index_multi(self, sort):
-        self.df.join(self.df_multi, on=['key1', 'key2'], sort=sort)
-
-    def time_join_dataframe_index_single_key_bigger(self, sort):
-        self.df.join(self.df_key2, on='key2', sort=sort)
-
-    def time_join_dataframe_index_single_key_small(self, sort):
-        self.df.join(self.df_key1, on='key1', sort=sort)
-
-    def time_join_dataframe_index_shuffle_key_bigger_sort(self, sort):
-        self.df_shuf.join(self.df_key2, on='key2', sort=sort) |#
-
-
-
 
 (define level1 (build-index-from-list (list 'a 'b 'c 'd 'e 'f 'g 'h 'i 'j)))
 
-(random-number-list 5 20)
+;(random-number-list 10000 200)
 
-(random-symbol-list 50 10 "" '())
+;(random-symbol-list 50 10 "" '())
+
+(define-predicate ListofFixnum? (Listof Fixnum))
+
+(define integer-col-1 (cons 'col1 (new-ISeries (list->vector (assert (random-number-list 10000 200) ListofFixnum?)) #f)))
+
+(define integer-col-2 (cons 'col2 (new-ISeries (list->vector (assert (random-number-list 10000 200) ListofFixnum?)) #f)))
+
+(define integer-col-3 (cons 'col3 (new-ISeries (list->vector (assert (random-number-list 10000 200) ListofFixnum?)) #f)))
+
+(define integer-col-4 (cons 'col4 (new-ISeries (list->vector (assert (random-number-list 10000 200) ListofFixnum?)) #f)))
+
+
+(define columns-integer
+  (list integer-col-1 integer-col-2 integer-col-3 integer-col-4))
+
+(define data-frame-integer (new-data-frame columns-integer))
+
+
+;(define float-col-1 (cons 'float-col-1 (new-NSeries (flvector 1.5 2.5 3.5 4.5 5.5) #f)))
+
+;(define categorical-col-1 (cons' categorical-col-1 (new-CSeries (vector 'a 'b 'c 'd 'e) #f)))
+
+(data-frame-write-tab data-frame-integer (current-output-port))
+
+(displayln "data-frame-groupby")
+(data-frame-groupby data-frame-integer (list 'col1))
+
+(data-frame-groupby data-frame-integer (list 'col2))
+
+(data-frame-groupby data-frame-integer (list 'col1 'col2))
+
+(displayln "data-frame-groupby aggregate mean")
+(apply-agg-data-frame 'mean (data-frame-groupby data-frame-integer (list 'col1 'col2)))
+
+(displayln "data-frame-groupby aggregate count")
+(apply-agg-data-frame 'count (data-frame-groupby data-frame-integer (list 'col1 'col2)))
 
 

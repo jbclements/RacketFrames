@@ -18,6 +18,7 @@
 (require "../data-frame/data-frame.rkt")
 (require "../data-frame/data-frame-join.rkt")
 (require "../data-frame/data-frame-print.rkt")
+(require "../data-frame/series-print.rkt")
 
 ; ***********
 ; Test Cases
@@ -69,10 +70,11 @@
 (data-frame-groupby data-frame-integer (list 'col1 'col2))
 
 (displayln "data-frame-groupby aggregate mean")
-(apply-agg-data-frame 'mean (data-frame-groupby data-frame-integer (list 'col1 'col2)))
+(series-print (apply-agg-data-frame 'mean (data-frame-groupby data-frame-integer (list 'col1 'col2))) (current-output-port))
 
 (displayln "data-frame-groupby aggregate count")
-(apply-agg-data-frame 'count (data-frame-groupby data-frame-integer (list 'col1 'col2)))
+(series-print  (apply-agg-data-frame 'count (data-frame-groupby data-frame-integer (list 'col1 'col2))) (current-output-port))
+
 
 ; unable to protect opaque value
 ;(check-equal?
@@ -90,7 +92,7 @@
 
 (check-equal?
  ((key-fn (key-cols-series (list integer-col-2 integer-col-1 float-col-1 categorical-col-1))) 2)
- "8\t3\tc\t")
+ "8\t3\t3.5\tc\t")
 
 ; build hash join
 ;(check-equal?
@@ -364,3 +366,14 @@
                                    (new-ISeries (vector 21 22 23 24) #f)))
 
 (build-multi-index-from-cols columns-mixed-10)
+
+(define integer-series-groupby (new-ISeries (vector 1 2 3 4 2 3 4 4 5 6 7 8 9) #f))
+(iseries-groupby integer-series-groupby)
+
+(define integer-series-groupby-label-index (new-ISeries (vector 1 2 3 4 2 3 4 4 5 6 7 8 9) (build-index-from-list (list 'a 'a 'a 'b 'c 'd 'e 'e 'f 'g 'e 'b 'c))))
+
+(iseries-print integer-series-groupby-label-index (current-output-port))
+
+(iseries-groupby integer-series-groupby-label-index)
+
+(gen-series-print (apply-agg-iseries 'sum (iseries-groupby integer-series-groupby-label-index)) (current-output-port))

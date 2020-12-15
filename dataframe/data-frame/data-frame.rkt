@@ -26,7 +26,7 @@
  [data-frame-extend  (DataFrame (U Column Columns DataFrame) -> DataFrame)]
  [data-frame-description (DataFrame [#:project LabelProjection] -> DataFrameDescription)]
  [show-data-frame-description (DataFrameDescription -> Void)]
- [data-frame-set-index (DataFrame (U (Listof Label) (Listof Integer) (Listof Float) (Listof Datetime) RFIndex) -> DataFrame)]
+ [data-frame-set-index (DataFrame (U (Listof Label) (Listof Fixnum) (Listof Flonum) (Listof Datetime) RFIndex) -> DataFrame)]
  [data-frame-loc (DataFrame (U Label (Listof Label) (Listof Boolean)) LabelProjection -> (U Series DataFrame))]
  [data-frame-iloc (DataFrame (U Index (Listof Index)) (U Index (Listof Index)) -> (U Series DataFrame))]
  [data-frame-iloc-label (DataFrame (U Index (Listof Index)) LabelProjection -> (U Series DataFrame))]
@@ -164,9 +164,6 @@
   
   (check-equal-length)
 
-  (displayln (map (λ: ((s : (Pair Symbol Series)))
-                                     (car s)) cols))
-
   (when (not (are-all-unique? (map (λ: ((s : (Pair Symbol Series)))
                                      (car s)) cols)))
     (error 'new-data-frame "Frame must have uniquely named series: ~a" (map (λ: ((s : (Pair Symbol Series)))
@@ -266,15 +263,15 @@
 ; ***********************************************************
 
 ; (inst) example usage
-; (map (inst cons Symbol Integer) '(a b c d) '(1 2 3 4))
-; - : (Listof (Pairof Symbol Integer))
+; (map (inst cons Symbol Fixnum) '(a b c d) '(1 2 3 4))
+; - : (Listof (Pairof Symbol Fixnum))
 ; '((a . 1) (b . 2) (c . 3) (d . 4))
 
 ; This function consumes a DataFrame and returns of Listof
 ; Symbol representing all the column names.
 (: data-frame-names (DataFrame -> (Listof Symbol)))
 (define (data-frame-names data-frame)  
-  (map (λ: ((kv : (Pair Symbol (Listof Integer))))
+  (map (λ: ((kv : (Pair Symbol (Listof Fixnum))))
 	   (car kv))
        ((inst sort (Pair Symbol (Listof Index)) (Pair Symbol (Listof Index)))
         (data-frame-labels data-frame)
@@ -467,7 +464,7 @@
 ; ***********************************************************
 
 ; ***********************************************************
-(: data-frame-set-index (DataFrame (U (Listof Label) (Listof Integer) (Listof Float) (Listof Datetime) RFIndex) -> DataFrame))
+(: data-frame-set-index (DataFrame (U (Listof Label) (Listof Fixnum) (Listof Flonum) (Listof Datetime) RFIndex) -> DataFrame))
 (define (data-frame-set-index data-frame new-index)
   (define src-series (DataFrame-series data-frame))
   (define src-column-names (map column-heading (data-frame-explode data-frame)))

@@ -35,6 +35,8 @@
  [iseries-referencer (ISeries -> (Index -> Fixnum))]
  [iseries-data (ISeries -> (Vectorof Fixnum))]
  [iseries-index (ISeries -> (U False RFIndex))]
+ [iseries-groupby (ISeries -> GroupHash)]
+ [apply-agg-iseries (Symbol GroupHash -> GenSeries)]
  [map/is (ISeries (Fixnum -> Fixnum) -> ISeries)]
  [bop/is (ISeries ISeries (Fixnum Fixnum -> Fixnum) -> ISeries)]
  [comp/is (ISeries ISeries (Fixnum Fixnum -> Boolean) -> BSeries)]
@@ -68,17 +70,23 @@
 ; LabelIndex structs from indexed-series.
 (require
  racket/unsafe/ops
+ racket/pretty
  (only-in "indexed-series.rkt"
 	  build-index-from-list build-multi-index-from-list         
           RFIndex RFIndex? IndexDataType
           extract-index
 	  Label SIndex LabelIndex LabelIndex-index
-          FIndex FloatIndex
+          FIndex FlonumIndex
           label-index key->lst-idx
           idx->key is-labeled? ListofIndexDataType?
           is-indexed? ListofIndex? ListofListofString ListofListofString?)
  (only-in "boolean-series.rkt"
-          BSeries))
+          BSeries)
+ (only-in "generic-series.rkt"
+	  GenSeries GenSeries? GenericType gen-series-iref new-GenSeries
+	  gen-series-referencer)
+ (only-in "groupby-util.rkt"
+          make-agg-value-hash-sindex agg-value-hash-to-gen-series AggValueHash))
 ; ***********************************************************
 
 ; ***********************************************************
@@ -606,3 +614,70 @@
       (referencer idx))))
 
 ; ***********************************************************
+;; ISeries groupby
+
+(define-type Key String)
+(define-type GroupHash (HashTable Key (Listof Fixnum)))
+
+; This function is self-explanatory, it consumes no arguments
+; and creates a hash map which will represent a JoinHash.
+(: make-group-hash (-> GroupHash))
+(define (make-group-hash)
+  (make-hash))
+
+;Used to determine the groups for the groupby. If by is a function, it’s called on each value of the object’s index. The Series VALUES will be used to determine the groups.
+(: iseries-groupby (ISeries -> GroupHash))
+(define (iseries-groupby iseries)
+  (define: group-index : GroupHash (make-group-hash))  
+
+  (let ((len (iseries-length iseries))
+        (k (current-continuation-marks)))
+    (if (zero? len)
+	(raise (make-exn:fail:contract "iseries can't be empty on groupby." k))
+	(begin          
+	  (do ((i 0 (add1 i)))
+	      ((>= i len) group-index)
+	    (let* ((fixnum-val : (U Fixnum ISeries) (iseries-iloc iseries (assert i index?)))
+                   (fixnum-list : (Listof Fixnum) (if (fixnum? fixnum-val) (list fixnum-val) (vector->list (ISeries-data fixnum-val))))
+                  (key (if (ISeries-index iseries)
+                                   (idx->key (ISeries-index iseries) (assert i index?))
+                                   (assert i index?)))
+                  (key-str : String (cond
+                                      [(symbol? key) (symbol->string key)]
+                                      [(number? key) (number->string key)]
+                                      ; pretty-format anything else
+                                      [else (pretty-format key)])))              
+              (hash-update! group-index key-str
+			      (λ: ((val : (Listof Fixnum)))                                
+				  (append fixnum-list val))
+			      (λ () (list)))))))))
+
+; ***********************************************************
+;; ISeries agg ops
+
+; Applies the aggregate function specificed by function-name to the values in
+; the column-name column. Currently supports 3: sum, avg, count.
+(: apply-agg-iseries (Symbol GroupHash -> GenSeries))
+(define (apply-agg-iseries function-name group-hash)
+  (define len (hash-count group-hash))
+
+  (: agg-value-hash AggValueHash)
+  (define agg-value-hash (make-hash))
+
+  (hash-for-each group-hash
+                 (lambda ([key : String] [val : (Listof Fixnum)])
+                   
+                   (let ((key (assert key string?))
+                         (val (assert (flatten val) ListofFixnum?)))
+                     (hash-set! agg-value-hash key
+                                (cond 
+                                  [(eq? function-name 'sum) (apply + val)]
+                                  [(eq? function-name 'mean) (mean val)]
+                                  ;[(eq? function-name 'median) (median (vector->list (ISeries-data series)))]
+                                  ;[(eq? function-name 'mode) (mode (vector->list (ISeries-data series)))]
+                                  [(eq? function-name 'count) (length val)]
+                                  [(eq? function-name 'min) (argmin (lambda ([x : Real]) x) val)]
+                                  [(eq? function-name 'max) (argmax (lambda ([x : Real]) x) val)]
+                                  [else (error 'apply-agg-data-frame "Unknown aggregate function.")])))))
+
+  (agg-value-hash-to-gen-series agg-value-hash))

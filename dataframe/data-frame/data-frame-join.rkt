@@ -30,8 +30,7 @@
  [key-fn ((Listof IndexableSeries) -> (Index -> Key))])
 
 (provide
- IndexableSeries
- GroupHash)
+ IndexableSeries)
 
 (require
  racket/pretty
@@ -97,7 +96,9 @@
 	  append-NSeriesBuilder complete-NSeriesBuilder
 	  new-NSeriesBuilder)
  (only-in "data-frame-print.rkt"
-          data-frame-write-tab))
+          data-frame-write-tab)
+ (only-in "groupby-util.rkt"
+          make-agg-value-hash-sindex agg-value-hash-to-gen-series GroupHash AggValueHash))
 
 ; ***********************************************************
 
@@ -105,9 +106,7 @@
 
 (define-type Key String)
 (define-type JoinHash (HashTable Key (Listof Index)))
-(define-type GroupHash (HashTable Key (Listof GenericType)))
-(define-type AggValueHash (HashTable String GenericType))
-(define-type IndexableSeries (U GenSeries CSeries ISeries))
+(define-type IndexableSeries (U GenSeries CSeries ISeries NSeries))
 
 (define-predicate ListofReal? (Listof Real))
 
@@ -177,7 +176,8 @@
 (define (key-cols-series cols)
   (filter (λ: ((s : Series)) (or (GenSeries? s)
                               (CSeries? s)
-                              (ISeries? s)))
+                              (ISeries? s)
+                              (NSeries? s)))
 	  (map column-series cols)))
 
 ; This function consumes a Listof IndexableSeries and builds key
@@ -191,7 +191,9 @@
                          (gen-series-referencer col)
 			     (if (CSeries? col)
 				 (cseries-referencer col)
-				 (iseries-referencer col))))))
+                                 (if (ISeries? col)
+				 (iseries-referencer col)
+                                 (nseries-referencer col)))))))
 	(λ: ((row-id : Index))
 	    (let ((outp (open-output-string)))
 	      (for ([col-ref (in-list col-refs)])
@@ -319,7 +321,7 @@
                   (append-GenSeriesBuilder builder (car (assert val list?)))
                   (copy-column-row-error series col))))
            ((NSeries? series)
-            (let: ((num : Float (car (nseries-iref series (list row-id)))))
+            (let: ((num : Flonum (car (nseries-iref series (list row-id)))))
               (if (NSeriesBuilder? builder)
                   (append-NSeriesBuilder builder num)
                   (copy-column-row-error series col))))
@@ -671,9 +673,9 @@
 					 (set-intersect (list->set cols)
 							(set-intersect cols-a cols-b))))
 
-  (displayln "Join Cols")
+  ;(displayln "Join Cols")
 
-  (displayln join-cols)
+  ;(displayln join-cols)
 
   (when (null? join-cols)
 	(error "No common columns between data-frames to join on."))
@@ -819,7 +821,7 @@
 (define (make-group-hash)
   (make-hash))
 
-;Used to determine the groups for the groupby. If by is a function, it’s called on each value of the object’s index. If a dict or Series is passed, the Series or dict VALUES will be used to determine the groups (the Series’ values are first aligned; see .align() method). If an ndarray is passed, the values are used as-is determine the groups. A label or list of labels may be passed to group by the columns in self. Notice that a tuple is interpreted a (single) key.
+;Used to determine the groups for the groupby. If by is a function, it’s called on each value of the object’s index. The Serie VALUES will be used to determine the groups.
 (: data-frame-groupby (DataFrame (Listof Label) -> GroupHash))
 (define (data-frame-groupby data-frame by)
   (define: group-index : GroupHash (make-group-hash))
@@ -847,7 +849,7 @@
 ;; DataFrame agg ops
 
 ; Applies the aggregate function specificed by function-name to the values in
-; the column-name column. Currently supports 3: sum, avg, count.
+; the column-name column. Currently supports 3: sum, mean, count, min, max.
 (: apply-agg-data-frame (Symbol GroupHash -> Series))
 (define (apply-agg-data-frame function-name group-hash)
   (define len (hash-count group-hash))
@@ -871,38 +873,7 @@
                                   [(eq? function-name 'max) (argmax (lambda ([x : Real]) x) val)]
                                   [else (error 'apply-agg-data-frame "Unknown aggregate function.")])))))
 
-  (agg-value-hash-to-series agg-value-hash))
-
-(: make-agg-value-hash-sindex ((Listof (Pair String GenericType)) -> SIndex))
-(define (make-agg-value-hash-sindex sorted-agg-value-hash)
-  (let ((index : SIndex (make-hash '()))
-          (len (length sorted-agg-value-hash)))
-    
-      (begin
-        (let loop ([i 0])
-          (if (>= i len)
-              index
-              (let: ((i : Index (assert i index?)))
-                (let ((key (car (list-ref sorted-agg-value-hash i))))
-                  (hash-update! index (string->symbol key)
-                                (λ: ((idx : (Listof Index)))
-                                  (append idx (list i)))
-                                (λ () (list))))
-                (loop (add1 i)))))
-        index)))
-
-(: agg-value-hash-to-series (AggValueHash -> Series))
-(define (agg-value-hash-to-series agg-value-hash)
-  (let ((sorted-agg-value-hash
-         ((inst sort (Pair String GenericType) (Pair String GenericType))
-         (hash->list agg-value-hash)
-         (λ: ((kv1 : (Pair String GenericType))
-              (kv2 : (Pair String GenericType)))
-           (string<? (car kv1) (car kv2))))))
-
-    (let ((index : SIndex (make-agg-value-hash-sindex sorted-agg-value-hash)))
-      (new-GenSeries (for/vector: : (Vectorof GenericType) ([p sorted-agg-value-hash])
-                       (cdr p)) (LabelIndex index)))))
+  (agg-value-hash-to-gen-series agg-value-hash))
 
 ; **********************************************************
 

@@ -20,19 +20,21 @@
 
 (provide:
  [set-NSeries-index (NSeries (U (Listof Label) RFIndex) -> NSeries)]
- [nseries-iref (NSeries (Listof Index) -> (Listof Float))]
- [nseries-loc-boolean (NSeries (Listof Boolean) -> (U Float NSeries))] 
- [nseries-loc (NSeries (U Label (Listof Label) (Listof Boolean)) -> (U Float NSeries))]
- [nseries-loc-multi-index (NSeries (U (Listof String) ListofListofString) -> (U Float NSeries))]
- [nseries-iloc (NSeries (U Index (Listof Index)) -> (U Float NSeries))]
- [nseries-index-ref (NSeries IndexDataType -> (Listof Float))]
+ [nseries-iref (NSeries (Listof Index) -> (Listof Flonum))]
+ [nseries-loc-boolean (NSeries (Listof Boolean) -> (U Flonum NSeries))] 
+ [nseries-loc (NSeries (U Label (Listof Label) (Listof Boolean)) -> (U Flonum NSeries))]
+ [nseries-loc-multi-index (NSeries (U (Listof String) ListofListofString) -> (U Flonum NSeries))]
+ [nseries-iloc (NSeries (U Index (Listof Index)) -> (U Flonum NSeries))]
+ [nseries-index-ref (NSeries IndexDataType -> (Listof Flonum))]
  [nseries-range (NSeries Index -> FlVector)]
- [nseries-referencer (NSeries -> (Index -> Float))]
+ [nseries-referencer (NSeries -> (Index -> Flonum))]
  [nseries-length (NSeries -> Index)]
  [nseries-data (NSeries -> FlVector)]
+ [nseries-groupby (NSeries -> GroupHash)]
+ [apply-agg-nseries (Symbol GroupHash -> GenSeries)]
  [nseries-index (NSeries -> (U False RFIndex))]
- [map/ns (NSeries (Float -> Float) -> NSeries)]
- [bop/ns (NSeries NSeries (Float Float -> Float) -> NSeries)]
+ [map/ns (NSeries (Flonum -> Flonum) -> NSeries)]
+ [bop/ns (NSeries NSeries (Flonum Flonum -> Flonum) -> NSeries)]
  [+/ns (NSeries NSeries -> NSeries)]
  [-/ns (NSeries NSeries -> NSeries)]
  [*/ns (NSeries NSeries -> NSeries)]
@@ -43,10 +45,10 @@
  [<=/ns (NSeries NSeries -> BSeries)]
  [=/ns (NSeries NSeries -> BSeries)]
  [!=/ns (NSeries NSeries -> BSeries)]
- [+./ns (NSeries Float -> NSeries)]
- [-./ns (NSeries Float -> NSeries)]
- [*./ns (NSeries Float -> NSeries)]
- [/./ns (NSeries Float -> NSeries)]
+ [+./ns (NSeries Flonum -> NSeries)]
+ [-./ns (NSeries Flonum -> NSeries)]
+ [*./ns (NSeries Flonum -> NSeries)]
+ [/./ns (NSeries Flonum -> NSeries)]
  [+/ns/is (NSeries ISeries -> NSeries)]
  [-/ns/is (NSeries ISeries -> NSeries)]
  [*/ns/is (NSeries ISeries -> NSeries)]
@@ -69,8 +71,8 @@
  [!=/is/ns (ISeries NSeries -> BSeries)]
  [apply-agg-ns (Symbol NSeries -> Real)]
  [apply-stat-ns (Symbol NSeries -> Real)]
- [flvector->list (FlVector Fixnum -> (Listof Float))]
- [list->flvector ((Listof Float) -> FlVector)]
+ [flvector->list (FlVector Fixnum -> (Listof Flonum))]
+ [list->flvector ((Listof Flonum) -> FlVector)]
  [nseries-print (NSeries Output-Port -> Void)])
 
 (provide
@@ -93,7 +95,7 @@
  (only-in "indexed-series.rkt"
 	  RFIndex? label-index label->lst-idx
 	  build-index-from-list IndexDataType
-	  Label RFIndex extract-index
+	  SIndex Label RFIndex extract-index
 	  LabelIndex LabelIndex-index
           idx->key is-indexed?
           key->lst-idx
@@ -102,7 +104,12 @@
  (only-in "boolean-series.rkt"
           BSeries BSeries-data)
  (only-in "integer-series.rkt"
-          ISeries ISeries-data))
+          ISeries ISeries-data)
+ (only-in "generic-series.rkt"
+	  GenSeries GenSeries? GenericType gen-series-iref new-GenSeries
+	  gen-series-referencer)
+ (only-in "groupby-util.rkt"
+          make-agg-value-hash-sindex agg-value-hash-to-gen-series AggValueHash))
 
 ; ***********************************************************
 
@@ -144,15 +151,15 @@
 
 ; ***********************************************************
 
-(struct: Summary ([mean : Float]
-                  [variance : Float]
-                  [min : Float]
-                  [max : Float]
+(struct: Summary ([mean : Flonum]
+                  [variance : Flonum]
+                  [min : Flonum]
+                  [max : Flonum]
                   [count : Natural]
                   [nans : Natural]))
 
-;; An NSeries is an optimized Series for computation over vectors of Float
-;; i.e., NSeries should be faster then (Series Float)
+;; An NSeries is an optimized Series for computation over vectors of Flonum
+;; i.e., NSeries should be faster then (Series Flonum)
 (struct: NSeries ([index : (Option RFIndex)] [data : FlVector]))
 
 (: new-NSeries (FlVector (Option (U (Listof IndexDataType) RFIndex)) -> NSeries))
@@ -193,7 +200,7 @@
 ; lambda function which consumes an index and provides the
 ; value of the data at that index in the series. It can be
 ; defined once and used repeatedly as a referencer.
-(: nseries-referencer (NSeries -> (Index -> Float)))
+(: nseries-referencer (NSeries -> (Index -> Flonum)))
 (define (nseries-referencer series)
   (let ((data (NSeries-data series)))
     (λ: ((idx : Index))
@@ -201,7 +208,7 @@
 
 ; This function consumes an integer series and an index and
 ; returns the value at that index in the series.
-(: nseries-iref (NSeries (Listof Index) -> (Listof Float)))
+(: nseries-iref (NSeries (Listof Index) -> (Listof Flonum)))
 (define (nseries-iref series lst-idx)
   (map (lambda ((idx : Index)) (flvector-ref (NSeries-data series) idx))
        lst-idx))
@@ -218,7 +225,7 @@
   
   flvector-ranged)
 
-(: nseries-index-ref (NSeries IndexDataType -> (Listof Float)))
+(: nseries-index-ref (NSeries IndexDataType -> (Listof Flonum)))
 (define (nseries-index-ref series key)
   (nseries-iref series (key->lst-idx (assert (NSeries-index series)) key)))
 
@@ -238,19 +245,19 @@
 (define (nseries-length nseries)
   (flvector-length (NSeries-data nseries)))
 
-(: flvector->list (FlVector Fixnum -> (Listof Float)))
+(: flvector->list (FlVector Fixnum -> (Listof Flonum)))
 (define (flvector->list flvec idx)
   (cond
     [(= idx (flvector-length flvec)) null]
     [else (cons (flvector-ref flvec idx) (flvector->list flvec (unsafe-fx+ idx 1)))]))
 
-(: list->flvector ((Listof Float) -> FlVector))
-(define (list->flvector float-list)
-  (define len : Index (length float-list))
+(: list->flvector ((Listof Flonum) -> FlVector))
+(define (list->flvector Flonum-list)
+  (define len : Index (length Flonum-list))
 
   (define result-flvector (make-flvector len))
 
-  (for([flo float-list]
+  (for([flo Flonum-list]
      [i (in-range len)])
     (flvector-set! result-flvector i flo))
 
@@ -261,10 +268,10 @@
 ; ***********************************************************
 ;; Map a function
 
-; This function consumes a series and a function both of Float
+; This function consumes a series and a function both of Flonum
 ; types and applies the function to each member of the series
 ; returning a new series.
-(: map/ns (NSeries (Float -> Float) -> NSeries))
+(: map/ns (NSeries (Flonum -> Flonum) -> NSeries))
 (define (map/ns series fn)
   (let ((old-data (NSeries-data series))
 	(new-data (make-flvector (flvector-length (NSeries-data series)))))
@@ -283,7 +290,7 @@
 
 ;; Binary NSeries Ops
 
-(: bop/ns (NSeries NSeries (Float Float -> Float) -> NSeries))
+(: bop/ns (NSeries NSeries (Flonum Flonum -> Flonum) -> NSeries))
 (define (bop/ns ns1 ns2 bop)
   (define v1 (NSeries-data ns1))
   (define v2 (NSeries-data ns2))
@@ -321,7 +328,7 @@
 
 ;; Binary NSeries ISeries Ops
 
-(: bop/ns/is (NSeries ISeries (Float Float -> Float) -> NSeries))
+(: bop/ns/is (NSeries ISeries (Flonum Flonum -> Flonum) -> NSeries))
 (define (bop/ns/is ns1 ns2 bop)
   (define v1 (NSeries-data ns1))
   (define v2 (ISeries-data ns2))
@@ -359,7 +366,7 @@
 
 ;; Binary ISeries NSeries Ops
 
-(: bop/is/ns (ISeries NSeries (Float Float -> Float) -> NSeries))
+(: bop/is/ns (ISeries NSeries (Flonum Flonum -> Flonum) -> NSeries))
 (define (bop/is/ns ns1 ns2 bop)
   (define v1 (ISeries-data ns1))
   (define v2 (NSeries-data ns2))
@@ -398,7 +405,7 @@
 ; ***********************************************************
 ;; Scalar NSeries Ops
 
-(: bop./ns (Float NSeries (Float Float -> Float) -> NSeries))
+(: bop./ns (Flonum NSeries (Flonum Flonum -> Flonum) -> NSeries))
 (define (bop./ns fl ns bop)
   (define v1 (NSeries-data ns))
   (define: len : Index (flvector-length v1))
@@ -408,19 +415,19 @@
        ((= idx len) (NSeries #f v-bop))
        (flvector-set! v-bop idx (bop (flvector-ref v1 idx) fl))))
 
-(: +./ns (NSeries Float -> NSeries))
+(: +./ns (NSeries Flonum -> NSeries))
 (define (+./ns ns fl)
   (bop./ns fl ns fl+))
 
-(: -./ns (NSeries Float -> NSeries))
+(: -./ns (NSeries Flonum -> NSeries))
 (define (-./ns ns fl )
   (bop./ns fl ns fl-))
 
-(: *./ns (NSeries Float -> NSeries))
+(: *./ns (NSeries Flonum -> NSeries))
 (define (*./ns ns fl)
   (bop./ns fl ns fl*))
 
-(: /./ns (NSeries Float -> NSeries))
+(: /./ns (NSeries Flonum -> NSeries))
 (define (/./ns ns fl)
   (bop./ns fl ns fl/))
 
@@ -435,7 +442,7 @@
 ; index resulting in a new boolean point and at the end of the loop
 ; a new data vector. This data vector is the data of the new ISeries
 ; which is returned.
-(: comp/ns (NSeries NSeries (Float Float -> Boolean) -> BSeries))
+(: comp/ns (NSeries NSeries (Flonum Flonum -> Boolean) -> BSeries))
 (define (comp/ns ns1 ns2 comp)
   (define v1 (NSeries-data ns1))
   (define v2 (NSeries-data ns2))
@@ -483,7 +490,7 @@
 
 (: !=/ns (NSeries NSeries -> BSeries))
 (define (!=/ns ns1 ns2)
-  (comp/ns ns1 ns2 (lambda ([a : Float] [b : Float]) (not (unsafe-fl= a b)))))
+  (comp/ns ns1 ns2 (lambda ([a : Flonum] [b : Flonum]) (not (unsafe-fl= a b)))))
 
 ; ***********************************************************
 
@@ -497,7 +504,7 @@
 ; index resulting in a new boolean point and at the end of the loop
 ; a new data vector. This data vector is the data of the new ISeries
 ; which is returned.
-(: comp/ns/is (NSeries ISeries (Float Float -> Boolean) -> BSeries))
+(: comp/ns/is (NSeries ISeries (Flonum Flonum -> Boolean) -> BSeries))
 (define (comp/ns/is ns is comp)
   (define v1 (NSeries-data ns))
   (define v2 (ISeries-data is))
@@ -545,7 +552,7 @@
 
 (: !=/ns/is (NSeries ISeries -> BSeries))
 (define (!=/ns/is ns is)
-  (comp/ns/is ns is (lambda ([a : Float] [b : Float]) (not (unsafe-fl= a b)))))
+  (comp/ns/is ns is (lambda ([a : Flonum] [b : Flonum]) (not (unsafe-fl= a b)))))
 
 ; ***********************************************************
 
@@ -558,7 +565,7 @@
 ; index resulting in a new boolean point and at the end of the loop
 ; a new data vector. This data vector is the data of the new ISeries
 ; which is returned.
-(: comp/is/ns (ISeries NSeries (Float Float -> Boolean) -> BSeries))
+(: comp/is/ns (ISeries NSeries (Flonum Flonum -> Boolean) -> BSeries))
 (define (comp/is/ns is ns comp)
   (define v1 (ISeries-data is))
   (define v2 (NSeries-data ns))
@@ -606,7 +613,7 @@
 
 (: !=/is/ns (ISeries NSeries -> BSeries))
 (define (!=/is/ns is ns)
-  (comp/is/ns is ns (lambda ([a : Float] [b : Float]) (not (unsafe-fl= a b)))))
+  (comp/is/ns is ns (lambda ([a : Flonum] [b : Flonum]) (not (unsafe-fl= a b)))))
 
 ; ***********************************************************
 
@@ -663,7 +670,7 @@
       (list label)))
 
 (define-predicate ListofBoolean? (Listof Boolean))
-(define-predicate ListofFloat? (Listof Float))
+(define-predicate ListofFlonum? (Listof Flonum))
 
 ; label based
 ; for two different use cases:
@@ -679,7 +686,7 @@
 (define (true? boolean)
   (not (false? boolean)))
 
-(: nseries-loc-boolean (NSeries (Listof Boolean) -> (U Float NSeries)))
+(: nseries-loc-boolean (NSeries (Listof Boolean) -> (U Flonum NSeries)))
 (define (nseries-loc-boolean nseries boolean-lst)
   (: data FlVector)
   (define data (nseries-data nseries))
@@ -709,7 +716,7 @@
       (flvector-ref new-data 0)
       (new-NSeries new-data #f)))
 
-(: nseries-loc-multi-index (NSeries (U (Listof String) ListofListofString) -> (U Float NSeries)))
+(: nseries-loc-multi-index (NSeries (U (Listof String) ListofListofString) -> (U Flonum NSeries)))
 (define (nseries-loc-multi-index nseries label)
   (unless (NSeries-index nseries)
     (let ((k (current-continuation-marks)))
@@ -723,7 +730,7 @@
       (nseries-loc nseries (map get-index-val label))
       (nseries-loc nseries (get-index-val label))))
     
-(: nseries-loc (NSeries (U Label (Listof Label) (Listof Boolean)) -> (U Float NSeries)))
+(: nseries-loc (NSeries (U Label (Listof Label) (Listof Boolean)) -> (U Flonum NSeries)))
 (define (nseries-loc nseries label)
   (unless (is-indexed? (assert (NSeries-index nseries)))
     (let ((k (current-continuation-marks)))
@@ -735,15 +742,15 @@
                                        (map (lambda ([l : Label]) (length (nseries-index-ref nseries l))) (convert-to-label-lst label)))
             (vals : FlVector
              (if (list? label)
-                 (list->flvector (assert (flatten (map (lambda ([l : Label]) (nseries-index-ref nseries l)) label)) ListofFloat?))
-                 (list->flvector (assert (nseries-index-ref nseries label) ListofFloat?)))))
+                 (list->flvector (assert (flatten (map (lambda ([l : Label]) (nseries-index-ref nseries l)) label)) ListofFlonum?))
+                 (list->flvector (assert (nseries-index-ref nseries label) ListofFlonum?)))))
 
         (if (= (flvector-length vals) 1)
             (flvector-ref vals 0)
             (new-NSeries vals (build-index-from-list (build-labels-by-count (convert-to-label-lst label) associated-indices-length)))))))
 
 ; index based
-(: nseries-iloc (NSeries (U Index (Listof Index)) -> (U Float NSeries)))
+(: nseries-iloc (NSeries (U Index (Listof Index)) -> (U Flonum NSeries)))
 (define (nseries-iloc nseries idx)
   (let ((referencer (nseries-referencer nseries)))
     (if (list? idx)
@@ -751,7 +758,7 @@
         ; make a new index from these labels using build-index-from-labels
         ; sub-vector the data vector to get the data and create a new-BSeries
         (new-NSeries
-         (list->flvector (for/list: : (Listof Float) ([i idx])
+         (list->flvector (for/list: : (Listof Flonum) ([i idx])
                            (flvector-ref (nseries-data nseries) i)))
 
          (if (not (NSeries-index nseries))
@@ -760,3 +767,73 @@
         (referencer idx))))
 
 ; ***********************************************************
+
+; ***********************************************************
+;; NSeries groupby
+
+(define-type Key String)
+(define-type GroupHash (HashTable Key (Listof Flonum)))
+
+; This function is self-explanatory, it consumes no arguments
+; and creates a hash map which will represent a JoinHash.
+(: make-group-hash (-> GroupHash))
+(define (make-group-hash)
+  (make-hash))
+
+;Used to determine the groups for the groupby. If by is a function, it’s called on each value of the object’s index. The Series VALUES will be used to determine the groups.
+(: nseries-groupby (NSeries -> GroupHash))
+(define (nseries-groupby nseries)
+  (define: group-index : GroupHash (make-group-hash))  
+
+  (let ((len (nseries-length nseries))
+        (k (current-continuation-marks)))
+    (if (zero? len)
+	(raise (make-exn:fail:contract "nseries can't be empty on groupby." k))
+	(begin          
+	  (do ((i 0 (add1 i)))
+	      ((>= i len) group-index)
+	    (let* ((flonum-val : (U Flonum NSeries) (nseries-iloc nseries (assert i index?)))
+                   (flonum-list : (Listof Flonum) (if (flonum? flonum-val) (list flonum-val) (flvector->list (NSeries-data (assert flonum-val NSeries?)) (flvector-length (NSeries-data (assert flonum-val NSeries?))))))
+                  (key (if (NSeries-index nseries)
+                                   (idx->key (NSeries-index nseries) (assert i index?))
+                                   (assert i index?)))
+                  (key-str : String (cond
+                                      [(symbol? key) (symbol->string key)]
+                                      [(number? key) (number->string key)]
+                                      ; pretty-format anything else
+                                      [else (pretty-format key)])))              
+              (hash-update! group-index key-str
+			      (λ: ((val : (Listof Flonum)))                                
+				  (append flonum-list val))
+			      (λ () (list)))))))))
+
+; ***********************************************************
+;; NSeries agg ops
+(define-type AggValueHash (HashTable Key GenericType))
+
+; Applies the aggregate function specificed by function-name to the values in
+; the column-name column. Currently supports 3: sum, avg, count.
+(: apply-agg-nseries (Symbol GroupHash -> GenSeries))
+(define (apply-agg-nseries function-name group-hash)
+  (define len (hash-count group-hash))
+
+  (: agg-value-hash AggValueHash)
+  (define agg-value-hash (make-hash))
+
+  (hash-for-each group-hash
+                 (lambda ([key : String] [val : (Listof Flonum)])
+                   
+                   (let ((key (assert key string?))
+                         (val (assert (flatten val) ListofFlonum?)))
+                     (hash-set! agg-value-hash key
+                                (cond 
+                                  [(eq? function-name 'sum) (apply + val)]
+                                  [(eq? function-name 'mean) (mean val)]
+                                  ;[(eq? function-name 'median) (median (vector->list (NSeries-data series)))]
+                                  ;[(eq? function-name 'mode) (mode (vector->list (NSeries-data series)))]
+                                  [(eq? function-name 'count) (length val)]
+                                  [(eq? function-name 'min) (argmin (lambda ([x : Real]) x) val)]
+                                  [(eq? function-name 'max) (argmax (lambda ([x : Real]) x) val)]
+                                  [else (error 'apply-agg-data-frame "Unknown aggregate function.")])))))
+
+  (agg-value-hash-to-gen-series agg-value-hash))

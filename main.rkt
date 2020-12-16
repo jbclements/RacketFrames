@@ -42,6 +42,8 @@
  "dataframe/data-frame/date.rkt"
  "dataframe/data-frame/datetime-series.rkt" 
  "dataframe/data-frame/categorical-series-ops.rkt"
+ "dataframe/data-frame/numeric-series-ops.rkt"
+ "dataframe/data-frame/integer-series-ops.rkt"
  "dataframe/util/datetime.rkt"
  "dataframe/data-frame/series-iter.rkt"
  "dataframe/data-frame/series-print.rkt"
@@ -85,6 +87,8 @@
  (all-from-out "dataframe/data-frame/date.rkt")
  (all-from-out "dataframe/data-frame/datetime-series.rkt")
  (all-from-out "dataframe/data-frame/categorical-series-ops.rkt")
+ (all-from-out "dataframe/data-frame/numeric-series-ops.rkt")
+ (all-from-out "dataframe/data-frame/integer-series-ops.rkt")
  (all-from-out "dataframe/data-frame/gen-nseries.rkt")
  (all-from-out "dataframe/data-frame/series-print.rkt")
  (all-from-out "dataframe/plot/plot.rkt")

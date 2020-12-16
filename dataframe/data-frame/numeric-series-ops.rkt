@@ -106,3 +106,14 @@
           (vector-set! data i #t)
           (vector-set! data i #f)))
     (new-BSeries data #f)))
+
+(define N (expt 10 4))
+(: col-d-data FlVector)
+(define col-d-data (make-flvector N))
+
+(for ([i N])
+  (flvector-set! col-d-data i  (assert (exact->inexact (random N)) flonum?)))
+
+(define my-nseries (nseries-append (new-NSeries col-d-data #f) (new-NSeries col-d-data #f)))
+
+(nseries-head-display my-nseries #:rows 20)

@@ -39,10 +39,11 @@
 (define col-c-data (for/vector: : (Vectorof Fixnum) ([i N]) (random N)))
 
 ; no for/flvector loop
+(: col-d-data FlVector)
 (define col-d-data (make-flvector N))
 
 (for ([i N])
-  (flvector-set! col-d-data i (real->double-flonum (random N))))
+  (flvector-set! col-d-data i  (assert (exact->inexact (random N)) flonum?)))
 
 (: col-obj1-data (Vectorof Symbol))
 (define col-obj1-data (make-vector N 'bar))
@@ -82,6 +83,9 @@
 (define concat-vertical-result (data-frame-concat-vertical data-frame-numerical data-frame-numerical #:col '()))
 (define append-numerical-after (- (now) append-numerical-before))
 
+(show-data-frame-description (data-frame-description concat-vertical-result))
+(data-frame-head concat-vertical-result)
+
 (fprintf (current-output-port)
          "Append numerical bench ~v ms.\n"
          append-numerical-after)
@@ -94,6 +98,9 @@
 (define append-mixed-before (now))
 (define concat-vertical-result-2 (data-frame-concat-vertical data-frame-mixed data-frame-mixed #:col '()))
 (define append-mixed-after (- (now) append-mixed-before))
+
+(show-data-frame-description (data-frame-description concat-vertical-result-2))
+(data-frame-head concat-vertical-result-2)
 
 (fprintf (current-output-port)
          "Append mixed bench ~v ms.\n"

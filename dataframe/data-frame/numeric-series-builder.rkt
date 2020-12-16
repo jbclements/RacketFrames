@@ -65,5 +65,4 @@
 (define (complete-NSeriesBuilder builder)  
   (let* ((data (NSeriesBuilder-data builder))
          (len (NSeriesBuilder-index builder)))
-    (displayln data)
     (NSeries #f (flvector-copy data 0 len))))

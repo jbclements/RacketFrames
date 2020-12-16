@@ -40,12 +40,12 @@
 
 (define twenty-frame-c (for/list: : (Listof DataFrame) ([i 20]) (new-data-frame
                  (for/list: : Columns ([col 200])
-                   (cons (string->symbol (number->string (+ col (random))))
+                   (cons (string->symbol (~a "df~" i "~" col))
                            (new-ISeries (for/vector: : (Vectorof Fixnum) ([i N]) 0) #f))))))
 
 (define frame-f (new-data-frame
                  (for/list: : Columns ([col 200])
-                   (cons (string->symbol (number->string col))
+                   (cons (string->symbol (~a "df~" col))
                            (new-ISeries (for/vector: : (Vectorof Fixnum) ([i N]) 0) #f)))))
 
 (define twenty-frame-f (for/list: : (Listof DataFrame) ([i 20]) frame-f))
@@ -57,7 +57,7 @@
 
 (show-data-frame-description (data-frame-description concat-horizontal-result))
 
-(data-frame-head concat-horizontal-result)
+;(data-frame-head concat-horizontal-result)
 
 (fprintf (current-output-port)
          "DataFrame list horizontal concat bench ~v ms.\n"

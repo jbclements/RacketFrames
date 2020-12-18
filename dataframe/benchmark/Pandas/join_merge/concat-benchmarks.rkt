@@ -75,3 +75,20 @@
          "DataFrame list vertical concat bench ~v ms.\n"
          data-frame-list-vertical-concat-bench-after)
 (printf "Pandas Compare* join_merge.ConcatDataFrames.time_f_ordered 123.28ms")
+
+
+(define iseries-append-bench-before (now))
+(define iseries-appended (iseries-append (new-ISeries (for/vector: : (Vectorof Fixnum) ([i N]) 0) #f) (new-ISeries (for/vector: : (Vectorof Fixnum) ([i N]) 0) #f)))
+(define iseries-append-bench-after (- (now) iseries-append-bench-before))
+(series-print iseries-appended  (current-output-port))
+(fprintf (current-output-port)
+         "iseries append bench ~v ms.\n"
+         iseries-append-bench-after)
+
+(define cseries-append-bench-before (now))
+(define cseries-appended (cseries-append (new-CSeries (for/vector: : (Vectorof Symbol) ([i N]) 'a) #f) (new-CSeries (for/vector: : (Vectorof Symbol) ([i N]) 'b) #f)))
+(define cseries-append-bench-after (- (now) cseries-append-bench-before))
+(series-print cseries-appended  (current-output-port))
+(fprintf (current-output-port)
+         "cseries append bench ~v ms.\n"
+         cseries-append-bench-after)

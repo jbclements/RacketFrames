@@ -13,3 +13,10 @@ echo "**********"
 raco make append-benchmarks.rkt
 racket append-benchmarks.rkt
 echo "**********\n\n"
+
+echo "**********"
+echo "Join Benchmark Comparisons"
+echo "**********"
+raco make join-benchmarks.rkt
+racket join-benchmarks.rkt
+echo "**********\n\n"

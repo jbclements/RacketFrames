@@ -140,3 +140,5 @@
 (check-equal? (iseries-loc-multi-index multi-index-iseries-2 (list "c" "3" "9")) 100)
 
 (iseries-print (assert (iseries-loc-multi-index multi-index-iseries-3 (list "c" "3")) ISeries?) (current-output-port))
+
+(ISeries-data (new-ISeries (vector (inexact->exact +nan.0) (inexact->exact +nan.0) (inexact->exact +nan.0) (inexact->exact +nan.0) (inexact->exact +nan.0)) (build-index-from-list (list 'a 'a 'b 'c 'd))))

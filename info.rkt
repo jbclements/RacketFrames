@@ -2,21 +2,13 @@
 
 (define collection 'multi)
 
-#;(define deps (list (list "portaudio" "0.1") 
-                   "base"
-                   "data-lib"
-                   "gui-lib"
-                   "htdp-lib"
+(define deps (list "base"
                    "math-lib"
-                   "plot-lib"
                    "plot-gui-lib"
-                   "rackunit-lib"
+                   "plot-lib"
+                   "rackunit-typed"
                    "typed-racket-lib"
-                   "drracket-plugin-lib"
-                   "memoize"
-                   "pict-lib"
-                   "wxme-lib"
-                   "snip-lib"))
-#;(define build-deps (list "scribble-lib"
-                         "racket-doc"
-                         "wxme-lib"))
+                   "typed-racket-more"))
+
+(define build-deps (list "racket-doc"
+                         "scribble-lib"))

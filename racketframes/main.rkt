@@ -22,75 +22,75 @@
 #lang typed/racket
 
 (require
- (only-in "dataframe/load/load.rkt"
+ (only-in "load/load.rkt"
 	  load-csv-file
 	  load-delimited-file
           data-frame-from-sql)
- "dataframe/data-frame/types.rkt"
- "dataframe/data-frame/data-frame.rkt"
- "dataframe/data-frame/data-frame-ops.rkt"
- "dataframe/data-frame/data-frame-concat.rkt"
- "dataframe/data-frame/data-frame-print.rkt"
- "dataframe/data-frame/data-frame-join.rkt"
- "dataframe/data-frame/indexed-series.rkt"
- "dataframe/data-frame/series-description.rkt"
- "dataframe/data-frame/generic-series.rkt"
- "dataframe/data-frame/integer-series.rkt"
- "dataframe/data-frame/numeric-series.rkt"
- "dataframe/data-frame/categorical-series.rkt"
- "dataframe/data-frame/boolean-series.rkt"
- "dataframe/data-frame/date.rkt"
- "dataframe/data-frame/datetime-series.rkt" 
- "dataframe/data-frame/categorical-series-ops.rkt"
- "dataframe/data-frame/numeric-series-ops.rkt"
- "dataframe/data-frame/integer-series-ops.rkt"
- "dataframe/util/datetime.rkt"
- "dataframe/data-frame/series-iter.rkt"
- "dataframe/data-frame/series-print.rkt"
- (only-in "dataframe/load/schema-syntax.rkt"
+ "data-frame/types.rkt"
+ "data-frame/data-frame.rkt"
+ "data-frame/data-frame-ops.rkt"
+ "data-frame/data-frame-concat.rkt"
+ "data-frame/data-frame-print.rkt"
+ "data-frame/data-frame-join.rkt"
+ "data-frame/indexed-series.rkt"
+ "data-frame/series-description.rkt"
+ "data-frame/generic-series.rkt"
+ "data-frame/integer-series.rkt"
+ "data-frame/numeric-series.rkt"
+ "data-frame/categorical-series.rkt"
+ "data-frame/boolean-series.rkt"
+ "data-frame/date.rkt"
+ "data-frame/datetime-series.rkt" 
+ "data-frame/categorical-series-ops.rkt"
+ "data-frame/numeric-series-ops.rkt"
+ "data-frame/integer-series-ops.rkt"
+ "util/datetime.rkt"
+ "data-frame/series-iter.rkt"
+ "data-frame/series-print.rkt"
+ (only-in "load/schema-syntax.rkt"
 	  schema)
- "dataframe/plot/plot.rkt"
- ;"dataframe/stats/tabulate.rkt"
- ;"dataframe/stats/statistics.rkt"
- (only-in "dataframe/load/schema.rkt"
+ "plot/plot.rkt"
+ ;"stats/tabulate.rkt"
+ ;"stats/statistics.rkt"
+ (only-in "load/schema.rkt"
           Schema
 	  ColumnInfo
 	  alter-schema-columns
 	  alter-schema-no-headers)
- (only-in "dataframe/data-frame/gen-nseries.rkt"
+ (only-in "data-frame/gen-nseries.rkt"
 	  generate-NSeries)
- (only-in "dataframe/util/filepath.rkt"
+ (only-in "util/filepath.rkt"
 	  FilePath FilePath->string)
  racket/flonum)
 
 
 (provide
- (all-from-out "dataframe/data-frame/types.rkt")
- (all-from-out "dataframe/load/load.rkt")
- (all-from-out "dataframe/load/schema-syntax.rkt")
- (all-from-out "dataframe/load/schema.rkt")
- (all-from-out "dataframe/data-frame/indexed-series.rkt")
- (all-from-out "dataframe/data-frame/series-description.rkt")
- (all-from-out "dataframe/data-frame/series-iter.rkt")
- (all-from-out "dataframe/data-frame/data-frame.rkt")
- (all-from-out "dataframe/data-frame/data-frame-ops.rkt")
- (all-from-out "dataframe/data-frame/data-frame-concat.rkt")
- (all-from-out "dataframe/data-frame/data-frame-print.rkt")
- (all-from-out "dataframe/data-frame/data-frame-join.rkt")
- ;(all-from-out "dataframe/stats/tabulate.rkt")
- ;(all-from-out "dataframe/stats/statistics.rkt")
- (all-from-out "dataframe/data-frame/generic-series.rkt")
- (all-from-out "dataframe/data-frame/integer-series.rkt")
- (all-from-out "dataframe/data-frame/numeric-series.rkt")
- (all-from-out "dataframe/data-frame/categorical-series.rkt")
- (all-from-out "dataframe/data-frame/boolean-series.rkt")
- (all-from-out "dataframe/data-frame/date.rkt")
- (all-from-out "dataframe/data-frame/datetime-series.rkt")
- (all-from-out "dataframe/data-frame/categorical-series-ops.rkt")
- (all-from-out "dataframe/data-frame/numeric-series-ops.rkt")
- (all-from-out "dataframe/data-frame/integer-series-ops.rkt")
- (all-from-out "dataframe/data-frame/gen-nseries.rkt")
- (all-from-out "dataframe/data-frame/series-print.rkt")
- (all-from-out "dataframe/plot/plot.rkt")
- (all-from-out "dataframe/util/datetime.rkt")
+ (all-from-out "data-frame/types.rkt")
+ (all-from-out "load/load.rkt")
+ (all-from-out "load/schema-syntax.rkt")
+ (all-from-out "load/schema.rkt")
+ (all-from-out "data-frame/indexed-series.rkt")
+ (all-from-out "data-frame/series-description.rkt")
+ (all-from-out "data-frame/series-iter.rkt")
+ (all-from-out "data-frame/data-frame.rkt")
+ (all-from-out "data-frame/data-frame-ops.rkt")
+ (all-from-out "data-frame/data-frame-concat.rkt")
+ (all-from-out "data-frame/data-frame-print.rkt")
+ (all-from-out "data-frame/data-frame-join.rkt")
+ ;(all-from-out "stats/tabulate.rkt")
+ ;(all-from-out "stats/statistics.rkt")
+ (all-from-out "data-frame/generic-series.rkt")
+ (all-from-out "data-frame/integer-series.rkt")
+ (all-from-out "data-frame/numeric-series.rkt")
+ (all-from-out "data-frame/categorical-series.rkt")
+ (all-from-out "data-frame/boolean-series.rkt")
+ (all-from-out "data-frame/date.rkt")
+ (all-from-out "data-frame/datetime-series.rkt")
+ (all-from-out "data-frame/categorical-series-ops.rkt")
+ (all-from-out "data-frame/numeric-series-ops.rkt")
+ (all-from-out "data-frame/integer-series-ops.rkt")
+ (all-from-out "data-frame/gen-nseries.rkt")
+ (all-from-out "data-frame/series-print.rkt")
+ (all-from-out "plot/plot.rkt")
+ (all-from-out "util/datetime.rkt")
  (all-from-out racket/flonum))

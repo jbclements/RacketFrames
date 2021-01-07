@@ -16,7 +16,54 @@ used to accomplish theses tasks, but this option is especially good if you are 1
 using Racket already 2) may need to integrate your solution with other Racket applications
 in the future or 3) just plain love functional programming.
 
-Table of Contents
+@bold{Getting Started}
+@codeblock|{
+(require RacketFrames)
+
+(define columns-mix
+  (list
+   (cons 'integer-col (new-ISeries (vector 1 2 3 4)
+                            (build-index-from-list (list 'a 'b 'c 'd))))
+   (cons 'categorical-col (new-CSeries (vector 'hello 'world 'fizz 'buzz)
+                                       (build-index-from-list (list 'a 'b 'c 'd))))))
+
+; create new data-frame-mix
+(define data-frame-mix (new-data-frame columns-mix))
+
+(data-frame-write-tab data-frame-mix (current-output-port))
+
+; no schema
+(define salary-data-frame-csv-no-schema (load-csv-file "../sample-csv/salary_date.csv" #:schema #f))
+
+(data-frame-head salary-data-frame-csv-no-schema)
+
+(print salary-data-frame-csv-no-schema)
+
+(displayln "DataFrame List of Column Names")
+(data-frame-names salary-data-frame-csv-no-schema)
+
+(displayln "DataFrame Dimensions")
+(data-frame-dim salary-data-frame-csv-no-schema)
+
+(displayln "DataFrame Description")
+(show-data-frame-description (data-frame-description salary-data-frame-csv-no-schema))
+
+(displayln "DataFrame Remove")
+(data-frame-head (data-frame-remove salary-data-frame-csv-no-schema (list 'first 'age)))
+
+(displayln "DataFrame Project")
+(data-frame-head (data-frame-project salary-data-frame-csv-no-schema (list 'first 'last 'dollar)))
+
+(displayln "DataFrame Replace")
+(data-frame-head (data-frame-replace salary-data-frame-csv-no-schema (cons 'salary (new-CSeries (make-vector 200 '$0.00) #f))))
+
+(displayln "DataFrame Replace Non Existent Column")
+(data-frame-head (data-frame-replace salary-data-frame-csv-no-schema (cons 'dollar (new-CSeries (make-vector 200 '$0.00) #f))))
+
+(displayln "DataFrame Extend")
+(data-frame-head (data-frame-extend salary-data-frame-csv-no-schema (cons 'state (new-CSeries (make-vector 200 'CA) #f))))}|
+
+@bold{Table of Contents}
 
 @table-of-contents[]
 
@@ -1947,6 +1994,10 @@ data-frame-groupby aggregate count
 
 @section[#:style 'toc]{Loading}
 
+Loading data from various data sources is important for any DataFrames implementation.
+RacketFrames supports delimited files such as CSV (comma-separated value) as well as SQL Lite databases through the Racket SQL Lite driver.
+
+@subsection[#:style 'toc]{Delimitted Files}
 Read CSV (comma-separated or other delimitted) file into DataFrame.
 
 @codeblock|{
@@ -1972,168 +2023,140 @@ Read CSV (comma-separated or other delimitted) file into DataFrame.
 
 (data-frame-head fruits-data-frame-delimited-no-schema) }|
 
+@subsection[#:style 'toc]{Databases}
+@codeblock|{
+(require typed/db)
+            
+(define data-frame-from-sql-genres (data-frame-from-sql (sqlite3-connect #:database "db/chinook.db") #f "SELECT * FROM genres" empty))
+
+(data-frame-head data-frame-from-sql-genres)
+
+(define data-frame-from-sql-customers (data-frame-from-sql (sqlite3-connect #:database "db/chinook.db") #f "SELECT * FROM customers" empty))
+
+(data-frame-head data-frame-from-sql-customers) }|
+
+@tabular[#:sep @hspace[1]
+(list (list @bold{GenreId} @bold{Name})
+(list "1" "Rock")
+(list "2" "Jazz")
+(list "3" "Metal")
+(list "4" "Alternative & P")
+(list "5" "Rock And Roll")
+(list "6" "Blues")
+(list "7" "Latin")
+(list "8" "Reggae")
+(list "9" "Pop")
+(list "10" "Soundtrack"))]
 
 @section[#:style 'toc]{Plotting}
 
 @codeblock|{
-; read csv
-(define salary-data-frame-csv-schema (load-csv-file "../sample-csv/salary.csv" #:schema salary-schema))
+(displayln "plotting integer series")
 
-(data-frame-head salary-data-frame-csv-schema)
+(make-scatter-plot (new-ISeries (vector 1 2 3 4 5) #f))
 
-(displayln "NO SCHEMA");
+(make-line-plot (new-ISeries (vector 1 2 3 4 5) #f)) }|
 
-; no schema
-(define salary-data-frame-csv-no-schema (load-csv-file "../sample-csv/salary.csv" #:schema #f))
+@image["integer_scatter_line_plots.png"]
 
-(data-frame-head salary-data-frame-csv-no-schema)
+@codeblock|{
+(define float-column (cons 'col1 (new-NSeries (flvector 1.5 2.5 3.5 4.5) #f)))
 
-; read delimited
-(define random-demographic-data-frame-delimited (load-delimited-file "../sample-csv/random_demographic.csv" "|" #:schema random-demographic-schema))
+(displayln "plotting float columns")
 
-(data-frame-head random-demographic-data-frame-delimited)
+(make-scatter-plot float-column)
 
-; no schema
-(define fruits-data-frame-delimited-no-schema (load-delimited-file "../sample-csv/random_demographic.csv" "|" #:schema #f))
+(make-line-plot float-column)  }|
 
-(data-frame-head fruits-data-frame-delimited-no-schema) }|
+@image["float_scatter_line_plots.png"]
+
+@codeblock|{
+;******************
+;data-frame-integer
+;******************
+(define integer-columns
+  (list 
+   (cons 'col1 (new-ISeries (vector 1 2 3 4 4) #f))
+   (cons 'col2 (new-ISeries (vector 5 6 7 8 24) #f))
+   (cons 'col3 (new-ISeries (vector 9 10 11 12 24) #f))))
+
+; create new data-frame-integer
+(define data-frame-integer (new-data-frame integer-columns))
+
+(displayln "plotting integer data-frame")
+
+(make-scatter-plot data-frame-integer)
+
+(displayln "plotting integer columns")
+
+(make-scatter-plot integer-columns)
+}|
+
+@image["integer_columns_dataframe_plots.png"]
+
+@codeblock|{
+;******************
+;data-frame-float
+;******************
+(define float-columns
+  (list 
+   (cons 'col1 (new-NSeries (flvector 1.5 2.5 3.5 4.5) #f))
+   (cons 'col2 (new-NSeries (flvector 5.5 6.5 7.5 8.5) #f))
+   (cons 'col3 (new-NSeries (flvector 9.5 10.5 11.5 12.5) #f))))
+
+; create new data-frame-float
+(define data-frame-float (new-data-frame float-columns))
+
+(displayln "plotting float data-frame")
+
+(make-scatter-plot data-frame-float)
+
+(displayln "plotting float columns")
+
+(make-scatter-plot float-columns)
+
+(displayln "discrete histogram")
+
+(make-discrete-histogram (new-ISeries (vector 1 2 2 3 4 5 5 5) #f))
+
+(make-discrete-histogram (new-GenSeries (vector 1 2 2 1.5 3 4 5 5 'a 5) #f))
+
+(make-discrete-histogram float-column)
+
+(make-discrete-histogram integer-columns)
+
+(make-discrete-histogram data-frame-float)
+
+(get-index-vector (new-ISeries (vector 1 2 3 4 4) #f))
+
+(define series-integer-labeled
+  (new-ISeries (vector 1 2 3 4)
+               (list 'a 'b 'c 'd)))
+
+(get-index-vector series-integer-labeled)
+
+(make-discrete-histogram-stacked float-column)
+
+(make-discrete-histogram-stacked float-columns)
+
+;******************
+;data-frame-integer
+;******************
+(define integer-columns-2
+  (list 
+   (cons 'col1 (new-ISeries (vector 1 2 3 4)
+                            (build-index-from-list (list 'a 'b 'c 'd))))
+   (cons 'col2 (new-ISeries (vector 5 6 7 8)
+                            (build-index-from-list (list 'e 'f 'g 'h))))
+   (cons 'col3 (new-ISeries (vector 9 10 11 12)
+                            (build-index-from-list (list 'i 'j 'k 'l))))))
+
+; create new data-frame-integer
+(define data-frame-integer-2 (new-data-frame integer-columns-2))
+
+(make-discrete-histogram-stacked data-frame-integer-2) }|
 
 @section[#:style 'toc]{Aggregation}
-
-data : DataFrame
-
-x : label or position, default None
-
-y : label or position, default None
-
-Allows plotting of one column versus another
-
-kind : str
-
-‘line’ : line plot (default)
-‘bar’ : vertical bar plot
-‘barh’ : horizontal bar plot
-‘hist’ : histogram
-‘box’ : boxplot
-‘kde’ : Kernel Density Estimation plot
-‘density’ : same as ‘kde’
-‘area’ : area plot
-‘pie’ : pie plot
-‘scatter’ : scatter plot
-‘hexbin’ : hexbin plot
-ax : matplotlib axes object, default None
-
-subplots : boolean, default False
-
-Make separate subplots for each column
-
-sharex : boolean, default True if ax is None else False
-
-In case subplots=True, share x axis and set some x axis labels to invisible; defaults to True if ax is None otherwise False if an ax is passed in; Be aware, that passing in both an ax and sharex=True will alter all x axis labels for all axis in a figure!
-
-sharey : boolean, default False
-
-In case subplots=True, share y axis and set some y axis labels to invisible
-
-layout : tuple (optional)
-
-(rows, columns) for the layout of subplots
-
-figsize : a tuple (width, height) in inches
-
-use_index : boolean, default True
-
-Use index as ticks for x axis
-
-title : string or list
-
-Title to use for the plot. If a string is passed, print the string at the top of the figure. If a list is passed and subplots is True, print each item in the list above the corresponding subplot.
-
-grid : boolean, default None (matlab style default)
-
-Axis grid lines
-
-legend : False/True/’reverse’
-
-Place legend on axis subplots
-
-style : list or dict
-
-matplotlib line style per column
-
-logx : boolean, default False
-
-Use log scaling on x axis
-
-logy : boolean, default False
-
-Use log scaling on y axis
-
-loglog : boolean, default False
-
-Use log scaling on both x and y axes
-
-xticks : sequence
-
-Values to use for the xticks
-
-yticks : sequence
-
-Values to use for the yticks
-
-xlim : 2-tuple/list
-
-ylim : 2-tuple/list
-
-rot : int, default None
-
-Rotation for ticks (xticks for vertical, yticks for horizontal plots)
-
-fontsize : int, default None
-
-Font size for xticks and yticks
-
-colormap : str or matplotlib colormap object, default None
-
-Colormap to select colors from. If string, load colormap with that name from matplotlib.
-
-colorbar : boolean, optional
-
-If True, plot colorbar (only relevant for ‘scatter’ and ‘hexbin’ plots)
-
-position : float
-
-Specify relative alignments for bar plot layout. From 0 (left/bottom-end) to 1 (right/top-end). Default is 0.5 (center)
-
-table : boolean, Series or DataFrame, default False
-
-If True, draw a table using the data in the DataFrame and the data will be transposed to meet matplotlib’s default layout. If a Series or DataFrame is passed, use passed data to draw a table.
-
-yerr : DataFrame, Series, array-like, dict and str
-
-See Plotting with Error Bars for detail.
-
-xerr : same types as yerr.
-
-stacked : boolean, default False in line and
-
-bar plots, and True in area plot. If True, create stacked plot.
-
-sort_columns : boolean, default False
-
-Sort column names to determine plot ordering
-
-secondary_y : boolean or sequence, default False
-
-Whether to plot on the secondary y-axis If a list/tuple, which columns to plot on secondary y-axis
-
-mark_right : boolean, default True
-
-When using a secondary_y axis, automatically mark the column labels with “(right)” in the legend
-
-kwds : keywords
-
-Options to pass to matplotlib plotting method
 
 @local-table-of-contents[]
 
